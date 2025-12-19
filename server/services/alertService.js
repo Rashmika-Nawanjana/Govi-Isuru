@@ -218,17 +218,40 @@ async function saveDiseaseReport(reportData) {
 
 /**
  * Get active alerts for a location
+ * Shows alerts that are relevant to the user's specific area:
+ * - Alerts from the same GN Division (most relevant)
+ * - Alerts from the same DS Division (nearby areas)
+ * - Critical alerts from the same district (important regional alerts)
  */
 async function getActiveAlerts(gnDivision, dsDivision, district) {
   try {
-    const alerts = await CommunityAlert.find({
-      status: { $in: ['active', 'monitoring'] },
-      $or: [
-        { gnDivision: gnDivision },
+    // Build query based on specificity of location
+    let query = {
+      status: { $in: ['active', 'monitoring'] }
+    };
+
+    if (gnDivision && dsDivision) {
+      // Show alerts from same GN Division or same DS Division
+      // District-wide alerts only if severity is critical/high
+      query.$or = [
+        { gnDivision: gnDivision }, // Same village
+        { dsDivision: dsDivision, gnDivision: { $exists: true } }, // Same DS area
+        { district: district, severity: { $in: ['critical', 'high'] } } // Critical district alerts
+      ];
+    } else if (dsDivision) {
+      // Only DS Division provided - show DS level and critical district alerts
+      query.$or = [
         { dsDivision: dsDivision },
-        { district: district }
-      ]
-    }).sort({ severity: -1, lastUpdatedAt: -1 });
+        { district: district, severity: { $in: ['critical', 'high'] } }
+      ];
+    } else if (district) {
+      // Only district provided - show only critical/high alerts
+      query.district = district;
+      query.severity = { $in: ['critical', 'high'] };
+    }
+
+    const alerts = await CommunityAlert.find(query)
+      .sort({ severity: -1, lastUpdatedAt: -1 });
 
     return alerts;
   } catch (error) {
