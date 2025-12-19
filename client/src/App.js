@@ -173,7 +173,7 @@ export default function App() {
             {/* Show Community Alerts on AI Doctor view */}
             {view === 'doctor' && <CommunityAlerts user={user} language={lang} />}
             {view === 'doctor' && <AIDoctor lang={lang} user={user} />}
-            {view === 'market' && <Marketplace lang={lang} />}
+            {view === 'market' && <Marketplace lang={lang} currentUser={user} />}
             {view === 'weather' && <WeatherAdvisor lang={lang} lat={coords.lat} lon={coords.lon} />}
             {view === 'trends' && <MarketTrends lang={lang} />}
             {view === 'alerts' && <CommunityAlerts user={user} language={lang} />}

@@ -4,10 +4,12 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const User = require('./models/User');
+const Listing = require('./models/Listing');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const chatbotRoutes = require('./routes/chatbot');
 const alertRoutes = require('./routes/alerts');
+const reputationRoutes = require('./routes/reputation');
 
 const app = express();
 
@@ -21,6 +23,9 @@ app.use('/api/chatbot', chatbotRoutes);
 // Community Disease Alerts API Routes
 app.use('/api/alerts', alertRoutes);
 
+// Farmer Reputation API Routes
+app.use('/api/reputation', reputationRoutes);
+
 // 2. Connect to Database using environment variable
 // We remove the hardcoded string and the deprecated options (no longer needed in Mongoose 6+)
 const MONGO_URI = process.env.MONGO_URI;
@@ -32,38 +37,73 @@ mongoose.connect(MONGO_URI)
     console.error(err.message);
 });
 
-// 3. Define the Schema
-const ListingSchema = new mongoose.Schema({
-    farmerName: { type: String, required: true },
-    cropType: { type: String, required: true },
-    quantity: String,
-    price: String,
-    location: String,
-    phone: String,
-    date: { type: Date, default: Date.now }
-});
-
-const Listing = mongoose.model('Listing', ListingSchema);
-
-// 4. API Routes
-// GET: Fetch all items (latest first)
+// 3. API Routes
+// GET: Fetch all items (latest first) with farmer reputation
 app.get('/api/listings', async (req, res) => {
     try {
-        const items = await Listing.find().sort({ date: -1 });
+        const items = await Listing.find({ status: { $in: ['active', undefined] } })
+            .populate('farmer_id', 'username reputation_score is_verified_farmer total_sales')
+            .sort({ date: -1 });
         res.json(items);
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch listings" });
     }
 });
 
-// POST: Add new item
+// POST: Add new item with farmer association
 app.post('/api/listings', async (req, res) => {
     try {
-        const newItem = new Listing(req.body);
+        // Try to find farmer by username to associate listing
+        let farmerId = null;
+        if (req.body.farmerName) {
+            const farmer = await User.findOne({ username: req.body.farmerName });
+            if (farmer) {
+                farmerId = farmer._id;
+            }
+        }
+        
+        const newItem = new Listing({
+            ...req.body,
+            farmer_id: farmerId,
+            status: 'active'
+        });
         const savedItem = await newItem.save();
         res.status(201).json(savedItem);
     } catch (err) {
         res.status(400).json({ error: "Validation failed. Check your data." });
+    }
+});
+
+// DELETE: Remove a listing (only by the owner)
+app.delete('/api/listings/:id', async (req, res) => {
+    try {
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        if (!token) {
+            return res.status(401).json({ error: "Authentication required" });
+        }
+        
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'govi_secret');
+        const user = await User.findById(decoded.id);
+        
+        if (!user) {
+            return res.status(401).json({ error: "User not found" });
+        }
+        
+        const listing = await Listing.findById(req.params.id);
+        if (!listing) {
+            return res.status(404).json({ error: "Listing not found" });
+        }
+        
+        // Check if user owns this listing
+        if (listing.farmerName !== user.username) {
+            return res.status(403).json({ error: "You can only delete your own listings" });
+        }
+        
+        await Listing.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: "Listing deleted successfully" });
+    } catch (err) {
+        console.error("Delete error:", err);
+        res.status(500).json({ error: "Failed to delete listing" });
     }
 });
 
@@ -118,8 +158,8 @@ app.post('/api/register', async (req, res) => {
 
     await user.save();
 
-    // 4. Return Token (Login the user immediately)
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'govi_secret', { expiresIn: '1h' });
+    // 4. Return Token (Login the user immediately, include username for reputation system)
+    const token = jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET || 'govi_secret', { expiresIn: '24h' });
     res.json({ token, user: { username, district, dsDivision, gnDivision } });
 
   } catch (err) {
@@ -139,8 +179,8 @@ app.post('/api/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
 
-    // 3. Return Token
-    const token = jwt.sign({ id: user._id }, 'govi_secret', { expiresIn: '24h' });
+    // 3. Return Token (include username for reputation system)
+    const token = jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET || 'govi_secret', { expiresIn: '24h' });
     res.json({ 
       token, 
       user: { 
