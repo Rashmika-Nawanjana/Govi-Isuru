@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Leaf, ShoppingBag, Languages, LayoutDashboard, CloudSun, TrendingUp, LogOut } from 'lucide-react';
+import { Leaf, ShoppingBag, Languages, LayoutDashboard, CloudSun, TrendingUp, LogOut, AlertTriangle } from 'lucide-react';
 import AIDoctor from './components/AIDoctor';
 import Marketplace from './components/Marketplace';
 import WeatherAdvisor from './components/WeatherAdvisor';
@@ -7,6 +7,7 @@ import MarketTrends from './components/MarketTrends';
 import Register from './components/Register';
 import Login from './components/Login';
 import CropChatbot from './components/CropChatbot';
+import CommunityAlerts from './components/CommunityAlerts';
 
 const translations = {
   en: { 
@@ -14,7 +15,8 @@ const translations = {
     doctor: "AI Doctor", 
     market: "Marketplace", 
     trends: "Market Trends",
-    weather: "Weather Advisory", 
+    weather: "Weather Advisory",
+    alerts: "Disease Alerts",
     logout: "Logout",
     footer: "Empowering Sri Lankan Farmers" 
   },
@@ -23,7 +25,8 @@ const translations = {
     doctor: "AI වෛද්‍යවරයා", 
     market: "අලෙවිසැල", 
     trends: "මිල ප්‍රවණතා", 
-    weather: "කාලගුණ උපදෙස්", 
+    weather: "කාලගුණ උපදෙස්",
+    alerts: "රෝග අනතුරු ඇඟවීම්",
     logout: "පද්ධතියෙන් ඉවත් වන්න",
     footer: "ශ්‍රී ලාංකීය ගොවීන් සවිබල ගැන්වීම" 
   }
@@ -126,6 +129,13 @@ export default function App() {
           >
             <CloudSun size={20} /> {t.weather}
           </button>
+
+          <button 
+            onClick={() => setView('alerts')}
+            className={`flex items-center gap-3 w-full p-3 rounded-xl font-bold transition-all ${view === 'alerts' ? 'bg-white text-green-800 shadow-lg' : 'hover:bg-green-700'}`}
+          >
+            <AlertTriangle size={20} /> {t.alerts}
+          </button>
         </div>
 
         {/* Bottom Actions */}
@@ -160,10 +170,13 @@ export default function App() {
           </div>
 
           <div className="space-y-6">
-            {view === 'doctor' && <AIDoctor lang={lang} />}
+            {/* Show Community Alerts on AI Doctor view */}
+            {view === 'doctor' && <CommunityAlerts user={user} language={lang} />}
+            {view === 'doctor' && <AIDoctor lang={lang} user={user} />}
             {view === 'market' && <Marketplace lang={lang} />}
             {view === 'weather' && <WeatherAdvisor lang={lang} lat={coords.lat} lon={coords.lon} />}
             {view === 'trends' && <MarketTrends lang={lang} />}
+            {view === 'alerts' && <CommunityAlerts user={user} language={lang} />}
           </div>
         </div>
 

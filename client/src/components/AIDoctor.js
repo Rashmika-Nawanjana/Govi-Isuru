@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Upload, Leaf, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Upload, Leaf, Loader2, CheckCircle, AlertTriangle, Bell, MapPin } from 'lucide-react';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-const AIDoctor = ({ lang }) => {
+const AIDoctor = ({ lang, user }) => {
 
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [reportStatus, setReportStatus] = useState(null);
+  const [alertsTriggered, setAlertsTriggered] = useState([]);
 
   const t = {
   en: {
@@ -41,6 +44,45 @@ const AIDoctor = ({ lang }) => {
     setFile(selectedFile);
     setPreview(URL.createObjectURL(selectedFile));
     setResult(null);
+    setReportStatus(null);
+    setAlertsTriggered([]);
+  };
+
+  // Report disease detection to community alert system
+  const reportToAlertSystem = async (predictionResult) => {
+    // Only report if user has location set
+    if (!user?.gnDivision) {
+      console.log('User location not set, skipping disease report');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${API_BASE}/api/alerts/disease-report`,
+        {
+          crop: 'Rice', // Default crop type
+          disease: predictionResult.disease,
+          confidence: predictionResult.confidence,
+          district: user.district,
+          dsDivision: user.dsDivision,
+          gnDivision: user.gnDivision,
+          treatment: predictionResult.treatment,
+          farmerUsername: user.username
+        },
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        }
+      );
+
+      setReportStatus('success');
+      if (response.data.alertsTriggered > 0) {
+        setAlertsTriggered(response.data.alerts);
+      }
+    } catch (error) {
+      console.error('Failed to report disease:', error);
+      setReportStatus('error');
+    }
   };
 
   const handleAnalyze = async () => {
@@ -52,6 +94,11 @@ const AIDoctor = ({ lang }) => {
     try {
       const response = await axios.post('http://localhost:8888/predict', formData);
       setResult(response.data);
+      
+      // Auto-report to community alert system
+      if (response.data && response.data.disease !== 'Healthy') {
+        await reportToAlertSystem(response.data);
+      }
     } catch (error) {
       console.error("Error connecting to AI service", error);
       alert("Error: Is the Python backend running?");
@@ -135,6 +182,37 @@ const AIDoctor = ({ lang }) => {
                   {lang === 'si' && result.treatment_si ? result.treatment_si : result.treatment}
                 </p>
               </div>
+
+              {/* Community Alert Reporting Status */}
+              {reportStatus === 'success' && user?.gnDivision && (
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <span className="text-xs font-bold text-green-600 uppercase tracking-wide flex items-center gap-1">
+                    <Bell className="h-3 w-3" /> 
+                    {lang === 'si' ? 'ප්‍රජා අනතුරු ඇඟවීම් පද්ධතිය' : 'Community Alert System'}
+                  </span>
+                  <p className="text-green-700 mt-2 text-sm flex items-center gap-1">
+                    <MapPin className="h-4 w-4" />
+                    {lang === 'si' 
+                      ? `මෙම වාර්තාව ${user.gnDivision} ප්‍රදේශය සඳහා සුරකින ලදී`
+                      : `This report has been logged for ${user.gnDivision} area`}
+                  </p>
+                </div>
+              )}
+
+              {/* Alert Triggered Notification */}
+              {alertsTriggered.length > 0 && (
+                <div className="bg-red-50 p-4 rounded-lg border border-red-200 animate-pulse">
+                  <span className="text-xs font-bold text-red-600 uppercase tracking-wide flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" /> 
+                    {lang === 'si' ? 'අනතුරු ඇඟවීම අවුලුවන ලදී!' : 'Alert Triggered!'}
+                  </span>
+                  <p className="text-red-700 mt-2 text-sm">
+                    {lang === 'si' 
+                      ? `ඔබගේ ප්‍රදේශයේ ${result.disease} රෝග අවස්ථා කිහිපයක් හඳුනාගෙන ඇත. අසල්වැසි ගොවීන්ට දැනුම් දෙනු ලැබේ.`
+                      : `Multiple cases of ${result.disease} detected in your area. Nearby farmers will be notified.`}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -7,6 +7,7 @@ const User = require('./models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const chatbotRoutes = require('./routes/chatbot');
+const alertRoutes = require('./routes/alerts');
 
 const app = express();
 
@@ -16,6 +17,9 @@ app.use(express.json());
 
 // Chatbot API Routes
 app.use('/api/chatbot', chatbotRoutes);
+
+// Community Disease Alerts API Routes
+app.use('/api/alerts', alertRoutes);
 
 // 2. Connect to Database using environment variable
 // We remove the hardcoded string and the deprecated options (no longer needed in Mongoose 6+)

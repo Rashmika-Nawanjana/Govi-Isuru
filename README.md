@@ -29,10 +29,6 @@
 - **Treatment Recommendations**: Receive bilingual (English/Sinhala) treatment guidance for detected diseases
 - **Transfer Learning**: Utilizes MobileNetV2 pre-trained on ImageNet for superior accuracy with limited training data
 - **Balanced Model Training**: Implements class weighting to handle imbalanced datasets
-- **🔥 Grad-CAM Explainability**: Visual heatmaps show exactly where the AI detected disease symptoms, building trust through transparency
-  - Red areas indicate disease-affected regions
-  - Side-by-side comparison of original image and AI detection map
-  - Bilingual explanations for farmer understanding
 
 ### 📊 Market Intelligence Dashboard
 - **Price Trend Analytics**: Visualize historical price trends for major crops (Rice, Chili, Tea) across 6 months
@@ -110,8 +106,6 @@
 - **NumPy**: Numerical computations
 - **Uvicorn**: ASGI server for FastAPI
 - **Scikit-learn**: Class weight calculation for balanced training
-- **OpenCV (cv2)**: Image manipulation for Grad-CAM visualization
-- **Grad-CAM**: Explainable AI technique for visual interpretation
 
 ### DevOps & Deployment
 - **Docker**: Containerization for all services
@@ -198,7 +192,7 @@ npm start
 #### 4. Setup AI Service
 ```bash
 cd ../ai-service
-pip install fastapi uvicorn tensorflow pillow numpy python-multipart scikit-learn opencv-python
+pip install fastapi uvicorn tensorflow pillow numpy python-multipart scikit-learn
 
 # Ensure the trained model exists
 # If not, run the training script:
@@ -268,7 +262,6 @@ govi-isuru/
 │   │   └── Leaf smut/
 │   ├── main.py                      # FastAPI prediction API
 │   ├── train_model.py               # Model training script
-│   ├── gradcam.py                   # Grad-CAM explainability module
 │   ├── rice_model_v2.h5             # Trained model (generated)
 │   └── __pycache__/                 # Python cache
 │
@@ -340,10 +333,7 @@ govi-isuru/
   "disease": "Bacterial leaf blight",
   "confidence": 0.89,
   "treatment": "Reduce Nitrogen fertilizer. Manage water levels properly.",
-  "treatment_si": "නයිට්‍රජන් පොහොර භාවිතය අඩු කරන්න. ජල මට්ටම පාලනය කරන්න.",
-  "heatmap": "base64_encoded_image_string",
-  "explanation": "Red areas show where the AI detected disease symptoms on the leaf.",
-  "explanation_si": "රතු පැහැයෙන් දිස්වන කොටස් AI විසින් රෝග ලක්ෂණ හඳුනාගත් ස්ථාන වේ."
+  "treatment_si": "නයිට්‍රජන් පොහොර භාවිතය අඩු කරන්න. ජල මට්ටම පාලනය කරන්න."
 }
 ```
 
@@ -396,36 +386,6 @@ ai-service/dataset/
     └── ...
 ```
 
-### Explainable AI (Grad-CAM)
-
-**Govi Isuru** implements **Gradient-weighted Class Activation Mapping (Grad-CAM)** to provide visual explanations for AI predictions, a critical feature for building farmer trust.
-
-#### What is Grad-CAM?
-Grad-CAM generates a heatmap that highlights which regions of the leaf image the AI model focused on when making its disease prediction.
-
-#### How It Works
-1. **Forward Pass**: Image is processed through the neural network
-2. **Gradient Calculation**: Computes gradients of the predicted class with respect to the last convolutional layer
-3. **Importance Weighting**: Determines which feature maps are most important for the prediction
-4. **Heatmap Generation**: Creates a visual overlay showing disease-affected areas
-
-#### Visual Output
-- **🔴 Red regions**: High attention - likely disease symptoms detected here
-- **🟡 Yellow regions**: Moderate attention
-- **🔵 Blue regions**: Low attention - healthy tissue
-
-#### Benefits
-- **Transparency**: Shows exactly where disease was detected
-- **Trust Building**: Farmers can verify AI reasoning
-- **Educational**: Helps farmers recognize disease patterns
-- **Debugging**: Ensures model focuses on relevant features, not background
-
-#### Technical Implementation
-- **Base Layer**: `Conv_1` (MobileNetV2's final convolutional layer)
-- **Overlay Alpha**: 0.4 (40% heatmap, 60% original image)
-- **Colormap**: JET (blue → red scale)
-- **Output Format**: Base64-encoded PNG for web display
-
 ## 🔐 Environment Variables
 
 ### Backend Server (`.env` in `server/`)
@@ -466,7 +426,7 @@ REACT_APP_WEATHER_KEY=your_openweathermap_api_key
 ## 🌟 Key Innovations
 
 1. **Bilingual Support**: First-class Sinhala language support for rural farmers
-2. **Explainable AI with Grad-CAM**: Visual heatmaps show exactly where diseases are detected, building trust through transparency
+2. **Offline-First Design**: Core features work with minimal internet (planned)
 3. **Location Intelligence**: GN Division-level precision for hyper-local services
 4. **Class-Balanced ML**: Ensures minority disease classes are detected accurately
 5. **Transfer Learning**: Achieves high accuracy with limited training data
