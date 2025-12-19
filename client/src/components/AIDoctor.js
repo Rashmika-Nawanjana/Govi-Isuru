@@ -50,7 +50,7 @@ const AIDoctor = ({ lang }) => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:8000/predict', formData);
+      const response = await axios.post('http://localhost:8888/predict', formData);
       setResult(response.data);
     } catch (error) {
       console.error("Error connecting to AI service", error);

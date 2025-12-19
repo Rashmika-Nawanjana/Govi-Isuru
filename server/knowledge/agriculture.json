@@ -1,0 +1,118 @@
+{
+  "rice": {
+    "yala": {
+      "fertilizer": {
+        "recommendation": "Use Urea in split doses (3 applications). Apply TSP (Triple Super Phosphate) and MOP (Muriate of Potash) during land preparation. Recommended: 225kg Urea, 55kg TSP, 60kg MOP per hectare.",
+        "si": "යාල කාලය සඳහා යුරියා කොටස් 3කින් භාවිතා කරන්න. TSP (ත්‍රිත්ව සුපර් පොස්පේට්) සහ MOP (මියුරේට් ඔෆ් පොටෑෂ්) බිම සකස් කිරීමේදී යොදන්න. නිර්දේශිත: හෙක්ටයාරයකට යුරියා 225kg, TSP 55kg, MOP 60kg."
+      },
+      "planting": {
+        "recommendation": "Best planting time: April to May. Use certified seeds. Maintain 2-3cm water level during early growth stage.",
+        "si": "වඩාත්ම සුදුසු වගා කාලය: අප්‍රේල් - මැයි. සහතික කළ බීජ භාවිතා කරන්න. මුල් වර්ධන අවධියේ ජල මට්ටම 2-3cm පවත්වන්න."
+      },
+      "harvest": {
+        "recommendation": "Harvest when 80-85% of grains turn golden yellow. Moisture content should be 20-24% at harvest.",
+        "si": "ධාන්‍ය 80-85% රන් කහ පැහැයට හැරෙන විට අස්වනු නෙළන්න. අස්වනු නෙළීමේදී තෙතමන ප්‍රමාණය 20-24% විය යුතුය."
+      }
+    },
+    "maha": {
+      "fertilizer": {
+        "recommendation": "Apply organic fertilizer (compost/cow dung) before planting. Reduce nitrogen during heavy rains to prevent lodging. Split Urea application into 4 doses during Maha season.",
+        "si": "මහ කාලයේ වගා කිරීමට පෙර ජෛව පොහොර (කොම්පෝස්ට්/ගොම) යොදන්න. වැඩි වර්ෂාවේදී නයිට්‍රජන් අඩු කරන්න. මහ කන්නයේදී යුරියා කොටස් 4කින් යොදන්න."
+      },
+      "planting": {
+        "recommendation": "Best planting time: October to November. Use short-duration varieties (3-3.5 months) to avoid flood damage.",
+        "si": "වඩාත්ම සුදුසු වගා කාලය: ඔක්තෝබර් - නොවැම්බර්. ගංවතුර හානි වැලැක්වීමට කෙටි කාලීන ප්‍රභේද (මාස 3-3.5) භාවිතා කරන්න."
+      },
+      "harvest": {
+        "recommendation": "Monitor weather forecasts closely. Harvest before heavy December rains if possible.",
+        "si": "කාලගුණ අනාවැකි හොඳින් නිරීක්ෂණය කරන්න. හැකි නම් දෙසැම්බර් වැඩි වර්ෂාවට පෙර අස්වනු නෙළන්න."
+      }
+    },
+    "diseases": {
+      "blast": {
+        "symptoms": "Diamond-shaped lesions on leaves with gray centers. Severe cases show neck rot.",
+        "treatment": "Avoid excess nitrogen fertilizer. Apply Tricyclazole or Isoprothiolane fungicide if severe. Use resistant varieties like BG 300.",
+        "si": "කොළ මත දියමන්ති හැඩැති තුවාල අළු මධ්‍යයන් සහිතව පෙනේ. දරුණු අවස්ථාවල බෙල්ල කුණුවීම දක්නට ලැබේ. අධික නයිට්‍රජන් පොහොර වලින් වළකින්න. දරුණු නම් ට්‍රයිසයික්ලසෝල් හෝ අයිසොප්‍රොතයොලේන් දිලීර නාශක යොදන්න. BG 300 වැනි ප්‍රතිරෝධී ප්‍රභේද භාවිතා කරන්න."
+      },
+      "bacterial_leaf_blight": {
+        "symptoms": "Water-soaked lesions that turn yellow to white, starting from leaf tips. Leaves dry from tip downward.",
+        "treatment": "Reduce nitrogen fertilizer application. Drain excess water from fields. Apply copper-based bactericides. Use resistant varieties.",
+        "si": "ජලයෙන් පොඟවන ලද තුවාල කහ සිට සුදු දක්වා වෙනස් වේ, කොළ අග සිට ආරම්භ වේ. කොළ අග සිට පහළට වියළේ. නයිට්‍රජන් පොහොර යෙදීම අඩු කරන්න. කෙත්වල අතිරික්ත ජලය බැස යන්න දෙන්න. තඹ පාදක බැක්ටීරියා නාශක යොදන්න."
+      },
+      "brown_spot": {
+        "symptoms": "Circular to oval brown spots with gray centers on leaves. Dark brown spots on grains.",
+        "treatment": "Apply potassium fertilizer. Use Mancozeb or Carbendazim fungicide. Improve soil fertility with organic matter.",
+        "si": "කොළ මත අළු මධ්‍යයන් සහිත රවුම් සිට ඕවලාකාර දුඹුරු ලප. ධාන්‍ය මත තද දුඹුරු ලප. පොටෑසියම් පොහොර යොදන්න. මැන්කොසෙබ් හෝ කාබෙන්ඩසිම් දිලීර නාශක භාවිතා කරන්න."
+      },
+      "leaf_smut": {
+        "symptoms": "Black powdery spores on leaf surface. Leaves appear dirty with sooty appearance.",
+        "treatment": "Remove and destroy infected leaves. Spray Copper oxychloride. Maintain proper plant spacing for air circulation.",
+        "si": "කොළ මතුපිට කළු කුඩු බීජාණු. කොළ කාබන් වැනි පෙනුමක් ඇති අපිරිසිදු බවක් පෙනේ. ආසාදිත කොළ ඉවත් කර විනාශ කරන්න. කොපර් ඔක්සික්ලෝරයිඩ් ඉසින්න."
+      }
+    },
+    "pests": {
+      "stem_borer": {
+        "symptoms": "Dead hearts in vegetative stage. White heads during flowering.",
+        "treatment": "Apply Carbofuran granules at base. Use pheromone traps. Release Trichogramma parasitoids.",
+        "si": "ශාකමය අවධියේදී මළ හදවත්. මල් පිපෙන කාලයේ සුදු හිස්. කාබෝෆියුරන් කැට පාමුල යොදන්න. ෆෙරමෝන උගුල් භාවිතා කරන්න."
+      },
+      "brown_planthopper": {
+        "symptoms": "Hopper burn - circular patches of dried plants. Honeydew secretion on plants.",
+        "treatment": "Avoid excess nitrogen. Alternate wet and dry irrigation. Apply Imidacloprid or Buprofezin if severe.",
+        "si": "හොපර් පිළිස්සුම් - වියළුණු ශාකවල රවුම් පැල්ලම්. ශාක මත මී දිය ශ්‍රාවය. අධික නයිට්‍රජන් වළකින්න. තෙත් හා වියළි වාරිමාර්ග ක්‍රමය මාරු කරන්න."
+      }
+    },
+    "water_management": {
+      "recommendation": "Maintain 2-5cm water during tillering. Drain for 7-10 days before harvest. Alternate Wetting and Drying (AWD) saves 20-30% water.",
+      "si": "පැල පෙරීමේදී 2-5cm ජලය පවත්වන්න. අස්වනු නෙළීමට දින 7-10කට පෙර ජලය බැස යන්න දෙන්න. AWD ක්‍රමයෙන් ජලය 20-30% ඉතිරි කරයි."
+    }
+  },
+  "vegetables": {
+    "general": {
+      "fertilizer": {
+        "recommendation": "Apply well-decomposed compost 2 weeks before planting. Use NPK 10:10:10 as basal application. Top dress with Urea every 2-3 weeks.",
+        "si": "වගා කිරීමට සති 2කට පෙර හොඳින් දිරාපත් වූ කොම්පෝස්ට් යොදන්න. NPK 10:10:10 පාදක යෙදුමක් ලෙස භාවිතා කරන්න. සෑම සති 2-3කට වරක් යුරියා ඉහළ ඇඳුමක් ලෙස යොදන්න."
+      }
+    },
+    "diseases": {
+      "fungal": {
+        "treatment": "Improve drainage. Apply Mancozeb or Copper hydroxide. Avoid overhead irrigation.",
+        "si": "ජලාපවහනය වැඩි දියුණු කරන්න. මැන්කොසෙබ් හෝ කොපර් හයිඩ්‍රොක්සයිඩ් යොදන්න. ඉහළ සිට වාරි ජලය දැමීමෙන් වළකින්න."
+      }
+    }
+  },
+  "weather_advice": {
+    "heavy_rain": {
+      "recommendation": "Ensure proper drainage in fields. Delay fertilizer application. Watch for fungal disease outbreaks.",
+      "si": "කෙත්වල නිසි ජලාපවහනය සහතික කරන්න. පොහොර යෙදීම ප්‍රමාද කරන්න. දිලීර රෝග පැතිරීම නිරීක්ෂණය කරන්න."
+    },
+    "drought": {
+      "recommendation": "Mulch around plants to conserve moisture. Irrigate early morning or late evening. Consider drought-resistant varieties.",
+      "si": "තෙතමනය සංරක්ෂණය කිරීමට ශාක වටා වැසුම් දමන්න. උදේ පාන්දර හෝ සවස් වරුවේ වාරිමාර්ග යොදන්න. නියං ප්‍රතිරෝධී ප්‍රභේද සලකා බලන්න."
+    },
+    "high_humidity": {
+      "recommendation": "Monitor for fungal diseases. Ensure good air circulation. Avoid dense planting.",
+      "si": "දිලීර රෝග නිරීක්ෂණය කරන්න. හොඳ වාතාශ්‍රය සහතික කරන්න. ඝන වගාවෙන් වළකින්න."
+    }
+  },
+  "organic_farming": {
+    "compost": {
+      "recommendation": "Prepare compost using crop residues, cow dung, and green manure. Apply 10-15 tons per hectare. Ready in 2-3 months.",
+      "si": "බෝග අවශේෂ, ගොම සහ කොළ පොහොර භාවිතයෙන් කොම්පෝස්ට් සකස් කරන්න. හෙක්ටයාරයකට ටොන් 10-15 යොදන්න. මාස 2-3කින් සූදානම්."
+    },
+    "pest_control": {
+      "recommendation": "Use neem-based pesticides. Introduce beneficial insects. Practice crop rotation.",
+      "si": "කොහොඹ පාදක පළිබෝධනාශක භාවිතා කරන්න. ප්‍රයෝජනවත් කෘමීන් හඳුන්වා දෙන්න. බෝග මාරුව පුහුණු කරන්න."
+    }
+  },
+  "government_schemes": {
+    "fertilizer_subsidy": {
+      "info": "Government provides subsidized fertilizer through agrarian service centers. Bring your farmer ID card to collect.",
+      "si": "රජය කෘෂිකාර්මික සේවා මධ්‍යස්ථාන හරහා සහනාධාර පොහොර සපයයි. එකතු කිරීමට ඔබේ ගොවි හැඳුනුම්පත ගෙන එන්න."
+    },
+    "crop_insurance": {
+      "info": "Agricultural Insurance Board provides coverage for crop damage. Register at your local Agrarian Service Center.",
+      "si": "කෘෂිකාර්මික රක්ෂණ මණ්ඩලය බෝග හානි සඳහා ආවරණය සපයයි. ඔබේ ප්‍රදේශයේ කෘෂිකාර්මික සේවා මධ්‍යස්ථානයේ ලියාපදිංචි වන්න."
+    }
+  }
+}

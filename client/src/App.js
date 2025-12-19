@@ -6,6 +6,7 @@ import WeatherAdvisor from './components/WeatherAdvisor';
 import MarketTrends from './components/MarketTrends';
 import Register from './components/Register';
 import Login from './components/Login';
+import CropChatbot from './components/CropChatbot';
 
 const translations = {
   en: { 
@@ -170,6 +171,9 @@ export default function App() {
           © 2025 {t.title} — {t.footer}
         </footer>
       </main>
+
+      {/* Floating Chatbot - Available on all pages */}
+      <CropChatbot lang={lang} />
     </div>
   );
 }
