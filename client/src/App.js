@@ -91,82 +91,106 @@ export default function App() {
   );
 }
 
+  // Navigation items config
+  const navItems = [
+    { id: 'doctor', icon: LayoutDashboard, label: t.doctor, emoji: '🩺' },
+    { id: 'trends', icon: TrendingUp, label: t.trends, emoji: '📈' },
+    { id: 'market', icon: ShoppingBag, label: t.market, emoji: '🛒' },
+    { id: 'weather', icon: CloudSun, label: t.weather, emoji: '🌤️' },
+    { id: 'alerts', icon: AlertTriangle, label: t.alerts, emoji: '⚠️' },
+  ];
+
   // 4. MAIN APP DASHBOARD
   return (
-    <div className="min-h-screen bg-slate-50 font-sans flex flex-col md:flex-row">
-      {/* Sidebar Navigation */}
-      <nav className="w-full md:w-64 bg-green-800 text-white shadow-2xl flex-shrink-0 flex flex-col">
-        <div className="p-6 flex items-center gap-3 border-b border-green-700">
-          <Leaf className="h-10 w-10 text-green-300" />
-          <span className="text-2xl font-black tracking-tight leading-none">{t.title}</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-green-50/30 font-sans flex flex-col md:flex-row">
+      {/* Sidebar Navigation - Enhanced */}
+      <nav className="w-full md:w-72 bg-gradient-to-b from-green-800 to-green-900 text-white shadow-2xl flex-shrink-0 flex flex-col">
+        {/* Logo Header */}
+        <div className="p-6 flex items-center gap-3 border-b border-green-700/50 bg-green-800/50">
+          <div className="p-2 bg-green-600 rounded-xl shadow-lg">
+            <Leaf className="h-8 w-8 text-green-200" />
+          </div>
+          <div>
+            <span className="text-2xl font-black tracking-tight leading-none block">{t.title}</span>
+            <span className="text-xs text-green-300">Smart Farming Platform</span>
+          </div>
         </div>
 
-        <div className="p-4 flex flex-col gap-2 flex-grow">
-          <button 
-            onClick={() => setView('doctor')}
-            className={`flex items-center gap-3 w-full p-3 rounded-xl font-bold transition-all ${view === 'doctor' ? 'bg-white text-green-800 shadow-lg' : 'hover:bg-green-700'}`}
-          >
-            <LayoutDashboard size={20} /> {t.doctor}
-          </button>
-
-          <button 
-            onClick={() => setView('trends')}
-            className={`flex items-center gap-3 w-full p-3 rounded-xl font-bold transition-all ${view === 'trends' ? 'bg-white text-green-800 shadow-lg' : 'hover:bg-green-700'}`}
-          >
-            <TrendingUp size={20} /> {t.trends}
-          </button>
-          
-          <button 
-            onClick={() => setView('market')}
-            className={`flex items-center gap-3 w-full p-3 rounded-xl font-bold transition-all ${view === 'market' ? 'bg-white text-green-800 shadow-lg' : 'hover:bg-green-700'}`}
-          >
-            <ShoppingBag size={20} /> {t.market}
-          </button>
-
-          <button 
-            onClick={() => setView('weather')}
-            className={`flex items-center gap-3 w-full p-3 rounded-xl font-bold transition-all ${view === 'weather' ? 'bg-white text-green-800 shadow-lg' : 'hover:bg-green-700'}`}
-          >
-            <CloudSun size={20} /> {t.weather}
-          </button>
-
-          <button 
-            onClick={() => setView('alerts')}
-            className={`flex items-center gap-3 w-full p-3 rounded-xl font-bold transition-all ${view === 'alerts' ? 'bg-white text-green-800 shadow-lg' : 'hover:bg-green-700'}`}
-          >
-            <AlertTriangle size={20} /> {t.alerts}
-          </button>
+        {/* Navigation Items */}
+        <div className="p-4 flex flex-col gap-1.5 flex-grow">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = view === item.id;
+            return (
+              <button 
+                key={item.id}
+                onClick={() => setView(item.id)}
+                className={`group flex items-center gap-3 w-full p-3.5 rounded-xl font-semibold transition-all duration-200 ${
+                  isActive 
+                    ? 'bg-white text-green-800 shadow-lg shadow-green-900/20 translate-x-1' 
+                    : 'hover:bg-white/10 hover:translate-x-1'
+                }`}
+              >
+                <div className={`p-1.5 rounded-lg transition-colors ${isActive ? 'bg-green-100' : 'bg-green-700/50 group-hover:bg-green-600/50'}`}>
+                  <Icon size={18} className={isActive ? 'text-green-700' : 'text-green-200'} />
+                </div>
+                <span className="flex-grow text-left">{item.label}</span>
+                {isActive && (
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                )}
+              </button>
+            );
+          })}
         </div>
+
+        {/* User Info */}
+        {user && (
+          <div className="mx-4 mb-2 p-3 bg-green-700/30 rounded-xl border border-green-600/30">
+            <p className="text-xs text-green-300 font-medium">Logged in as</p>
+            <p className="text-sm font-bold text-white truncate">{user.username}</p>
+            <p className="text-xs text-green-400 mt-0.5 truncate">📍 {user.gnDivision}</p>
+          </div>
+        )}
 
         {/* Bottom Actions */}
-        <div className="p-4 border-t border-green-700 space-y-2">
+        <div className="p-4 border-t border-green-700/50 space-y-2">
           <button 
             onClick={() => setLang(lang === 'en' ? 'si' : 'en')}
-            className="flex items-center gap-2 w-full p-3 rounded-xl font-bold border border-green-500 hover:bg-green-700 text-xs"
+            className="flex items-center gap-2 w-full p-3 rounded-xl font-semibold border border-green-600/50 hover:bg-green-700/50 hover:border-green-500 text-sm transition-all"
           >
-            <Languages size={16} /> {lang === 'en' ? 'සිංහල' : 'English'}
+            <Languages size={18} /> 
+            <span>{lang === 'en' ? 'සිංහල' : 'English'}</span>
+            <span className="ml-auto text-xs bg-green-700 px-2 py-0.5 rounded-full">{lang.toUpperCase()}</span>
           </button>
 
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-2 w-full p-3 rounded-xl font-bold text-red-300 hover:bg-red-900/30 text-xs"
+            className="flex items-center gap-2 w-full p-3 rounded-xl font-semibold text-red-300 hover:bg-red-500/20 hover:text-red-200 text-sm transition-all"
           >
-            <LogOut size={16} /> {t.logout}
+            <LogOut size={18} /> {t.logout}
           </button>
         </div>
       </nav>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8">
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-gradient-to-br from-slate-50 via-white to-green-50/20">
         <div className="max-w-5xl mx-auto">
-          {/* Welcome Tag */}
-          <div className="mb-6 p-4 bg-white rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
-            <p className="text-slate-600 font-medium">
-              {lang === 'si' ? 'ආයුබෝවන්' : 'Welcome back'}, <span className="text-green-700 font-bold">{user.username}</span>
-            </p>
-            <span className="text-xs bg-slate-100 px-3 py-1 rounded-full text-slate-500 font-bold uppercase tracking-wider">
-              {user.gnDivision}
-            </span>
+          {/* Welcome Header - Enhanced */}
+          <div className="mb-6 p-5 bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <p className="text-slate-500 text-sm">
+                {lang === 'si' ? 'ආයුබෝවන්' : 'Welcome back'},
+              </p>
+              <p className="text-xl font-bold text-slate-800">{user.username}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-full font-semibold flex items-center gap-1">
+                📍 {user.gnDivision}
+              </span>
+              <span className="text-xs bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-medium">
+                {new Date().toLocaleDateString(lang === 'si' ? 'si-LK' : 'en-LK', { weekday: 'short', day: 'numeric', month: 'short' })}
+              </span>
+            </div>
           </div>
 
           <div className="space-y-6">
@@ -180,8 +204,8 @@ export default function App() {
           </div>
         </div>
 
-        <footer className="text-center text-gray-400 text-xs py-10">
-          © 2025 {t.title} — {t.footer}
+        <footer className="text-center text-slate-400 text-xs py-10 mt-8 border-t border-slate-100">
+          <p>© 2025 <span className="font-semibold text-green-600">{t.title}</span> — {t.footer}</p>
         </footer>
       </main>
 

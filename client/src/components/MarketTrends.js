@@ -1,25 +1,36 @@
 import React from 'react';
 import PriceAnalytics from './PriceAnalytics';
 import PriceComparison from './PriceComparison';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, TrendingUp, Lightbulb } from 'lucide-react';
 
 const MarketTrends = ({ lang }) => {
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-600 to-green-800 p-8 rounded-3xl text-white shadow-lg">
-        <div className="flex items-center gap-4">
-          <div className="bg-white/20 p-3 rounded-2xl">
-            <BarChart3 size={32} />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold">
-              {lang === 'si' ? 'වෙළඳපල බුද්ධි තොරතුරු' : 'Market Intelligence'}
-            </h2>
-            <p className="text-green-100 opacity-90 text-sm">
-              {lang === 'si' ? 'දත්ත මත පදනම්ව නිවැරදි තීරණ ගන්න' : 'Make data-driven decisions for your harvest'}
-            </p>
-          </div>
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Section Header */}
+      <div className="mb-2">
+        <h2 className="text-2xl font-bold text-green-800 flex items-center gap-2">
+          <TrendingUp className="h-7 w-7" />
+          📈 {lang === 'si' ? 'වෙළඳපල බුද්ධි තොරතුරු' : 'Market Intelligence'}
+        </h2>
+        <p className="text-gray-500 mt-1">{lang === 'si' ? 'දත්ත මත පදනම්ව නිවැරදි තීරණ ගන්න' : 'Make data-driven decisions for your harvest'}</p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-4 rounded-xl border border-green-200 text-center">
+          <p className="text-xs text-green-600 font-bold uppercase tracking-wider mb-1">Rice Price</p>
+          <p className="text-2xl font-black text-green-800">Rs. 225</p>
+          <p className="text-xs text-green-600 mt-1">+5% this week</p>
+        </div>
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-4 rounded-xl border border-blue-200 text-center">
+          <p className="text-xs text-blue-600 font-bold uppercase tracking-wider mb-1">Vegetables</p>
+          <p className="text-2xl font-black text-blue-800">Rs. 180</p>
+          <p className="text-xs text-blue-600 mt-1">Stable</p>
+        </div>
+        <div className="bg-gradient-to-br from-amber-50 to-orange-100 p-4 rounded-xl border border-amber-200 text-center">
+          <p className="text-xs text-amber-600 font-bold uppercase tracking-wider mb-1">Coconut</p>
+          <p className="text-2xl font-black text-amber-800">Rs. 95</p>
+          <p className="text-xs text-red-500 mt-1">-3% this week</p>
         </div>
       </div>
 
@@ -30,10 +41,18 @@ const MarketTrends = ({ lang }) => {
       </div>
 
       {/* Pro-tip for Judges */}
-      <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl">
-        <p className="text-amber-800 text-sm italic">
-          <strong>Tip:</strong> {lang === 'si' ? 'කොළඹ වෙළඳපලේ මිල ඉහළ මට්ටමක පවතින බැවින් ප්‍රවාහන වියදම් සලකා බැලීම නිර්දේශ කෙරේ.' : 'Prices in Colombo are peaking; consider transport logistics for maximum profit.'}
-        </p>
+      <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 p-5 rounded-xl flex items-start gap-3">
+        <div className="p-2 bg-amber-500 rounded-lg flex-shrink-0">
+          <Lightbulb className="text-white h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-1">
+            {lang === 'si' ? 'ගොවි උපදෙස්' : 'Farmer Tip'}
+          </p>
+          <p className="text-amber-800 text-sm">
+            {lang === 'si' ? 'කොළඹ වෙළඳපලේ මිල ඉහළ මට්ටමක පවතින බැවින් ප්‍රවාහන වියදම් සලකා බැලීම නිර්දේශ කෙරේ.' : 'Prices in Colombo are peaking; consider transport logistics for maximum profit.'}
+          </p>
+        </div>
       </div>
     </div>
   );

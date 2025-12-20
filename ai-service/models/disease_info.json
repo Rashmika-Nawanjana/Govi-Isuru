@@ -1,0 +1,90 @@
+{
+  "Bacterial Leaf Blight": {
+    "si_name": "බැක්ටීරියා පත්‍ර අංගමාරය",
+    "description": "Caused by Xanthomonas oryzae. Yellow to white lesions along leaf veins.",
+    "treatment": [
+      "Use certified disease-free seeds",
+      "Apply copper-based bactericides",
+      "Drain fields and avoid excessive nitrogen",
+      "Remove and destroy infected plant debris"
+    ],
+    "severity": "high"
+  },
+  "Brown Spot": {
+    "si_name": "දුඹුරු පුල්ලි රෝගය",
+    "description": "Fungal disease causing oval brown spots with gray centers on leaves.",
+    "treatment": [
+      "Apply fungicides like Mancozeb or Carbendazim",
+      "Use balanced fertilizers (avoid nitrogen excess)",
+      "Ensure proper seed treatment before planting",
+      "Maintain field hygiene"
+    ],
+    "severity": "medium"
+  },
+  "Healthy Rice Leaf": {
+    "si_name": "නිරෝගී වී පත්‍රය",
+    "description": "The leaf is healthy with no signs of disease.",
+    "treatment": [
+      "Continue good agricultural practices",
+      "Monitor regularly for early disease detection",
+      "Maintain proper water management",
+      "Apply balanced fertilization"
+    ],
+    "severity": "none"
+  },
+  "Leaf Blast": {
+    "si_name": "පත්‍ර පිපිරුම් රෝගය",
+    "description": "Caused by Magnaporthe oryzae. Diamond-shaped lesions with gray centers.",
+    "treatment": [
+      "Apply Tricyclazole or Isoprothiolane fungicide",
+      "Use resistant rice varieties (BG 250, BG 300)",
+      "Avoid excessive nitrogen fertilizer",
+      "Maintain proper plant spacing"
+    ],
+    "severity": "high"
+  },
+  "Leaf scald": {
+    "si_name": "පත්‍ර පිළිස්සුම් රෝගය",
+    "description": "Fungal disease with zonate lesions starting from leaf tips.",
+    "treatment": [
+      "Apply fungicides at early infection stage",
+      "Remove infected plant residues",
+      "Use disease-free seeds",
+      "Avoid water stress conditions"
+    ],
+    "severity": "medium"
+  },
+  "Narrow Brown Leaf Spot": {
+    "si_name": "පටු දුඹුරු පත්‍ර ලප රෝගය",
+    "description": "Linear brown lesions on leaves caused by Cercospora oryzae.",
+    "treatment": [
+      "Apply Mancozeb or Zineb fungicides",
+      "Use balanced potassium fertilization",
+      "Ensure proper drainage",
+      "Remove crop residues after harvest"
+    ],
+    "severity": "medium"
+  },
+  "Rice Hispa": {
+    "si_name": "වී හිස්පා පළිබෝධය",
+    "description": "Insect pest causing white streaks by scraping leaf surface.",
+    "treatment": [
+      "Apply Chlorpyrifos or Carbofuran insecticide",
+      "Remove grassy weeds from field borders",
+      "Use light traps to monitor adult population",
+      "Clip and destroy affected leaf tips"
+    ],
+    "severity": "medium"
+  },
+  "Sheath Blight": {
+    "si_name": "කොපු අංගමාරය",
+    "description": "Fungal disease with irregular grayish-green lesions on sheaths.",
+    "treatment": [
+      "Apply Validamycin or Hexaconazole fungicide",
+      "Reduce plant density and nitrogen",
+      "Ensure proper field drainage",
+      "Remove sclerotia from field after harvest"
+    ],
+    "severity": "high"
+  }
+}

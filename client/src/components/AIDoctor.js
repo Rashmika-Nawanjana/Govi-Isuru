@@ -1,43 +1,84 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Upload, Leaf, Loader2, CheckCircle, AlertTriangle, Bell, MapPin } from 'lucide-react';
+import { 
+  Upload, Loader2, CheckCircle, AlertTriangle, Bell, MapPin, Info,
+  Microscope, Stethoscope, Shield, Calendar, Leaf, Activity, Brain,
+  FileText, ChevronRight
+} from 'lucide-react';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const AI_API = process.env.REACT_APP_AI_URL || 'http://localhost:8000';
 
 const AIDoctor = ({ lang, user }) => {
-
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [analysisStep, setAnalysisStep] = useState(0);
   const [result, setResult] = useState(null);
   const [reportStatus, setReportStatus] = useState(null);
   const [alertsTriggered, setAlertsTriggered] = useState([]);
+  const [showGradCam, setShowGradCam] = useState(false);
 
   const t = {
-  en: {
-    title: "Govi Isuru",
-    subtitle: "The smart AI solution for farming",
-    uploadTitle: "Upload Leaf Photo",
-    uploadDesc: "Take a clear photo of the affected crop leaf.",
-    analyzeBtn: "Analyze Crop",
-    analyzing: "Analyzing...",
-    results: "Diagnosis Results",
-    treatment: "Recommended Treatment",
-    footer: "Empowering Sri Lankan Farmers"
-  },
-  si: {
-    title: "ගොවි ඉසුරු",
-    subtitle: "ගොවිතැනට සුහුරු AI විසඳුම",
-    uploadTitle: "ඡායාරූපය ඇතුලත් කරන්න",
-    uploadDesc: "රෝගී ශාක පත්‍රයේ පැහැදිලි ඡායාරූපයක් ගන්න.",
-    analyzeBtn: "පරීක්ෂා කරන්න",
-    analyzing: "විශ්ලේෂණය කරමින්...",
-    results: "රෝග විනිශ්චය",
-    treatment: "නිර්දේශිත ප්‍රතිකාර",
-    footer: "ශ්‍රී ලාංකීය ගොවීන් සවිබල ගැන්වීම"
-  }
-};
-  
+    en: {
+      title: "Govi Isuru",
+      sectionTitle: "🌾 AI Crop Diagnosis",
+      subtitle: "The smart AI solution for farming",
+      uploadTitle: "Upload Leaf Photo",
+      uploadDesc: "Take a clear photo of the affected crop leaf for instant AI diagnosis.",
+      analyzeBtn: "Analyze Crop",
+      analyzing: "Analyzing...",
+      results: "Diagnosis Report",
+      treatment: "Recommended Treatment",
+      footer: "Empowering Sri Lankan Farmers",
+      steps: ["Uploading image...", "Running AI analysis...", "Generating diagnosis..."],
+      diseaseDetected: "Disease Detected",
+      confidence: "AI Confidence",
+      whyDiagnosis: "Why this diagnosis?",
+      gradcamExplain: "Red/yellow areas show where the AI model focused to identify the disease.",
+      gradcamTrust: "This visual proof helps ensure the diagnosis is reliable.",
+      viewAnalysis: "View AI Analysis",
+      hide: "Hide",
+      show: "Show",
+      description: "Description",
+      context: "Diagnosis Context",
+      communityStatus: "Community Monitoring",
+      monitoringActive: "Community monitoring active",
+      reportLogged: "Report logged for",
+      alertTriggered: "Alert Triggered!",
+      multipleCases: "Multiple cases detected in your area. Nearby farmers will be notified."
+    },
+    si: {
+      title: "ගොවි ඉසුරු",
+      sectionTitle: "🌾 AI බෝග රෝග විනිශ්චය",
+      subtitle: "ගොවිතැනට සුහුරු AI විසඳුම",
+      uploadTitle: "පත්‍ර ඡායාරූපය උඩුගත කරන්න",
+      uploadDesc: "ක්ෂණික AI විශ්ලේෂණය සඳහා බලපෑමට ලක් වූ බෝග පත්‍රයේ පැහැදිලි ඡායාරූපයක් ගන්න.",
+      analyzeBtn: "පරීක්ෂා කරන්න",
+      analyzing: "විශ්ලේෂණය කරමින්...",
+      results: "රෝග විනිශ්චය වාර්තාව",
+      treatment: "නිර්දේශිත ප්‍රතිකාර",
+      footer: "ශ්‍රී ලාංකීය ගොවීන් සවිබල ගැන්වීම",
+      steps: ["පින්තූරය උඩුගත කරමින්...", "AI විශ්ලේෂණය ක්‍රියාත්මක කරමින්...", "විශ්ලේෂණය ජනනය කරමින්..."],
+      diseaseDetected: "හඳුනාගත් රෝගය",
+      confidence: "AI විශ්වාසනීයත්වය",
+      whyDiagnosis: "මෙම විනිශ්චය ඇයි?",
+      gradcamExplain: "රතු/කහ ප්‍රදේශ AI ආකෘතිය රෝගය හඳුනා ගැනීමට අවධානය යොමු කළ ස්ථාන පෙන්වයි.",
+      gradcamTrust: "මෙම දෘශ්‍ය සාක්ෂිය විශ්ලේෂණය විශ්වසනීය බව සහතික කරයි.",
+      viewAnalysis: "AI විශ්ලේෂණය බලන්න",
+      hide: "සඟවන්න",
+      show: "පෙන්වන්න",
+      description: "විස්තරය",
+      context: "විශ්ලේෂණ සන්දර්භය",
+      communityStatus: "ප්‍රජා අධීක්ෂණය",
+      monitoringActive: "ප්‍රජා අධීක්ෂණය සක්‍රියයි",
+      reportLogged: "වාර්තාව සටහන් විය",
+      alertTriggered: "අනතුරු ඇඟවීම!",
+      multipleCases: "ඔබගේ ප්‍රදේශයේ රෝග අවස්ථා කිහිපයක් හඳුනාගෙන ඇත. අසල්වැසි ගොවීන්ට දැනුම් දෙනු ලැබේ."
+    }
+  };
+
+  const text = t[lang] || t.en;
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -46,22 +87,18 @@ const AIDoctor = ({ lang, user }) => {
     setResult(null);
     setReportStatus(null);
     setAlertsTriggered([]);
+    setAnalysisStep(0);
   };
 
-  // Report disease detection to community alert system
   const reportToAlertSystem = async (predictionResult) => {
-    // Only report if user has location set
-    if (!user?.gnDivision) {
-      console.log('User location not set, skipping disease report');
-      return;
-    }
+    if (!user?.gnDivision) return;
 
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
         `${API_BASE}/api/alerts/disease-report`,
         {
-          crop: 'Rice', // Default crop type
+          crop: 'Rice',
           disease: predictionResult.disease,
           confidence: predictionResult.confidence,
           district: user.district,
@@ -70,9 +107,7 @@ const AIDoctor = ({ lang, user }) => {
           treatment: predictionResult.treatment,
           farmerUsername: user.username
         },
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
-        }
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
       );
 
       setReportStatus('success');
@@ -88,139 +123,350 @@ const AIDoctor = ({ lang, user }) => {
   const handleAnalyze = async () => {
     if (!file) return;
     setLoading(true);
+    setShowGradCam(false);
+    setAnalysisStep(1);
+    
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:8888/predict', formData);
-      setResult(response.data);
+      // Simulate step progression for UX
+      setTimeout(() => setAnalysisStep(2), 800);
+      setTimeout(() => setAnalysisStep(3), 1600);
+
+      const response = await axios.post(`${AI_API}/predict`, formData);
+      const data = response.data;
       
-      // Auto-report to community alert system
-      if (response.data && response.data.disease !== 'Healthy') {
-        await reportToAlertSystem(response.data);
+      const mappedResult = {
+        disease: data.prediction,
+        si_name: data.si_name,
+        confidence: data.confidence,
+        treatment: Array.isArray(data.treatment) ? data.treatment.join('\n• ') : data.treatment,
+        treatment_list: data.treatment,
+        description: data.description,
+        severity: data.severity,
+        all_predictions: data.all_predictions,
+        gradcam: data.gradcam
+      };
+      
+      setResult(mappedResult);
+      
+      if (data.prediction && data.prediction !== 'Healthy Rice Leaf') {
+        await reportToAlertSystem({
+          disease: data.prediction,
+          confidence: data.confidence,
+          treatment: Array.isArray(data.treatment) ? data.treatment[0] : data.treatment
+        });
       }
     } catch (error) {
       console.error("Error connecting to AI service", error);
-      alert("Error: Is the Python backend running?");
+      alert(lang === 'en' 
+        ? "Unable to connect to AI service. Please try again." 
+        : "AI සේවාවට සම්බන්ධ විය නොහැක. නැවත උත්සාහ කරන්න.");
     } finally {
       setLoading(false);
+      setAnalysisStep(0);
     }
   };
 
+  const getSeverityStyle = (severity) => {
+    switch(severity) {
+      case 'high': return { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', badge: 'bg-red-500' };
+      case 'medium': return { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-700', badge: 'bg-yellow-500' };
+      case 'none': return { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', badge: 'bg-green-500' };
+      default: return { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', badge: 'bg-orange-500' };
+    }
+  };
+
+  const formatDate = () => {
+    return new Date().toLocaleDateString(lang === 'si' ? 'si-LK' : 'en-LK', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-green-50 font-sans text-gray-800">
-      
+    <div className="font-sans text-gray-800">
+      {/* Section Header */}
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-green-800 flex items-center gap-2">
+          <Stethoscope className="h-7 w-7" />
+          {text.sectionTitle}
+        </h2>
+        <p className="text-gray-500 mt-1">{text.subtitle}</p>
+      </div>
 
-      <main className="max-w-md mx-auto mt-8 p-4">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-green-800">{t[lang].subtitle}</h2>
-          <p className="text-gray-600 mt-2">{t[lang].uploadDesc}</p>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-md p-6 border-2 border-dashed border-green-300 hover:border-green-500 transition-colors">
-          <div className="flex flex-col items-center gap-4">
-            {preview ? (
-              <img src={preview} alt="Crop preview" className="w-full h-48 object-cover rounded-lg shadow-sm" />
-            ) : (
-              <div className="w-full h-32 bg-green-50 rounded-lg flex items-center justify-center">
-                <Upload className="h-10 w-10 text-green-400" />
-              </div>
-            )}
-            
-            <input 
-              type="file" 
-              accept="image/*"
-              onChange={handleFileChange} 
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-green-700 hover:file:bg-green-200"
-            />
+      {/* Upload Card */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="p-6">
+          {/* Upload Area */}
+          <div className={`relative border-2 border-dashed rounded-xl p-6 transition-all duration-300 ${
+            preview ? 'border-green-400 bg-green-50/50' : 'border-gray-200 hover:border-green-400 hover:bg-green-50/30'
+          }`}>
+            <div className="flex flex-col items-center gap-4">
+              {preview ? (
+                <div className="relative w-full">
+                  <img 
+                    src={preview} 
+                    alt="Crop preview" 
+                    className="w-full h-56 object-cover rounded-xl shadow-md" 
+                  />
+                  <div className="absolute top-2 right-2 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                    <CheckCircle className="h-3 w-3" /> Ready
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full h-40 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl flex flex-col items-center justify-center">
+                  <div className="p-4 bg-white rounded-full shadow-md mb-3">
+                    <Upload className="h-8 w-8 text-green-500" />
+                  </div>
+                  <p className="text-sm text-gray-500 font-medium">{text.uploadTitle}</p>
+                  <p className="text-xs text-gray-400 mt-1 text-center px-4">{text.uploadDesc}</p>
+                </div>
+              )}
+              
+              <input 
+                type="file" 
+                accept="image/*"
+                onChange={handleFileChange} 
+                className="block w-full text-sm text-gray-500 
+                  file:mr-4 file:py-2.5 file:px-5 
+                  file:rounded-full file:border-0 
+                  file:text-sm file:font-bold
+                  file:bg-green-100 file:text-green-700 
+                  hover:file:bg-green-200 file:cursor-pointer
+                  file:transition-all file:duration-200"
+              />
+            </div>
           </div>
 
+          {/* Analyze Button with Progress */}
           <button
             onClick={handleAnalyze}
             disabled={!file || loading}
-            className={`w-full mt-6 py-3 rounded-lg font-bold text-white flex justify-center items-center gap-2 shadow-md transition-all ${
-              !file ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+            className={`w-full mt-5 py-4 rounded-xl font-bold text-white flex flex-col items-center justify-center gap-1 shadow-lg transition-all duration-300 ${
+              !file ? 'bg-gray-300 cursor-not-allowed' : loading ? 'bg-green-600' : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 hover:shadow-xl hover:-translate-y-0.5'
             }`}
           >
             {loading ? (
-              <><Loader2 className="animate-spin h-5 w-5" /> {t[lang].analyzing}</>
+              <>
+                <div className="flex items-center gap-2">
+                  <Loader2 className="animate-spin h-5 w-5" />
+                  <span>{text.analyzing}</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-green-200 mt-1">
+                  {analysisStep > 0 && (
+                    <>
+                      <Activity className="h-3 w-3" />
+                      <span>{text.steps[analysisStep - 1]}</span>
+                    </>
+                  )}
+                </div>
+              </>
             ) : (
-              t[lang].analyzeBtn
+              <div className="flex items-center gap-2">
+                <Microscope className="h-5 w-5" />
+                <span>{text.analyzeBtn}</span>
+                <ChevronRight className="h-4 w-4" />
+              </div>
             )}
           </button>
         </div>
+      </div>
 
-        {result && (
-          <div className="mt-8 bg-white rounded-xl shadow-lg overflow-hidden animate-fade-in-up">
-            <div className="bg-green-100 p-4 border-b border-green-200">
-              <h3 className="text-lg font-bold text-green-900 flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-orange-600" />
-                {t[lang].results}
-              </h3>
-            </div>
-            
-            <div className="p-5 space-y-4">
-              <div>
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Disease Detected</span>
-                <p className="text-xl font-bold text-gray-800 mt-1">{result.disease}</p>
-                <div className="mt-1 flex items-center gap-2">
-                  <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-green-500" 
-                      style={{ width: `${result.confidence * 100}%` }}
-                    ></div>
+      {/* Divider */}
+      {result && <hr className="my-8 border-green-100" />}
+
+      {/* Results - Medical Report Style */}
+      {result && (
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden animate-fade-in">
+          {/* Report Header */}
+          <div className={`px-6 py-4 border-b-2 ${getSeverityStyle(result.severity).bg} ${getSeverityStyle(result.severity).border}`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {result.severity === 'none' ? (
+                  <div className="p-2 bg-green-500 rounded-lg">
+                    <CheckCircle className="h-6 w-6 text-white" />
                   </div>
-                  <span className="text-xs font-bold text-green-700">{(result.confidence * 100).toFixed(0)}%</span>
+                ) : (
+                  <div className={`p-2 ${getSeverityStyle(result.severity).badge} rounded-lg`}>
+                    <AlertTriangle className="h-6 w-6 text-white" />
+                  </div>
+                )}
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-gray-600" />
+                    {text.results}
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">AI-Powered Analysis • Govi Isuru</p>
                 </div>
               </div>
-
-              <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
-                <span className="text-xs font-bold text-yellow-600 uppercase tracking-wide flex items-center gap-1">
-                  <CheckCircle className="h-3 w-3" /> {t[lang].treatment}
-                </span>
-                <p className="text-gray-700 mt-2 text-sm leading-relaxed">
-                  {lang === 'si' && result.treatment_si ? result.treatment_si : result.treatment}
-                </p>
-              </div>
-
-              {/* Community Alert Reporting Status */}
-              {reportStatus === 'success' && user?.gnDivision && (
-                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                  <span className="text-xs font-bold text-green-600 uppercase tracking-wide flex items-center gap-1">
-                    <Bell className="h-3 w-3" /> 
-                    {lang === 'si' ? 'ප්‍රජා අනතුරු ඇඟවීම් පද්ධතිය' : 'Community Alert System'}
-                  </span>
-                  <p className="text-green-700 mt-2 text-sm flex items-center gap-1">
-                    <MapPin className="h-4 w-4" />
-                    {lang === 'si' 
-                      ? `මෙම වාර්තාව ${user.gnDivision} ප්‍රදේශය සඳහා සුරකින ලදී`
-                      : `This report has been logged for ${user.gnDivision} area`}
-                  </p>
-                </div>
-              )}
-
-              {/* Alert Triggered Notification */}
-              {alertsTriggered.length > 0 && (
-                <div className="bg-red-50 p-4 rounded-lg border border-red-200 animate-pulse">
-                  <span className="text-xs font-bold text-red-600 uppercase tracking-wide flex items-center gap-1">
-                    <AlertTriangle className="h-3 w-3" /> 
-                    {lang === 'si' ? 'අනතුරු ඇඟවීම අවුලුවන ලදී!' : 'Alert Triggered!'}
-                  </span>
-                  <p className="text-red-700 mt-2 text-sm">
-                    {lang === 'si' 
-                      ? `ඔබගේ ප්‍රදේශයේ ${result.disease} රෝග අවස්ථා කිහිපයක් හඳුනාගෙන ඇත. අසල්වැසි ගොවීන්ට දැනුම් දෙනු ලැබේ.`
-                      : `Multiple cases of ${result.disease} detected in your area. Nearby farmers will be notified.`}
-                  </p>
-                </div>
-              )}
+              <span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${getSeverityStyle(result.severity).badge}`}>
+                {result.severity === 'none' ? '✓ Healthy' : result.severity === 'high' ? '⚠ High Risk' : '⚡ Moderate'}
+              </span>
             </div>
           </div>
-        )}
-      </main>
 
-      <footer className="text-center text-gray-400 text-sm py-8">
-        © 2024 {t[lang].title} - {t[lang].footer}
-      </footer>
+          <div className="p-6 space-y-5">
+            {/* Farmer Context Box */}
+            {user && (
+              <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{text.context}</p>
+                <div className="grid grid-cols-3 gap-3 text-sm">
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <MapPin className="h-4 w-4 text-slate-400" />
+                    <span>{user.gnDivision || 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <Leaf className="h-4 w-4 text-slate-400" />
+                    <span>Rice</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <Calendar className="h-4 w-4 text-slate-400" />
+                    <span>{formatDate()}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Disease Detection */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🦠</span>
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{text.diseaseDetected}</span>
+              </div>
+              <p className="text-2xl font-bold text-gray-900">{result.disease}</p>
+              {result.si_name && result.si_name !== result.disease && (
+                <p className="text-base text-gray-500">{result.si_name}</p>
+              )}
+            </div>
+
+            {/* Confidence Meter */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📍</span>
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{text.confidence}</span>
+                <span className="ml-auto text-lg font-bold text-gray-900">{(result.confidence * 100).toFixed(0)}%</span>
+              </div>
+              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    result.confidence > 0.75 ? 'bg-gradient-to-r from-green-400 to-green-600' : 
+                    result.confidence > 0.5 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 
+                    'bg-gradient-to-r from-red-400 to-red-600'
+                  }`}
+                  style={{ width: `${result.confidence * 100}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Description */}
+            {result.description && (
+              <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <Info className="h-4 w-4 text-blue-600" />
+                  <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">{text.description}</span>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">{result.description}</p>
+              </div>
+            )}
+
+            {/* Grad-CAM Visualization - Enhanced */}
+            {result.gradcam && (
+              <div className="border border-purple-200 rounded-xl overflow-hidden bg-gradient-to-br from-purple-50 to-indigo-50">
+                <button
+                  onClick={() => setShowGradCam(!showGradCam)}
+                  className="w-full p-4 flex items-center justify-between text-sm font-bold text-purple-700 hover:bg-purple-100/50 transition"
+                >
+                  <span className="flex items-center gap-2">
+                    <Brain className="h-5 w-5" />
+                    <span>🧠 {text.whyDiagnosis}</span>
+                  </span>
+                  <span className="text-xs bg-purple-200 px-3 py-1 rounded-full">
+                    {showGradCam ? text.hide : text.show}
+                  </span>
+                </button>
+                {showGradCam && (
+                  <div className="px-4 pb-4 space-y-3">
+                    <p className="text-xs text-purple-600 text-center bg-purple-100 rounded-lg p-2">
+                      💡 {text.gradcamExplain}
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="text-center">
+                        <p className="text-xs font-bold text-gray-500 mb-2">Original</p>
+                        <img src={preview} alt="Original" className="w-full h-36 object-cover rounded-xl shadow-md" />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs font-bold text-gray-500 mb-2">AI Focus</p>
+                        <img 
+                          src={`data:image/png;base64,${result.gradcam.overlay}`} 
+                          alt="Grad-CAM" 
+                          className="w-full h-36 object-cover rounded-xl shadow-md"
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-center text-gray-500 italic flex items-center justify-center gap-1">
+                      <Shield className="h-3 w-3" /> {text.gradcamTrust}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Treatment */}
+            <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg">💊</span>
+                <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">{text.treatment}</span>
+              </div>
+              {result.treatment_list ? (
+                <ul className="space-y-2">
+                  {result.treatment_list.map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-3 text-gray-700 text-sm">
+                      <span className="flex-shrink-0 w-5 h-5 bg-amber-200 text-amber-800 rounded-full flex items-center justify-center text-xs font-bold">
+                        {idx + 1}
+                      </span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-700 text-sm">{result.treatment}</p>
+              )}
+            </div>
+
+            {/* Community Status */}
+            {reportStatus === 'success' && user?.gnDivision && (
+              <div className="flex items-center justify-between bg-green-50 rounded-xl p-4 border border-green-200">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 rounded-full">
+                    <Bell className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-green-700">{text.communityStatus}</p>
+                    <p className="text-xs text-green-600">{text.reportLogged} {user.gnDivision}</p>
+                  </div>
+                </div>
+                <span className="bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3" /> {text.monitoringActive}
+                </span>
+              </div>
+            )}
+
+            {/* Alert Triggered */}
+            {alertsTriggered.length > 0 && (
+              <div className="border-l-4 border-red-500 bg-red-50 rounded-r-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                  <span className="text-sm font-bold text-red-700">🚨 {text.alertTriggered}</span>
+                </div>
+                <p className="text-sm text-red-600">{text.multipleCases}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

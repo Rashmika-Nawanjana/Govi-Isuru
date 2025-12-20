@@ -142,35 +142,37 @@ const Marketplace = ({ lang, currentUser }) => {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   return (
-    <div className="max-w-4xl mx-auto p-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="bg-green-100 p-6 rounded-2xl mb-8 flex items-center justify-between shadow-sm border border-green-200">
-        <div>
-          <h2 className="text-2xl font-bold text-green-900">{t[lang].header}</h2>
-          <p className="text-green-700">{t[lang].sub}</p>
-        </div>
-        <ShoppingBag className="h-10 w-10 text-green-600" />
+    <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Section Header */}
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-green-800 flex items-center gap-2">
+          <ShoppingBag className="h-7 w-7" />
+          🛒 {t[lang].header}
+        </h2>
+        <p className="text-gray-500 mt-1">{t[lang].sub}</p>
       </div>
 
       {/* Top Rated Farmers Section */}
       {topFarmers.length > 0 && (
-        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-xl mb-8 border border-amber-200">
+        <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 p-5 rounded-2xl mb-6 border border-amber-200 shadow-sm">
           <h3 className="text-sm font-bold text-amber-800 mb-3 flex items-center gap-2">
-            <Award size={18} className="text-amber-600" />
+            <div className="p-1.5 bg-amber-500 rounded-lg">
+              <Award size={14} className="text-white" />
+            </div>
             {t[lang].topFarmers}
           </h3>
           <div className="flex gap-3 overflow-x-auto pb-2">
             {topFarmers.map((farmer) => (
               <div 
                 key={farmer._id}
-                className="flex-shrink-0 bg-white px-4 py-2 rounded-lg shadow-sm border flex items-center gap-2"
+                className="flex-shrink-0 bg-white px-4 py-3 rounded-xl shadow-sm border border-amber-100 flex items-center gap-3 hover:shadow-md transition-shadow"
               >
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <User size={16} className="text-green-600" />
+                <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-emerald-200 rounded-full flex items-center justify-center">
+                  <User size={18} className="text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-800">{farmer.username}</p>
-                  <div className="flex items-center gap-1">
+                  <p className="text-sm font-bold text-gray-800">{farmer.username}</p>
+                  <div className="flex items-center gap-1 mt-0.5">
                     <MiniReputationBadge score={farmer.reputation_score} />
                     {farmer.is_verified_farmer && (
                       <CheckCircle size={12} className="text-blue-500" />
@@ -184,29 +186,34 @@ const Marketplace = ({ lang, currentUser }) => {
       )}
 
       {/* Sell Form */}
-      <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-10">
-        <h3 className="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
-          <PlusCircle className="h-5 w-5 text-green-600" /> {t[lang].formTitle}
+      <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 mb-8">
+        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <div className="p-2 bg-green-100 rounded-lg">
+            <PlusCircle className="h-5 w-5 text-green-600" />
+          </div>
+          {t[lang].formTitle}
         </h3>
-        <div className="mb-4 p-3 bg-green-50 rounded-lg border border-green-200 flex items-center gap-2">
-          <User size={18} className="text-green-600" />
+        <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 flex items-center gap-2">
+          <div className="p-1.5 bg-green-500 rounded-full">
+            <User size={14} className="text-white" />
+          </div>
           <span className="text-sm text-gray-600">{t[lang].postingAs}:</span>
           <span className="font-bold text-green-700">{currentUser?.username}</span>
         </div>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input name="cropType" value={form.cropType} onChange={handleChange} placeholder="Crop (e.g. Rice)" className="p-3 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" required />
-          <input name="quantity" value={form.quantity} onChange={handleChange} placeholder="Qty (e.g. 500kg)" className="p-3 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" required />
-          <input name="price" value={form.price} onChange={handleChange} placeholder="Price (LKR)" className="p-3 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" required />
-          <input name="location" value={form.location} onChange={handleChange} placeholder="Location" className="p-3 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" required />
-          <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone (e.g. 0771234567)" className="p-3 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" required />
-          <button type="submit" className="md:col-span-2 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition shadow-md">
+          <input name="cropType" value={form.cropType} onChange={handleChange} placeholder="Crop (e.g. Rice)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+          <input name="quantity" value={form.quantity} onChange={handleChange} placeholder="Qty (e.g. 500kg)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+          <input name="price" value={form.price} onChange={handleChange} placeholder="Price (LKR)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+          <input name="location" value={form.location} onChange={handleChange} placeholder="Location" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+          <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone (e.g. 0771234567)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+          <button type="submit" className="md:col-span-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3.5 rounded-xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
             {t[lang].btn}
           </button>
         </form>
       </div>
 
       {/* Listings Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {listings.map((item) => (
           <div key={item._id} className="bg-white p-5 rounded-2xl shadow-md hover:shadow-xl transition-all border-l-4 border-green-500 flex flex-col justify-between">
             <div>
