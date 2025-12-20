@@ -76,10 +76,15 @@
   - Rain alerts for fertilizer timing
   - Temperature advisories for crop protection
 
-### 💬 AI Crop Chatbot
+### 💬 AI Crop Chatbot with Advanced Features
 - **Natural Language Q&A**: Ask farming questions in plain language
 - **Knowledge Base**: Built-in agricultural knowledge for Sri Lankan crops
 - **Bilingual Support**: Responds in English or Sinhala
+- **Conversation Memory**: Maintains context across chat sessions - remembers crops, seasons, and topics discussed
+- **In-Chat Image Diagnosis**: Upload plant images directly in chat for AI disease detection with Grad-CAM visualization
+- **Smart Follow-up Suggestions**: Context-aware suggestion buttons based on conversation intent (fertilizer, disease, pest, planting, etc.)
+- **Voice Input**: Speech recognition with bilingual support (English & Sinhala) using Web Speech API
+- **Visual Indicators**: Context badges showing current crop and season focus
 
 ### 👤 User Authentication & Profiles
 - **Secure Registration**: JWT-based authentication with bcrypt password hashing
@@ -260,6 +265,7 @@ govi-isuru/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── AIDoctor.js          # Disease detection + Grad-CAM
+│   │   │   ├── CropChatbot.js       # AI chatbot with voice & LLM
 │   │   │   ├── CommunityAlerts.js   # Disease alert system
 │   │   │   ├── Marketplace.js       # P2P marketplace
 │   │   │   ├── MarketTrends.js      # Analytics dashboard
@@ -282,6 +288,10 @@ govi-isuru/
 ├── 📂 server/                       # Node.js Backend
 │   ├── models/
 │   │   └── User.js                  # User schema
+│   ├── routes/
+│   │   └── chatbot.js               # Chatbot API endpoints
+│   ├── knowledge/
+│   │   └── farming.json             # Agricultural knowledge base
 │   ├── index.js                     # Express server
 │   └── package.json
 │
@@ -528,6 +538,8 @@ REACT_APP_WEATHER_KEY=your_openweathermap_api_key
 | 🔄 **Transfer Learning** | Achieves high accuracy with limited training data |
 | 📱 **Integrated Communication** | Direct WhatsApp/call links from marketplace |
 | 👨‍🌾 **Farmer-Centric UX** | Simplified, icon-driven interface for all literacy levels |
+| 🎙️ **Voice Input** | Speech recognition for hands-free chatbot interaction |
+| 💭 **Conversation Memory** | Context-aware chatbot remembers discussion topics |
 
 ## 🤝 Contributing
 
