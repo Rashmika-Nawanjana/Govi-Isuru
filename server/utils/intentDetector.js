@@ -4,8 +4,8 @@
 // Synonym mappings for better understanding
 const synonyms = {
   fertilizer: ['fertilizer', 'fertiliser', 'urea', 'npk', 'potash', 'nitrogen', 'phosphate', 'manure', 'compost', 'පොහොර', 'යුරියා', 'poshora', 'pohora', 't750', 't200', 'dolomite'],
-  disease: ['disease', 'sick', 'infection', 'fungus', 'bacteria', 'virus', 'blight', 'blast', 'spot', 'smut', 'rust', 'ලෙඩ', 'රෝග', 'ආසාදනය', 'leda', 'roga', 'blister', 'බිබිලි'],
-  pest: ['pest', 'insect', 'bug', 'worm', 'borer', 'hopper', 'mite', 'tortrix', 'mosquito bug', 'කෘමි', 'පළිබෝධ', 'krumi'],
+  disease: ['disease', 'sick', 'infection', 'fungus', 'bacteria', 'virus', 'blight', 'blast', 'spot', 'smut', 'rust', 'ලෙඩ', 'රෝග', 'ආසාදනය', 'leda', 'roga', 'blister', 'බිබිලි', 'thrips', 'yellow virus', 'leaf spot'],
+  pest: ['pest', 'insect', 'bug', 'worm', 'borer', 'hopper', 'mite', 'tortrix', 'mosquito bug', 'කෘමි', 'පළිබෝධ', 'krumi', 'thrips', 'aphid', 'whitefly', 'fruit borer'],
   planting: ['planting', 'sowing', 'seed', 'seedling', 'transplant', 'වගා', 'බීජ', 'පැල', 'waga', 'bija', 'spacing'],
   harvest: ['harvest', 'harvesting', 'yield', 'crop', 'reap', 'pluck', 'plucking', 'අස්වනු', 'අස්වැන්න', 'aswanu', 'නෙලීම'],
   water: ['water', 'irrigation', 'watering', 'drought', 'flood', 'rain', 'drainage', 'ජලය', 'වාරිමාර්ග', 'jalaya'],
@@ -22,12 +22,12 @@ const synonyms = {
 const cropPatterns = {
   rice: ['rice', 'paddy', ' වී', 'හාල්', 'ගොයම'],
   vegetables: ['vegetable', 'veggies', 'එළවලු', 'බෝග'],
-  chili: ['chili', 'chilli', 'pepper', 'මිරිස්'],
+  chili: ['chili', 'chilli', 'pepper', 'මිරිස්', 'miris', 'hot pepper', 'capsicum', 'kochchi', 'කොච්චි'],
   tea: ['tea', 'තේ', 'තේ කොළ', 'tea leaf', 'tea plant', 'tea bush'],
   coconut: ['coconut', 'පොල්']
 };
 
-// Disease name patterns - includes both rice and tea diseases
+// Disease name patterns - includes rice, tea, and chili diseases
 const diseasePatterns = {
   // Rice diseases
   blast: ['blast', 'පිපිරුම', 'leaf blast'],
@@ -38,7 +38,11 @@ const diseasePatterns = {
   blister_blight: ['blister', 'blister blight', 'බිබිලි', 'බිබිලි රෝගය'],
   brown_blight: ['brown blight', 'tea brown', 'දුඹුරු පිළිස්සුම'],
   gray_blight: ['gray blight', 'grey blight', 'අළු පිළිස්සුම'],
-  red_rust: ['red rust', 'rust', 'රතු මලකඩ', 'මලකඩ']
+  red_rust: ['red rust', 'rust', 'රතු මලකඩ', 'මලකඩ'],
+  // Chili diseases
+  leaf_spot: ['leaf spot', 'bercak', 'පත්‍ර පුල්ලි', 'cercospora'],
+  thrips_damage: ['thrips', 'තොප්ස්', 'silver streaks', 'leaf curling'],
+  yellow_virus: ['yellow virus', 'virus kuning', 'gemini virus', 'කහ වයිරස්', 'leaf curl virus', 'whitefly virus']
 };
 
 function detectIntent(message) {

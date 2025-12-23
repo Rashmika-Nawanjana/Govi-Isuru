@@ -65,6 +65,12 @@ const followUpSuggestions = {
       "Recovery time after pruning?",
       "Tools for pruning?"
     ],
+    CHILI: [
+      "How to prevent chili diseases?",
+      "Best fertilizer for chili?",
+      "When to harvest chili?",
+      "Pest control for chili?"
+    ],
     GREETING: [
       "What fertilizer for rice?",
       "How to treat plant diseases?",
@@ -138,8 +144,12 @@ const followUpSuggestions = {
       "කප්පාදු සඳහා උස කොපමණද?",
       "කප්පාදු කිරීමෙන් පසු යථා කාලය?",
       "කප්පාදු මෙවලම්?"
-    ],
-    GREETING: [
+    ],    CHILI: [
+      "මිරිස් රෝග වැළැක්වීමට කෙසේද?",
+      "මිරිස් සඳහා හොඳම පොහොර?",
+      "මිරිස් අස්වැනු නෙලන්නේ කවදාද?",
+      "මිරිස් පළිබෝධ පාලනය?"
+    ],    GREETING: [
       "වී සඳහා පොහොර කුමක්ද?",
       "ශාක රෝග ප්‍රතිකාර කරන්නේ කෙසේද?",
       "තේ නෙලීමේ ඉඟි?",
@@ -158,7 +168,7 @@ const translations = {
   en: {
     title: "Crop Assistant",
     subtitle: "Ask me about farming!",
-    placeholder: "Ask about rice, tea, fertilizer, diseases...",
+    placeholder: "Ask about rice, tea, chili, fertilizer, diseases...",
     send: "Send",
     typing: "Thinking...",
     source: "Source",
@@ -168,7 +178,7 @@ const translations = {
       "When to harvest rice?",
       "Tea pruning advice"
     ],
-    welcome: "👋 Hello! I'm your Govi Isuru farming assistant. Ask me about rice or tea - fertilizers, diseases, planting, or harvesting! You can also upload plant photos for disease diagnosis.",
+    welcome: "👋 Hello! I'm your Govi Isuru farming assistant. Ask me about rice, tea, or chili - fertilizers, diseases, planting, or harvesting! You can also upload plant photos for disease diagnosis.",
     uploadImage: "Upload plant photo",
     analyzing: "Analyzing image...",
     diagnosisResult: "Disease Diagnosis",
@@ -184,7 +194,7 @@ const translations = {
   si: {
     title: "බෝග සහායක",
     subtitle: "ගොවිතැන් ගැන මගෙන් අහන්න!",
-    placeholder: "වී, තේ, පොහොර, රෝග ගැන අහන්න...",
+    placeholder: "වී, තේ, මිරිස්, පොහොර, රෝග ගැන අහන්න...",
     send: "යවන්න",
     typing: "සිතමින්...",
     source: "මූලාශ්‍රය",
@@ -194,7 +204,7 @@ const translations = {
       "වී අස්වනු නෙලන්නේ කවදාද?",
       "තේ කප්පාදු උපදෙස්"
     ],
-    welcome: "👋 ආයුබෝවන්! මම ඔබේ ගොවි ඉසුරු ගොවිතැන් සහායකයා. වී හෝ තේ ගැන - පොහොර, රෝග, වගා කිරීම හෝ අස්වනු නෙලීම ගැන මගෙන් අහන්න! රෝග හඳුනා ගැනීමට ශාක ඡායාරූප උඩුගත කරන්න.",
+    welcome: "👋 ආයුබෝවන්! මම ඔබේ ගොවි ඉසුරු ගොවිතැන් සහායකයා. වී, තේ හෝ මිරිස් ගැන - පොහොර, රෝග, වගා කිරීම හෝ අස්වැනු නෙලීම ගැන මගෙන් අහන්න! රෝග හඳුනා ගැනීමට ශාක ඡායාරූප ඉඩුගත කරන්න.",
     uploadImage: "ශාක ඡායාරූපය උඩුගත කරන්න",
     analyzing: "රූපය විශ්ලේෂණය කරමින්...",
     diagnosisResult: "රෝග විනිශ්චය",
@@ -539,7 +549,7 @@ export default function CropChatbot({ lang = 'en' }) {
       id: Date.now(),
       type: 'user',
       text: lang === 'si' 
-        ? `🔍 මෙම ${selectedCropType === 'tea' ? 'තේ' : 'වී'} ශාකයේ රෝගය හඳුනා ගන්න` 
+        ? `🔍 මෙම ${selectedCropType === 'tea' ? 'තේ' : selectedCropType === 'chili' ? 'මිරිස්' : 'වී'} ශාකයේ රෝගය හඳුනා ගන්න` 
         : `🔍 Diagnose this ${selectedCropType} plant`,
       image: imageUrl,
       timestamp: new Date()
@@ -823,6 +833,16 @@ export default function CropChatbot({ lang = 'en' }) {
               }`}
             >
               🍃 {lang === 'si' ? 'තේ' : 'Tea'}
+            </button>
+            <button
+              onClick={() => setSelectedCropType('chili')}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                selectedCropType === 'chili'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              🌶️ {lang === 'si' ? 'මිරිස්' : 'Chili'}
             </button>
           </div>
         </div>

@@ -211,6 +211,7 @@ const useTTS = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [currentArticleId, setCurrentArticleId] = useState(null);
   const utteranceRef = useRef(null);
+  const audioRef = useRef(null);
 
   const getVoice = (lang) => {
     const voices = window.speechSynthesis.getVoices();
@@ -235,12 +236,77 @@ const useTTS = () => {
     return englishVoice || voices[0];
   };
 
-  const speak = async (article, lang = 'en') => {
-    if (!window.speechSynthesis) {
-      console.error('Speech synthesis not supported');
-      return;
-    }
+  // Check if browser has Sinhala voice support
+  const hasSinhalaVoice = () => {
+    const voices = window.speechSynthesis.getVoices();
+    return voices.some(v => 
+      v.lang.includes('si') || 
+      v.name.toLowerCase().includes('sinhala') ||
+      v.name.toLowerCase().includes('sinh')
+    );
+  };
 
+  // Use server-side TTS proxy for Sinhala (avoids CORS issues)
+  const speakWithGoogleTTS = async (text, lang, articleId) => {
+    try {
+      // Stop any existing audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+
+      // Split text into chunks (Google TTS has ~200 char limit)
+      const chunks = [];
+      const maxLength = 180;
+      let remaining = text;
+      
+      while (remaining.length > 0) {
+        if (remaining.length <= maxLength) {
+          chunks.push(remaining);
+          break;
+        }
+        // Find a good break point (space, period, comma)
+        let breakPoint = remaining.lastIndexOf(' ', maxLength);
+        if (breakPoint === -1) breakPoint = remaining.lastIndexOf('.', maxLength);
+        if (breakPoint === -1) breakPoint = maxLength;
+        chunks.push(remaining.substring(0, breakPoint));
+        remaining = remaining.substring(breakPoint).trim();
+      }
+
+      setIsSpeaking(true);
+      setCurrentArticleId(articleId);
+
+      // Play chunks sequentially using server proxy
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = encodeURIComponent(chunks[i]);
+        const ttsLang = lang === 'si' ? 'si' : 'en';
+        // Use server-side proxy to avoid CORS issues
+        const audioUrl = `${API_BASE}/api/news/tts-audio?text=${chunk}&lang=${ttsLang}`;
+        
+        await new Promise((resolve, reject) => {
+          const audio = new Audio(audioUrl);
+          audioRef.current = audio;
+          
+          audio.onended = resolve;
+          audio.onerror = (e) => {
+            console.error('Audio error:', e);
+            reject(e);
+          };
+          
+          audio.play().catch(reject);
+        });
+      }
+
+      setIsSpeaking(false);
+      setCurrentArticleId(null);
+    } catch (error) {
+      console.error('Google TTS error:', error);
+      setIsSpeaking(false);
+      setCurrentArticleId(null);
+    }
+  };
+
+  const speak = async (article, lang = 'en') => {
     // Stop any ongoing speech
     stop();
 
@@ -255,10 +321,24 @@ const useTTS = () => {
         throw new Error('Failed to prepare text');
       }
 
-      const { text, lang: voiceLang } = response.data;
+      const { text } = response.data;
+
+      // For Sinhala, use Google TTS if no native Sinhala voice
+      if (lang === 'si' && !hasSinhalaVoice()) {
+        await speakWithGoogleTTS(text, lang, article.id);
+        return;
+      }
+
+      // Use Web Speech API for English or if Sinhala voice exists
+      if (!window.speechSynthesis) {
+        console.error('Speech synthesis not supported');
+        // Fallback to Google TTS
+        await speakWithGoogleTTS(text, lang, article.id);
+        return;
+      }
 
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = voiceLang;
+      utterance.lang = lang === 'si' ? 'si-LK' : 'en-GB';
       utterance.rate = lang === 'si' ? 0.85 : 0.95;
       utterance.pitch = 1;
       utterance.volume = 1;
@@ -283,9 +363,8 @@ const useTTS = () => {
 
       utterance.onerror = (event) => {
         console.error('TTS error:', event);
-        setIsSpeaking(false);
-        setIsPaused(false);
-        setCurrentArticleId(null);
+        // Fallback to Google TTS on error
+        speakWithGoogleTTS(text, lang, article.id);
       };
 
       utteranceRef.current = utterance;
@@ -296,31 +375,47 @@ const useTTS = () => {
   };
 
   const pause = () => {
-    if (window.speechSynthesis && isSpeaking) {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPaused(true);
+    } else if (window.speechSynthesis && isSpeaking) {
       window.speechSynthesis.pause();
       setIsPaused(true);
     }
   };
 
   const resume = () => {
-    if (window.speechSynthesis && isPaused) {
+    if (audioRef.current && isPaused) {
+      audioRef.current.play();
+      setIsPaused(false);
+    } else if (window.speechSynthesis && isPaused) {
       window.speechSynthesis.resume();
       setIsPaused(false);
     }
   };
 
   const stop = () => {
+    // Stop audio element if using Google TTS
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    // Stop Web Speech API
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-      setIsPaused(false);
-      setCurrentArticleId(null);
     }
+    setIsSpeaking(false);
+    setIsPaused(false);
+    setCurrentArticleId(null);
   };
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
       if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
       }
@@ -997,7 +1092,7 @@ const AgriNews = ({ lang = 'en', user }) => {
       </div>
 
       {/* Category Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="flex flex-wrap gap-2 pb-2">
         {categories.map(category => (
           <CategoryTab
             key={category}

@@ -31,6 +31,11 @@ MODELS_CONFIG = {
         "model_path": "models/tea/tea_best_model.keras",
         "class_indices_path": "models/tea/tea_class_indices.json",
         "disease_info_path": "models/tea/tea_disease_info.json"
+    },
+    "chili": {
+        "model_path": "models/chili/chili_best_model.keras",
+        "class_indices_path": "models/chili/chili_class_indices.json",
+        "disease_info_path": "models/chili/chili_disease_info.json"
     }
 }
 IMAGE_SIZE = (224, 224)
@@ -39,12 +44,13 @@ IMAGE_SIZE = (224, 224)
 class CropType(str, Enum):
     rice = "rice"
     tea = "tea"
+    chili = "chili"
 
 # Initialize FastAPI
 app = FastAPI(
     title="Govi Isuru - Multi-Crop Disease Predictor",
-    description="AI-powered crop disease detection for Rice and Tea with Grad-CAM visualization",
-    version="3.0.0"
+    description="AI-powered crop disease detection for Rice, Tea, and Chili with Grad-CAM visualization",
+    version="3.1.0"
 )
 
 # CORS middleware
@@ -442,6 +448,11 @@ async def predict_rice_disease(file: UploadFile = File(...)):
 async def predict_tea_disease(file: UploadFile = File(...)):
     """Endpoint for tea disease prediction"""
     return await predict_disease(file=file, crop_type=CropType.tea)
+
+@app.post("/predict/chili")
+async def predict_chili_disease(file: UploadFile = File(...)):
+    """Endpoint for chili disease prediction"""
+    return await predict_disease(file=file, crop_type=CropType.chili)
 
 @app.get("/classes")
 async def get_all_classes():

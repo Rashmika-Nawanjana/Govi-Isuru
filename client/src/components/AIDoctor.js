@@ -3,7 +3,7 @@ import axios from 'axios';
 import { 
   Upload, Loader2, CheckCircle, AlertTriangle, Bell, MapPin, Info,
   Microscope, Stethoscope, Shield, Calendar, Leaf, Activity, Brain,
-  FileText, ChevronRight, Coffee
+  FileText, ChevronRight, Coffee, Flame
 } from 'lucide-react';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -18,7 +18,7 @@ const AIDoctor = ({ lang, user }) => {
   const [reportStatus, setReportStatus] = useState(null);
   const [alertsTriggered, setAlertsTriggered] = useState([]);
   const [showGradCam, setShowGradCam] = useState(false);
-  const [cropType, setCropType] = useState('rice'); // 'rice' or 'tea'
+  const [cropType, setCropType] = useState('rice'); // 'rice', 'tea', or 'chili'
 
   const t = {
     en: {
@@ -51,8 +51,10 @@ const AIDoctor = ({ lang, user }) => {
       selectCrop: "Select Crop Type",
       rice: "Rice",
       tea: "Tea",
+      chili: "Chili",
       riceDesc: "Analyze rice leaf diseases",
-      teaDesc: "Analyze tea leaf diseases"
+      teaDesc: "Analyze tea leaf diseases",
+      chiliDesc: "Analyze chili plant diseases"
     },
     si: {
       title: "ගොවි ඉසුරු",
@@ -84,8 +86,10 @@ const AIDoctor = ({ lang, user }) => {
       selectCrop: "බෝග වර්ගය තෝරන්න",
       rice: "වී",
       tea: "තේ",
+      chili: "මිරිස්",
       riceDesc: "වී පත්‍ර රෝග විශ්ලේෂණය",
-      teaDesc: "තේ පත්‍ර රෝග විශ්ලේෂණය"
+      teaDesc: "තේ පත්‍ර රෝග විශ්ලේෂණය",
+      chiliDesc: "මිරිස් ශාක රෝග විශ්ලේෂණය"
     }
   };
 
@@ -109,7 +113,7 @@ const AIDoctor = ({ lang, user }) => {
       const response = await axios.post(
         `${API_BASE}/api/alerts/disease-report`,
         {
-          crop: cropType === 'rice' ? 'Rice' : 'Tea',
+          crop: cropType === 'rice' ? 'Rice' : cropType === 'tea' ? 'Tea' : 'Chili',
           disease: predictionResult.disease,
           confidence: predictionResult.confidence,
           district: user.district,
@@ -215,7 +219,7 @@ const AIDoctor = ({ lang, user }) => {
       {/* Crop Type Selector */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-3">{text.selectCrop}</label>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <button
             onClick={() => { setCropType('rice'); setResult(null); }}
             className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
@@ -251,6 +255,25 @@ const AIDoctor = ({ lang, user }) => {
                 🍵 {text.tea}
               </div>
               <div className="text-xs text-gray-500">{text.teaDesc}</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => { setCropType('chili'); setResult(null); }}
+            className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
+              cropType === 'chili' 
+                ? 'border-red-500 bg-red-50 shadow-md' 
+                : 'border-gray-200 hover:border-red-300 hover:bg-red-50/30'
+            }`}
+          >
+            <div className={`p-2 rounded-lg ${cropType === 'chili' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600'}`}>
+              <Flame className="h-6 w-6" />
+            </div>
+            <div className="text-left">
+              <div className={`font-semibold ${cropType === 'chili' ? 'text-red-700' : 'text-gray-700'}`}>
+                🌶️ {text.chili}
+              </div>
+              <div className="text-xs text-gray-500">{text.chiliDesc}</div>
             </div>
           </button>
         </div>

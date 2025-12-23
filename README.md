@@ -29,7 +29,9 @@
 ## ✨ Features
 
 ### 🤖 AI Crop Doctor with Grad-CAM Explainability
-- **Deep Learning Disease Detection**: Upload photos of rice crop leaves to detect 8 different conditions:
+- **Multi-Crop Deep Learning Disease Detection**: Upload photos of crop leaves to detect diseases across multiple crops:
+  
+  **🌾 Rice Diseases (8 classes):**
   - Bacterial Leaf Blight
   - Brown Spot
   - Healthy Rice Leaf
@@ -38,11 +40,35 @@
   - Narrow Brown Leaf Spot
   - Rice Hispa
   - Sheath Blight
+
+  **🍵 Tea Diseases (5 classes):**
+  - Blister Blight
+  - Brown Blight
+  - Gray Blight
+  - Healthy Tea Leaf
+  - Red Rust
+
+  **🌶️ Chili Diseases (4 classes):**
+  - Healthy Chili Leaf
+  - Leaf Spot
+  - Thrips Damage
+  - Yellow Virus
+
 - **Grad-CAM Visualization**: See exactly where the AI model focuses to make its diagnosis - builds trust and transparency
 - **Confidence Scoring**: Get prediction confidence levels with visual progress bars
 - **Treatment Recommendations**: Receive bilingual (English/Sinhala) treatment guidance with numbered steps
 - **Medical Report Style Results**: Professional diagnosis report with severity badges and context
 - **Transfer Learning**: Utilizes MobileNetV2 pre-trained on ImageNet for superior accuracy
+
+### 📰 Agricultural News Feed with AI Features
+- **Multi-Category News**: Agriculture, Market, Weather, Government, Technology news
+- **AI-Powered Summaries**: Automatic article summarization with key point extraction
+- **Sinhala Translation**: AI-powered translation of news summaries to Sinhala using MyMemory/Google Translate APIs
+- **Text-to-Speech (TTS)**: Read aloud articles in both English and Sinhala
+  - Native voice support for English
+  - Google Translate TTS proxy for Sinhala pronunciation
+- **Push Notifications**: Real-time alerts for urgent agricultural news
+- **Smart Caching**: 30-minute cache for efficient news loading
 
 ### 🚨 Community Disease Alert System
 - **Location-Based Alerts**: Real-time disease alerts for your GN Division area
@@ -78,7 +104,7 @@
 
 ### 💬 AI Crop Chatbot with Advanced Features
 - **Natural Language Q&A**: Ask farming questions in plain language
-- **Knowledge Base**: Built-in agricultural knowledge for Sri Lankan crops
+- **Multi-Crop Knowledge Base**: Built-in agricultural knowledge for Sri Lankan crops including Rice, Tea, and Chili
 - **Bilingual Support**: Responds in English or Sinhala
 - **Conversation Memory**: Maintains context across chat sessions - remembers crops, seasons, and topics discussed
 - **In-Chat Image Diagnosis**: Upload plant images directly in chat for AI disease detection with Grad-CAM visualization
@@ -155,11 +181,13 @@
              ▼                          ▼
 ┌────────────────────────────┐   ┌─────────────────────────────────┐
 │   BACKEND (Express.js)     │   │   AI SERVICE (FastAPI + TF)     │
-│  ├─ User Auth (JWT)        │   │  ├─ MobileNetV2 Model           │
-│  ├─ Marketplace CRUD       │   │  ├─ 8-Class Disease Detection   │
-│  ├─ Reputation System      │   │  ├─ Grad-CAM Visualization      │
-│  ├─ Disease Alerts         │   │  ├─ Image Preprocessing         │
-│  ├─ Market Price API       │   │  └─ Treatment Recommendations   │
+│  ├─ User Auth (JWT)        │   │  ├─ MobileNetV2 Models          │
+│  ├─ Marketplace CRUD       │   │  ├─ Rice: 8-Class Detection     │
+│  ├─ Reputation System      │   │  ├─ Tea: 5-Class Detection      │
+│  ├─ Disease Alerts         │   │  ├─ Chili: 4-Class Detection    │
+│  ├─ Market Price API       │   │  ├─ Grad-CAM Visualization      │
+│  ├─ News API + AI Summary  │   │  ├─ Image Preprocessing         │
+│  ├─ TTS Audio Proxy        │   │  └─ Treatment Recommendations   │
 │  └─ MongoDB Integration    │   └─────────────────────────────────┘
 └───────────┬────────────────┘
             │ Mongoose ODM
@@ -175,6 +203,9 @@
 
 External APIs:
 ├─ OpenWeatherMap API (Weather data)
+├─ NewsAPI (Agricultural news)
+├─ MyMemory Translation API (English to Sinhala)
+├─ Google Translate TTS (Sinhala text-to-speech)
 └─ MongoDB Atlas (Database hosting)
 ```
 
@@ -264,8 +295,9 @@ govi-isuru/
 │   ├── public/                      # Static assets
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── AIDoctor.js          # Disease detection + Grad-CAM
-│   │   │   ├── CropChatbot.js       # AI chatbot with voice & LLM
+│   │   │   ├── AIDoctor.js          # Multi-crop disease detection + Grad-CAM
+│   │   │   ├── CropChatbot.js       # AI chatbot with voice & image diagnosis
+│   │   │   ├── AgriNews.js          # News feed with AI summaries & TTS
 │   │   │   ├── CommunityAlerts.js   # Disease alert system
 │   │   │   ├── Marketplace.js       # P2P marketplace
 │   │   │   ├── MarketTrends.js      # Analytics dashboard
@@ -287,25 +319,58 @@ govi-isuru/
 │
 ├── 📂 server/                       # Node.js Backend
 │   ├── models/
-│   │   └── User.js                  # User schema
+│   │   ├── User.js                  # User schema
+│   │   ├── Listing.js               # Marketplace listings
+│   │   ├── CommunityAlert.js        # Disease alerts
+│   │   ├── DiseaseReport.js         # Disease reports
+│   │   ├── Feedback.js              # User feedback
+│   │   └── Notification.js          # Push notifications
 │   ├── routes/
-│   │   └── chatbot.js               # Chatbot API endpoints
+│   │   ├── chatbot.js               # Chatbot API endpoints
+│   │   ├── news.js                  # News API + AI summaries + TTS
+│   │   ├── alerts.js                # Disease alert endpoints
+│   │   └── reputation.js            # Farmer ratings
+│   ├── services/
+│   │   ├── alertService.js          # Alert management
+│   │   └── reputationService.js     # Reputation system
+│   ├── utils/
+│   │   └── intentDetector.js        # Chatbot intent detection
 │   ├── knowledge/
-│   │   └── farming.json             # Agricultural knowledge base
+│   │   └── agriculture.json         # Agricultural knowledge base
 │   ├── index.js                     # Express server
 │   └── package.json
 │
 ├── 📂 ai-service/                   # Python AI Service
-│   ├── dataset/                     # Training images
+│   ├── dataset/                     # Rice training images
 │   │   ├── train/                   # Training set (8 classes)
 │   │   ├── valid/                   # Validation set
 │   │   └── test/                    # Test set
+│   ├── tea_dataset/                 # Tea training images
+│   │   ├── train/                   # Training set (5 classes)
+│   │   ├── valid/                   # Validation set
+│   │   └── test/                    # Test set
+│   ├── chili_dataset/               # Chili training images
+│   │   ├── train/                   # Training set (4 classes)
+│   │   ├── valid/                   # Validation set
+│   │   └── test/                    # Test set
 │   ├── models/
-│   │   ├── rice_disease_model.keras # Trained model
-│   │   ├── class_indices.json       # Class mappings
-│   │   └── disease_info.json        # Disease details
+│   │   ├── best_model.keras         # Rice disease model
+│   │   ├── class_indices.json       # Rice class mappings
+│   │   ├── disease_info.json        # Rice disease details (EN/SI)
+│   │   ├── tea/
+│   │   │   ├── tea_best_model.keras # Tea disease model
+│   │   │   ├── tea_class_indices.json
+│   │   │   └── tea_disease_info.json
+│   │   └── chili/
+│   │       ├── chili_best_model.keras # Chili disease model
+│   │       ├── chili_class_indices.json
+│   │       └── chili_disease_info.json
 │   ├── main.py                      # FastAPI server + Grad-CAM
-│   ├── train_model.py               # Training script
+│   ├── train_model.py               # Rice training script
+│   ├── train_tea_model.py           # Tea training script
+│   ├── train_chili_model.py         # Chili training script
+│   ├── prepare_tea_dataset.py       # Tea dataset preparation
+│   ├── prepare_chili_dataset.py     # Chili dataset preparation
 │   └── test_model.py                # Model evaluation
 │
 ├── docker-compose.yml               # Container orchestration
@@ -378,19 +443,62 @@ govi-isuru/
 | `/api/price-trends` | GET | 6-month price trends |
 | `/api/market-prices` | GET | Current market prices |
 
+#### News & TTS
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/news/:category` | GET | Get news by category |
+| `/api/news/summarize` | POST | AI-generate article summary |
+| `/api/news/prepare-tts` | POST | Prepare text for TTS |
+| `/api/news/tts-audio` | GET | Get TTS audio (proxy) |
+| `/api/news/subscribe` | POST | Subscribe to push notifications |
+
+**POST** `/api/news/summarize`
+```json
+{
+  "article": { "id": "string", "title": "string", "description": "string" },
+  "lang": "en" // or "si" for Sinhala
+}
+```
+**Response**:
+```json
+{
+  "success": true,
+  "summary": {
+    "en": "English summary...",
+    "si": "සිංහල සාරාංශය...",
+    "keyPoints": [{ "type": "stat", "value": "25%" }]
+  }
+}
+```
+
+**GET** `/api/news/tts-audio?text=Hello&lang=si`
+- Returns audio/mpeg stream for text-to-speech
+- Supports `en` (English) and `si` (Sinhala)
+
 ### AI Service (FastAPI - Port 8000)
 
-**POST** `/predict`
+#### Disease Prediction Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/predict` | POST | Predict rice disease |
+| `/predict/rice` | POST | Predict rice disease |
+| `/predict/tea` | POST | Predict tea disease |
+| `/predict/chili` | POST | Predict chili disease |
+
+**POST** `/predict/chili`
 - **Content-Type**: `multipart/form-data`
 - **Body**: `file` (image file)
 
 **Response**:
 ```json
 {
-  "disease": "Bacterial leaf blight",
-  "confidence": 0.89,
-  "treatment": "Reduce nitrogen fertilizer application...",
-  "treatment_si": "නයිට්‍රජන් පොහොර භාවිතය අඩු කරන්න...",
+  "disease": "Leaf Spot",
+  "disease_si": "පත්‍ර පුල්ලි රෝගය",
+  "confidence": 0.94,
+  "treatment": "Remove and destroy infected leaves...",
+  "treatment_si": "ආසාදිත පත්‍ර ඉවත් කර විනාශ කරන්න...",
   "gradcam": "data:image/png;base64,..."
 }
 ```
@@ -405,26 +513,45 @@ govi-isuru/
 - **Base Model**: MobileNetV2 (pre-trained on ImageNet)
 - **Transfer Learning**: Frozen base layers, trainable top
 - **Input Shape**: 224×224×3 RGB images
-- **Output Classes**: 8 rice disease categories
 - **Final Activation**: Softmax
 
-### Disease Classes
-| Class | Description |
-|-------|-------------|
-| Bacterial Leaf Blight | Bacterial infection causing yellow lesions |
-| Brown Spot | Fungal disease with brown circular spots |
-| Healthy Rice Leaf | No disease detected |
-| Leaf Blast | Fungal disease with diamond-shaped lesions |
-| Leaf Scald | Bacterial disease with water-soaked lesions |
-| Narrow Brown Leaf Spot | Linear brown lesions on leaves |
-| Rice Hispa | Insect pest damage with tunneling patterns |
-| Sheath Blight | Fungal infection at leaf sheath |
+### Supported Crops & Disease Classes
+
+#### 🌾 Rice Model (8 Classes)
+| Class | Sinhala Name | Description |
+|-------|--------------|-------------|
+| Bacterial Leaf Blight | බැක්ටීරියා පත්‍ර අංගමාරය | Bacterial infection causing yellow lesions |
+| Brown Spot | දුඹුරු පුල්ලි රෝගය | Fungal disease with brown circular spots |
+| Healthy Rice Leaf | නිරෝගී වී පත්‍රය | No disease detected |
+| Leaf Blast | පත්‍ර පිපිරුම් රෝගය | Fungal disease with diamond-shaped lesions |
+| Leaf Scald | පත්‍ර පිළිස්සුම් රෝගය | Bacterial disease with water-soaked lesions |
+| Narrow Brown Leaf Spot | සිහින් දුඹුරු පත්‍ර පුල්ලි | Linear brown lesions on leaves |
+| Rice Hispa | වී හිස්පා කෘමියා | Insect pest damage with tunneling patterns |
+| Sheath Blight | කොපු අංගමාරය | Fungal infection at leaf sheath |
+
+#### 🍵 Tea Model (5 Classes)
+| Class | Sinhala Name | Description |
+|-------|--------------|-------------|
+| Blister Blight | බුබුළු අංගමාරය | Fungal disease causing blister-like spots |
+| Brown Blight | දුඹුරු අංගමාරය | Fungal disease with brown patches |
+| Gray Blight | අළු අංගමාරය | Fungal disease with grayish lesions |
+| Healthy Tea Leaf | නිරෝගී තේ පත්‍රය | No disease detected |
+| Red Rust | රතු මලකඩ | Algal disease with red-orange patches |
+
+#### 🌶️ Chili Model (4 Classes)
+| Class | Sinhala Name | Description |
+|-------|--------------|-------------|
+| Healthy Chili Leaf | නිරෝගී මිරිස් පත්‍රය | No disease detected |
+| Leaf Spot | පත්‍ර පුල්ලි රෝගය | Fungal/bacterial spots on leaves |
+| Thrips Damage | තිරිප්ස් කෘමි හානිය | Insect damage causing silvery streaks |
+| Yellow Virus | කහ පැහැ වෛරස් රෝගය | Viral infection causing yellowing |
 
 ### Model Architecture Details
 ```
 MobileNetV2 (frozen) → GlobalAveragePooling2D → Dense(256, ReLU) 
-    → Dropout(0.3) → Dense(128, ReLU) → Dense(8, Softmax)
+    → Dropout(0.3) → Dense(128, ReLU) → Dense(N, Softmax)
 ```
+Where N = number of classes (8 for rice, 5 for tea, 4 for chili)
 
 ### Grad-CAM Explainability
 The model includes **Gradient-weighted Class Activation Mapping** (Grad-CAM) to visualize which regions of the leaf image the model focused on to make its prediction. This provides:

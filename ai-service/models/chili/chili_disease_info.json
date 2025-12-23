@@ -1,0 +1,55 @@
+{
+  "Leaf Spot": {
+    "si_name": "පත්‍ර පුල්ලි රෝගය",
+    "description": "Leaf spot disease (Bercak Daun) is caused by fungal pathogens like Cercospora and Alternaria. Circular to irregular brown spots with dark margins appear on leaves, leading to defoliation.",
+    "treatment": [
+      "Apply copper-based fungicides (Copper Oxychloride)",
+      "Remove and destroy infected leaves immediately",
+      "Apply Mancozeb or Chlorothalonil fungicides",
+      "Maintain proper plant spacing for air circulation",
+      "Avoid overhead irrigation to reduce leaf wetness",
+      "Apply neem oil spray as organic alternative"
+    ],
+    "severity": "medium"
+  },
+  "Healthy": {
+    "si_name": "නිරෝගී මිරිස් පත්‍රය",
+    "description": "The chili plant is healthy with no visible signs of disease or pest damage. Leaves show good green color with proper texture and no spots or discoloration.",
+    "treatment": [
+      "Continue regular monitoring for early disease detection",
+      "Maintain balanced fertilization (NPK 10-10-10)",
+      "Ensure proper irrigation without waterlogging",
+      "Practice crop rotation to prevent soil-borne diseases",
+      "Apply preventive neem oil spray monthly",
+      "Monitor for early signs of pest infestation"
+    ],
+    "severity": "none"
+  },
+  "Thrips Damage": {
+    "si_name": "තිරිප්ස් කෘමි හානිය",
+    "description": "Thrips are tiny insects that feed on chili leaves causing silvery streaks, curling, and distortion. Heavy infestation leads to stunted growth and reduced yield.",
+    "treatment": [
+      "Apply systemic insecticides like Imidacloprid or Spinosad",
+      "Use blue or yellow sticky traps to monitor populations",
+      "Spray neem oil or insecticidal soap for organic control",
+      "Remove heavily infested plant parts",
+      "Apply Fipronil granules to soil for systemic protection",
+      "Introduce natural predators like minute pirate bugs"
+    ],
+    "severity": "high"
+  },
+  "Yellow Virus": {
+    "si_name": "කහ පැහැ වෛරස් රෝගය",
+    "description": "Yellow virus disease (Gemini virus/Leaf Curl Virus) is transmitted by whiteflies. Causes yellowing, curling, and stunting of leaves. Severely affects plant growth and fruit production.",
+    "treatment": [
+      "Remove and destroy infected plants immediately",
+      "Control whitefly vectors with Imidacloprid or Thiamethoxam",
+      "Use reflective mulches to repel whiteflies",
+      "Install insect-proof netting in nurseries",
+      "Apply neem-based products to control vectors",
+      "Plant resistant varieties if available",
+      "Avoid planting near infected fields"
+    ],
+    "severity": "high"
+  }
+}

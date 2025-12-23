@@ -6,28 +6,28 @@ const knowledge = require('../knowledge/agriculture.json');
 // Predefined greeting responses
 const greetings = {
   en: [
-    "Hello! I'm your Govi Isuru farming assistant. Ask me about fertilizers, diseases, planting, or harvesting for rice and tea!",
-    "Welcome farmer! How can I help you today? I can provide advice on rice and tea cultivation, pest control, and more.",
-    "Ayubowan! Ready to help with your farming questions. What would you like to know about rice or tea?"
+    "Hello! I'm your Govi Isuru farming assistant. Ask me about fertilizers, diseases, planting, or harvesting for rice, tea, and chili!",
+    "Welcome farmer! How can I help you today? I can provide advice on rice, tea, and chili cultivation, pest control, and more.",
+    "Ayubowan! Ready to help with your farming questions. What would you like to know about rice, tea, or chili?"
   ],
   si: [
-    "ආයුබෝවන්! මම ඔබේ ගොවි ඉසුරු ගොවිතැන් සහායකයා. වී සහ තේ සඳහා පොහොර, රෝග, වගා කිරීම හෝ අස්වනු නෙලීම ගැන මගෙන් අහන්න!",
-    "ගොවි මහත්තයා/මහත්මිය, ආයුබෝවන්! අද ඔබට මට උදව් කරන්නේ කෙසේද? වී සහ තේ වගාව, පළිබෝධ පාලනය සහ තවත් දේ ගැන උපදෙස් දිය හැක.",
-    "ආයුබෝවන්! ඔබේ ගොවිතැන් ප්‍රශ්නවලට උදව් කිරීමට සූදානම්. වී හෝ තේ ගැන ඔබ දැන ගැනීමට කැමති දේ කුමක්ද?"
+    "ආයුබෝවන්! මම ඔබේ ගොවි ඉසුරු ගොවිතැන් සහායකයා. වී, තේ සහ මිරිස් සඳහා පොහොර, රෝග, වගා කිරීම හෝ අස්වනු නෙලීම ගැන මගෙන් අහන්න!",
+    "ගොවි මහත්තයා/මහත්මිය, ආයුබෝවන්! අද ඔබට මට උදවු කරන්නේ කෙසේද? වී, තේ සහ මිරිස් වගාව, පළිබෝධ පාලනය සහ තවත් දේ ගැන උපදෙස් දිය හැක.",
+    "ආයුබෝවන්! ඔබේ ගොවිතැන් ප්‍රශ්නවලට උදවු කිරීමට සූදානම්. වී, තේ හෝ මිරිස් ගැන ඔබ දැන ගැනීමට කැමති දේ කුමක්ද?"
   ]
 };
 
 // Fallback responses
 const fallbacks = {
   en: [
-    "I'm not sure about that. Could you ask about fertilizers, diseases, planting, or harvesting for rice or tea?",
-    "I don't have information on that topic yet. Try asking about rice or tea cultivation, pest control, or weather advice!",
-    "Sorry, I couldn't understand. Please try asking about farming topics like fertilizer, diseases, or water management for rice or tea."
+    "I'm not sure about that. Could you ask about fertilizers, diseases, planting, or harvesting for rice, tea, or chili?",
+    "I don't have information on that topic yet. Try asking about rice, tea, or chili cultivation, pest control, or weather advice!",
+    "Sorry, I couldn't understand. Please try asking about farming topics like fertilizer, diseases, or water management for rice, tea, or chili."
   ],
   si: [
-    "ඒ ගැන මට විශ්වාස නැත. වී හෝ තේ සඳහා පොහොර, රෝග, වගා කිරීම හෝ අස්වනු නෙලීම ගැන අහන්න පුළුවන්ද?",
-    "එම මාතෘකාව ගැන මට තවම තොරතුරු නැත. වී හෝ තේ වගාව, පළිබෝධ පාලනය හෝ කාලගුණ උපදෙස් ගැන අහන්න!",
-    "සමාවෙන්න, මට තේරුණේ නැත. වී හෝ තේ සඳහා පොහොර, රෝග හෝ ජල කළමනාකරණය වැනි ගොවිතැන් මාතෘකා ගැන අහන්න."
+    "ඒ ගැන මට විශ්වාස නැත. වී, තේ හෝ මිරිස් සඳහා පොහොර, රෝග, වගා කිරීම හෝ අස්වනු නෙලීම ගැන අහන්න පුළුවන්ද?",
+    "එම මාතෘකාව ගැන මට තවම තොරතුරු නැත. වී, තේ හෝ මිරිස් වගාව, පළිබෝධ පාලනය හෝ කාලගුණ උපදෙස් ගැන අහන්න!",
+    "සමාවෙන්න, මට තේරුණේ නැත. වී, තේ හෝ මිරිස් සඳහා පොහොර, රෝග හෝ ජල කළමනාකරණය වැනි ගොවිතැන් මාතෘකා ගැන අහන්න."
   ]
 };
 
@@ -312,7 +312,8 @@ router.get('/topics', (req, res) => {
         'Organic farming tips',
         'Government schemes & subsidies',
         'Tea shade management',
-        'Tea pruning advice'
+        'Tea pruning advice',
+        'Chili cultivation guide'
       ],
       si: [
         'පොහොර නිර්දේශ',
@@ -325,13 +326,15 @@ router.get('/topics', (req, res) => {
         'ජෛව ගොවිතැන් ඉඟි',
         'රජයේ යෝජනා ක්‍රම සහ සහනාධාර',
         'තේ සෙවන කළමනාකරණය',
-        'තේ කප්පාදු උපදෙස්'
+        'තේ කප්පාදු උපදෙස්',
+        'මිරිස් වගා උපදෙස්'
       ]
     },
-    crops: ['rice', 'tea', 'vegetables'],
+    crops: ['rice', 'tea', 'chili', 'vegetables'],
     seasons: ['yala', 'maha'],
     teaDiseases: ['blister_blight', 'brown_blight', 'gray_blight', 'red_rust'],
-    riceDiseases: ['blast', 'bacterial_leaf_blight', 'brown_spot', 'leaf_smut']
+    riceDiseases: ['blast', 'bacterial_leaf_blight', 'brown_spot', 'leaf_smut'],
+    chiliDiseases: ['leaf_spot', 'thrips_damage', 'yellow_virus', 'healthy']
   });
 });
 

@@ -224,7 +224,7 @@ function isUrgentNews(article) {
  * Generate AI summary for article
  * Uses extractive summarization technique
  */
-function generateSummary(article, lang = 'en') {
+async function generateSummary(article, lang = 'en') {
   const cacheKey = `${article.id}_${lang}`;
   
   // Return cached summary if exists
@@ -281,10 +281,10 @@ function generateSummary(article, lang = 'en') {
 
   const englishSummary = topSentences.map(s => s.sentence).join('. ') + '.';
   
-  // Generate Sinhala summary with key point translations
+  // Generate Sinhala summary using AI translation service
   let sinhalaSummary = '';
   if (lang === 'si') {
-    sinhalaSummary = generateSinhalaSummary(article, englishSummary);
+    sinhalaSummary = await generateSinhalaSummary(article, englishSummary);
   }
 
   const summary = {
@@ -301,86 +301,79 @@ function generateSummary(article, lang = 'en') {
 }
 
 /**
- * Generate Sinhala summary from English content
+ * Generate Sinhala summary from English content using AI translation
  */
-function generateSinhalaSummary(article, englishSummary) {
-  // Key agricultural terms to translate
-  const translations = {
-    // Agriculture terms
-    'agriculture': 'කෘෂිකර්මය',
-    'farming': 'ගොවිතැන',
-    'farmers': 'ගොවීන්',
-    'crop': 'බෝග',
-    'crops': 'බෝග',
-    'harvest': 'අස්වැන්න',
-    'paddy': 'වී',
-    'rice': 'සහල්/වී',
-    'tea': 'තේ',
-    'vegetables': 'එළවළු',
-    'fertilizer': 'පොහොර',
-    'pesticide': 'පළිබෝධනාශක',
-    'irrigation': 'වාරිමාර්ග',
-    'cultivation': 'වගාව',
+async function generateSinhalaSummary(article, englishSummary) {
+  try {
+    // Use MyMemory Translation API (free, no API key required)
+    const translatedText = await translateToSinhalaAI(englishSummary);
     
-    // Weather terms
-    'rain': 'වැස්ස',
-    'rainfall': 'වර්ෂාපතනය',
-    'monsoon': 'මෝසම්',
-    'flood': 'ගංවතුර',
-    'drought': 'නියඟය',
-    'weather': 'කාලගුණය',
-    'climate': 'දේශගුණය',
-    
-    // Economic terms
-    'price': 'මිල',
-    'prices': 'මිල ගණන්',
-    'market': 'වෙළඳපොළ',
-    'export': 'අපනයනය',
-    'import': 'ආනයනය',
-    'subsidy': 'සහනාධාරය',
-    'increase': 'වැඩිවීම',
-    'decrease': 'අඩුවීම',
-    'percent': 'ප්‍රතිශතය',
-    
-    // Government terms
-    'government': 'රජය',
-    'ministry': 'අමාත්‍යාංශය',
-    'policy': 'ප්‍රතිපත්තිය',
-    'program': 'වැඩසටහන',
-    'announcement': 'නිවේදනය',
-    
-    // General
-    'Sri Lanka': 'ශ්‍රී ලංකාව',
-    'million': 'මිලියන',
-    'billion': 'බිලියන',
-    'new': 'නව',
-    'year': 'වසර',
-    'month': 'මාසය'
-  };
+    // Add category prefix emoji
+    const categoryPrefixes = {
+      agriculture: '🌾 කෘෂිකාර්මික ප්‍රවෘත්ති',
+      market: '📊 වෙළඳපොළ යාවත්කාලීන',
+      weather: '🌤️ කාලගුණ තොරතුරු',
+      government: '🏛️ රජයේ නිවේදනය',
+      technology: '💡 තාක්ෂණික ප්‍රවෘත්ති'
+    };
 
-  // Create a template-based Sinhala summary
-  let siSummary = '';
-  
-  // Translate key terms in the English summary
-  let translatedText = englishSummary.toLowerCase();
-  for (const [en, si] of Object.entries(translations)) {
-    translatedText = translatedText.replace(new RegExp(en, 'gi'), si);
+    const prefix = categoryPrefixes[article.category] || '📰 ප්‍රවෘත්ති';
+    
+    return `${prefix}\n\n${translatedText}`;
+  } catch (error) {
+    console.error('AI translation error:', error.message);
+    // Fallback to basic translation if AI fails
+    return `📰 ප්‍රවෘත්ති: ${article.title}`;
   }
+}
 
-  // Generate Sinhala summary template based on category
-  if (article.category === 'agriculture') {
-    siSummary = `🌾 කෘෂිකාර්මික ප්‍රවෘත්ති: ${article.title}`;
-  } else if (article.category === 'market') {
-    siSummary = `📊 වෙළඳපොළ යාවත්කාලීන: ${article.title}`;
-  } else if (article.category === 'weather') {
-    siSummary = `🌤️ කාලගුණ තොරතුරු: ${article.title}`;
-  } else if (article.category === 'government') {
-    siSummary = `🏛️ රජයේ නිවේදනය: ${article.title}`;
-  } else {
-    siSummary = `📰 ${article.title}`;
+/**
+ * Translate text to Sinhala using AI translation service
+ */
+async function translateToSinhalaAI(text) {
+  try {
+    // Using MyMemory Translation API (free tier: 5000 chars/day)
+    const encodedText = encodeURIComponent(text);
+    const response = await axios.get(
+      `https://api.mymemory.translated.net/get?q=${encodedText}&langpair=en|si`,
+      { timeout: 10000 }
+    );
+    
+    if (response.data && response.data.responseStatus === 200) {
+      return response.data.responseData.translatedText;
+    }
+    
+    // If MyMemory fails, try Google Translate (unofficial)
+    return await translateWithGoogleFree(text);
+  } catch (error) {
+    console.error('MyMemory translation error:', error.message);
+    // Try Google Translate as fallback
+    return await translateWithGoogleFree(text);
   }
+}
 
-  return siSummary;
+/**
+ * Fallback translation using Google Translate (unofficial free endpoint)
+ */
+async function translateWithGoogleFree(text) {
+  try {
+    const encodedText = encodeURIComponent(text);
+    const response = await axios.get(
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=si&dt=t&q=${encodedText}`,
+      { timeout: 10000 }
+    );
+    
+    if (response.data && response.data[0]) {
+      // Extract translated text from nested arrays
+      return response.data[0].map(item => item[0]).join('');
+    }
+    
+    throw new Error('Invalid response from Google Translate');
+  } catch (error) {
+    console.error('Google Translate error:', error.message);
+    // Return original text if all translations fail
+    return text;
+  }
 }
 
 /**
@@ -815,7 +808,7 @@ router.post('/summarize', async (req, res) => {
       });
     }
 
-    const summary = generateSummary(article, lang);
+    const summary = await generateSummary(article, lang);
     
     res.json({
       success: true,
@@ -878,9 +871,9 @@ router.get('/tts-config', (req, res) => {
 
 /**
  * POST /api/news/prepare-tts
- * Prepare text for TTS reading
+ * Prepare text for TTS reading with AI translation
  */
-router.post('/prepare-tts', (req, res) => {
+router.post('/prepare-tts', async (req, res) => {
   try {
     const { article, lang = 'en' } = req.body;
     
@@ -895,7 +888,7 @@ router.post('/prepare-tts', (req, res) => {
     let textToRead = '';
     
     if (lang === 'si') {
-      // Sinhala version
+      // Sinhala version - use AI translation
       const categoryNames = {
         agriculture: 'කෘෂිකාර්මික',
         market: 'වෙළඳපොළ',
@@ -904,10 +897,19 @@ router.post('/prepare-tts', (req, res) => {
         technology: 'තාක්ෂණික'
       };
       
+      // Translate description using AI service
+      const englishText = `${article.title}. ${article.description || ''}`;
+      let translatedText;
+      
+      try {
+        translatedText = await translateToSinhalaAI(englishText);
+      } catch (translationError) {
+        console.error('TTS translation error:', translationError.message);
+        translatedText = englishText; // Fallback to English
+      }
+      
       textToRead = `${categoryNames[article.category] || ''} ප්‍රවෘත්ති. `;
-      textToRead += `මාතෘකාව: ${article.title}. `;
-      textToRead += `මූලාශ්‍රය: ${article.source}. `;
-      textToRead += article.description || '';
+      textToRead += translatedText;
     } else {
       // English version
       textToRead = `${article.category} News. `;
@@ -1111,6 +1113,54 @@ router.get('/subscription-status', (req, res) => {
     subscriberCount: pushSubscriptions.length,
     isAvailable: true
   });
+});
+
+/**
+ * GET /api/news/tts-audio
+ * Proxy for Google Translate TTS to avoid CORS issues
+ * Supports Sinhala and English text-to-speech
+ */
+router.get('/tts-audio', async (req, res) => {
+  try {
+    const { text, lang = 'en' } = req.query;
+    
+    if (!text) {
+      return res.status(400).json({
+        success: false,
+        error: 'Text parameter required'
+      });
+    }
+
+    const ttsLang = lang === 'si' ? 'si' : 'en';
+    const encodedText = encodeURIComponent(text);
+    
+    // Use Google Translate TTS endpoint
+    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${ttsLang}&client=tw-ob&q=${encodedText}`;
+    
+    const response = await axios.get(ttsUrl, {
+      responseType: 'arraybuffer',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Referer': 'https://translate.google.com/'
+      },
+      timeout: 10000
+    });
+
+    // Set audio headers
+    res.set({
+      'Content-Type': 'audio/mpeg',
+      'Content-Length': response.data.length,
+      'Cache-Control': 'public, max-age=86400' // Cache for 24 hours
+    });
+
+    res.send(response.data);
+  } catch (error) {
+    console.error('TTS audio proxy error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate audio'
+    });
+  }
 });
 
 module.exports = router;

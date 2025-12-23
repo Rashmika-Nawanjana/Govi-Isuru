@@ -191,5 +191,69 @@
       "recommendation": "Prune tea bushes every 3-5 years. Best time for pruning: December-January. Leave 45-55cm from ground. Allow 8-10 weeks recovery before first plucking.",
       "si": "සෑම වසර 3-5කට වරක් තේ පඳුරු කප්පාදු කරන්න. කප්පාදු කිරීමට හොඳම කාලය: දෙසැම්බර්-ජනවාරි. බිමේ සිට 45-55cm තබන්න. පළමු නෙලීමට පෙර සති 8-10ක් යථා තත්ත්වයට පත්වීමට ඉඩ දෙන්න."
     }
+  },
+  "chili": {
+    "general": {
+      "fertilizer": {
+        "recommendation": "Apply well-decomposed organic matter before planting. Use NPK 10:10:10 as basal dressing (150-200 kg/ha). Apply Urea (100 kg/ha) in split doses at 2, 4, and 6 weeks after transplanting. Add MOP (75 kg/ha) during flowering.",
+        "si": "වගා කිරීමට පෙර හොඳින් දිරාපත් වූ කාබනික ද්‍රව්‍ය යොදන්න. NPK 10:10:10 පාදක ඇඳුමක් ලෙස භාවිතා කරන්න (හෙක්ටයාරයකට 150-200 kg). පැල සිටුවීමෙන් සති 2, 4, 6 කදී යුරියා කොටස් වශයෙන් යොදන්න. මල් පිපෙන කාලයේ MOP එක් කරන්න."
+      },
+      "planting": {
+        "recommendation": "Best planting time: Yala season (March-April) or Maha season (September-October). Spacing: 60cm x 45cm. Transplant 30-35 day old seedlings. Prepare raised beds for good drainage.",
+        "si": "වඩාත්ම සුදුසු වගා කාලය: යාල කන්නය (මාර්තු-අප්‍රේල්) හෝ මහ කන්නය (සැප්තැම්බර්-ඔක්තෝබර්). පරතරය: 60cm x 45cm. දින 30-35 පැළ පැළ කරන්න. හොඳ ජලාපවහනය සඳහා ඉහළ නැඟුණු ඇඳන් සකස් කරන්න."
+      },
+      "harvest": {
+        "recommendation": "First harvest 60-75 days after transplanting. Harvest green chili when fully grown but before color change. For dry chili, harvest when fruits turn red. Regular picking encourages more fruiting.",
+        "si": "පැල සිටුවීමෙන් දින 60-75 කින් පළමු අස්වැන්න. පැහැය වෙනස් වීමට පෙර සම්පූර්ණයෙන් වැඩුණු පසු කොළ මිරිස් නෙලන්න. වියළි මිරිස් සඳහා ගෙඩි රතු පාට වූ විට නෙලන්න. නිතිපතා නෙලීම වැඩි ඵල දැරීමට උදව් වේ."
+      }
+    },
+    "diseases": {
+      "leaf_spot": {
+        "symptoms": "Circular to irregular brown spots with dark margins on leaves. Spots may have concentric rings. Severe infection causes defoliation.",
+        "treatment": "Apply copper-based fungicides (Copper Oxychloride). Remove infected leaves. Use Mancozeb or Chlorothalonil. Avoid overhead irrigation. Maintain plant spacing for air circulation.",
+        "si": "කොළ මත තද දාර සහිත රවුම් හෝ අක්‍රමවත් දුඹුරු ලප. ලප වල සංකේන්ද්‍රික වළලු තිබිය හැක. දරුණු ආසාදනය පත්‍ර හැලීමට හේතු වේ. තඹ පාදක දිලීර නාශක (කොපර් ඔක්සික්ලෝරයිඩ්) යොදන්න. ආසාදිත කොළ ඉවත් කරන්න. මැන්කොසෙබ් හෝ ක්ලෝරොතලෝනිල් භාවිතා කරන්න."
+      },
+      "thrips_damage": {
+        "symptoms": "Silvery streaks on leaves. Leaf curling and distortion. Stunted plant growth. Flowers may drop prematurely.",
+        "treatment": "Apply Imidacloprid or Spinosad insecticides. Use blue sticky traps. Spray neem oil for organic control. Remove heavily infested parts. Introduce predatory mites.",
+        "si": "කොළ මත රිදී පාට ඉරි. කොළ කරකැවීම හා විකෘති වීම. ශාක වර්ධනය අඩාල වීම. මල් නොමේරූ ලෙස වැටිය හැක. ඉමිඩැක්ලෝප්‍රිඩ් හෝ ස්පයිනොසැඩ් කෘමිනාශක යොදන්න. නිල් ඇලෙන උගුල් භාවිතා කරන්න. ජෛව පාලනය සඳහා කොහොඹ තෙල් ඉසින්න."
+      },
+      "yellow_virus": {
+        "symptoms": "Yellowing of leaves especially young ones. Leaf curling upward. Stunted growth. Reduced fruit size and yield. Transmitted by whiteflies.",
+        "treatment": "Remove and destroy infected plants immediately. Control whitefly vectors with Imidacloprid or Thiamethoxam. Use reflective mulches. Plant resistant varieties. Avoid planting near infected fields.",
+        "si": "කොළ කහ වීම විශේෂයෙන් තරුණ කොළ. කොළ ඉහළට කරකැවීම. වර්ධනය අඩාල වීම. ඵල ප්‍රමාණය හා අස්වැන්න අඩු වීම. සුදු මැස්සන් මගින් පැතිරේ. ආසාදිත ශාක වහාම ඉවත් කර විනාශ කරන්න. ඉමිඩැක්ලෝප්‍රිඩ් හෝ තයමෙතොක්සැම් සමඟ සුදු මැස්සන් පාලනය කරන්න."
+      },
+      "healthy": {
+        "symptoms": "No disease symptoms. Leaves are green, healthy with no spots or discoloration. Plant shows vigorous growth.",
+        "treatment": "Continue good agricultural practices. Monitor regularly for pest and disease symptoms. Maintain balanced fertilization.",
+        "si": "රෝග ලක්ෂණ නැත. කොළ කොළ පැහැති, ලප හෝ පාට වෙනස් වීමක් නොමැතිව සෞඛ්‍ය සම්පන්නයි. ශාකය ශක්තිමත් වර්ධනයක් පෙන්වයි. හොඳ කෘෂිකාර්මික පිළිවෙත් දිගටම කරගෙන යන්න. පළිබෝධ හා රෝග ලක්ෂණ නිතර නිරීක්ෂණය කරන්න."
+      }
+    },
+    "pests": {
+      "aphids": {
+        "symptoms": "Clusters of small soft-bodied insects on young shoots. Honeydew secretion causing sooty mold. Curled and distorted leaves.",
+        "treatment": "Spray neem oil or insecticidal soap. Apply Imidacloprid for severe infestations. Introduce ladybird beetles as biological control. Remove heavily infested shoots.",
+        "si": "තරුණ අංකුර මත කුඩා මෘදු සිරුරු සහිත කෘමීන් පොකුරු. සූටි පුස් ඇති කරන මී දිය ශ්‍රාවය. කරකැවුණු හා විකෘති කොළ. කොහොඹ තෙල් හෝ කෘමිනාශක සබන් ඉසින්න. දරුණු ආසාදන සඳහා ඉමිඩැක්ලෝප්‍රිඩ් යොදන්න."
+      },
+      "fruit_borer": {
+        "symptoms": "Holes in fruits with caterpillar inside. Premature fruit drop. Rotting of damaged fruits.",
+        "treatment": "Apply Bacillus thuringiensis (Bt) sprays. Use pheromone traps for monitoring. Remove and destroy infested fruits. Apply Chlorantraniliprole for severe cases.",
+        "si": "ඇතුළත කැට්පිලර් සමඟ ගෙඩිවල සිදුරු. නොමේරූ ගෙඩි වැටීම. හානි වූ ගෙඩි කුණු වීම. Bacillus thuringiensis (Bt) ඉසින්න. නිරීක්ෂණය සඳහා ෆෙරමෝන උගුල් භාවිතා කරන්න."
+      },
+      "mites": {
+        "symptoms": "Bronzing or russeting of leaves. Fine webbing on leaf undersides. Leaf curling and drying.",
+        "treatment": "Apply sulfur-based miticides. Spray water to increase humidity. Use Abamectin or Propargite. Avoid water stress in plants.",
+        "si": "කොළ ලෝකඩ පාට හෝ රස්ට් පාට ගැන්වීම. කොළ යටි පැත්තේ සියුම් දැල්. කොළ කරකැවීම හා වියළීම. සල්ෆර් පාදක මයිටිසයිඩ් යොදන්න. තෙතමනය වැඩි කිරීමට ජලය ඉසින්න."
+      }
+    },
+    "water_management": {
+      "recommendation": "Water chili plants regularly but avoid waterlogging. Critical watering periods: flowering and fruit development. Drip irrigation recommended. Water early morning to prevent fungal diseases.",
+      "si": "මිරිස් පැල නිතිපතා ජලය දෙන්න නමුත් ජල රැඳීමෙන් වළකින්න. තීරණාත්මක ජලය දීමේ කාල: මල් පිපීම සහ ඵල වර්ධනය. බින්දු වාරිමාර්ග නිර්දේශ කෙරේ. දිලීර රෝග වැළැක්වීමට උදේ පාන්දර ජලය දෙන්න."
+    },
+    "varieties": {
+      "recommendation": "Popular Sri Lankan varieties: MI-1 (green chili), MI-2 (Kochchi), KA-2 (bird's eye chili). Hybrid varieties give higher yield but need more care.",
+      "si": "ජනප්‍රිය ශ්‍රී ලංකා ප්‍රභේද: MI-1 (කොළ මිරිස්), MI-2 (කොච්චි), KA-2 (කුකුල් මිරිස්). දෙමුහුන් ප්‍රභේද වැඩි අස්වැන්නක් ලබා දෙන නමුත් වැඩි රැකවරණයක් අවශ්‍ය වේ."
+    }
   }
 }
+
