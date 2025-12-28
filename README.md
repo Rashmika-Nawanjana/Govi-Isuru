@@ -150,6 +150,25 @@
 
 ---
 
+## **Government Officer Features**
+
+- **Purpose:** Tools for government/agriculture officers to verify disease reports, schedule and manage field visits, audit actions, and monitor officer performance and escalations.
+- **Key UI components:** `OfficerDashboard.js`, `ReportVerificationPanel.js`, `FieldVisitScheduling.js`, `InternalOfficerNotes.js`, `OfficerActionLogs.js`, `OfficerPerformanceDashboard.js`, `ReportVerificationPanel.js`, `AdminModerationPanel.js`.
+- **Backend routes & endpoints (examples):**
+  - Report verification: `GET /api/officer/reports`, `PUT /api/officer/reports/:id/status`, `PUT /api/officer/reports/:id/priority`, `POST /api/officer/reports/:id/note`, `GET /api/officer/report/:id/history`
+  - Action logs / audit trail: `GET /api/officer/action-logs`
+  - Officer stats & escalations: `GET /api/officer/stats`, `GET /api/officer/escalations`, `GET /api/officer/priority-config`
+  - Officer workflow (field visits & notes): `POST /api/officer-workflow/field-visits`, `GET /api/officer-workflow/field-visits`, `GET /api/officer-workflow/field-visits/:id`, `PUT /api/officer-workflow/field-visits/:id/status`, `POST /api/officer-workflow/field-visits/:id/notes`, `POST /api/officer-workflow/field-visits/:id/photos`, `PUT /api/officer-workflow/field-visits/:id/findings`, `GET /api/officer-workflow/field-visit-stats`
+  - Internal notes & flags: `POST /api/officer-workflow/internal-notes`, `GET /api/officer-workflow/internal-notes/target/:type/:id`, `GET /api/officer-workflow/internal-notes/farmer/:username`, `POST /api/officer-workflow/internal-notes/flag`, `DELETE /api/officer-workflow/internal-notes/:id/flag/:flag`, `PUT /api/officer-workflow/internal-notes/:id/resolve`, `GET /api/officer-workflow/internal-notes/stats`
+  - Performance & leaderboard: `GET /api/officer-workflow/performance`, `GET /api/officer-workflow/performance/monthly`, `GET /api/officer-workflow/leaderboard`
+- **Services & server-side components:** `officerService.js`, `officerPerformanceService.js`, `fieldVisitService.js`, `internalNoteService.js`, `alertService.js` — used to fetch reports, create field visits, record notes/flags, compute stats, and power escalations/leaderboards.
+- **Models involved:** `DiseaseReport.js`, `OfficerActionLog.js`, `FieldVisit.js`, `InternalNote.js`, `User.js` — supporting audit trails, scheduling, and verification workflows.
+- **Security & workflow:** Officer endpoints use an `officerAuthMiddleware` that requires `role: officer` or `role: admin` in the JWT; actions are recorded in `OfficerActionLog` for auditability.
+- **Typical officer workflows:**
+  - Review incoming AI or community disease reports → verify/reject/flag → optionally request `needs_field_visit` → schedule/complete field visit → record findings and internal notes → update report and trigger community alerts or escalations.
+  - Monitor district-level dashboards for priority alerts, reporting coverage, and officer performance; use leaderboards and monthly comparisons to manage operations.
+
+
 ## 🛠️ Tech Stack
 
 ### Frontend
@@ -432,14 +451,26 @@ govi-isuru/
 │   │   ├── CommunityAlert.js        # Disease alerts
 │   │   ├── DiseaseReport.js         # Disease reports
 │   │   ├── Feedback.js              # User feedback
-│   │   └── Notification.js          # Push notifications
+│   │   ├── FieldVisit.js            # Field visit records
+│   │   ├── InternalNote.js          # Officer internal notes
+│   │   ├── Notification.js          # Push notifications
+│   │   └── OfficerActionLog.js      # Officer action audit log
 │   ├── routes/
+│   │   ├── alerts.js                # Disease alert endpoints
+│   │   ├── analytics.js             # Analytics endpoints
 │   │   ├── chatbot.js               # Chatbot API endpoints
 │   │   ├── news.js                  # News API + AI summaries + TTS
-│   │   ├── alerts.js                # Disease alert endpoints
-│   │   └── reputation.js            # Farmer ratings
+│   │   ├── officer.js               # Officer user endpoints
+│   │   ├── officerWorkflow.js       # Officer workflow & verification
+│   │   ├── reputation.js            # Farmer ratings
+│   │   └── suitability.js           # Crop suitability endpoints
 │   ├── services/
 │   │   ├── alertService.js          # Alert management
+│   │   ├── analyticsService.js      # Market & usage analytics
+│   │   ├── fieldVisitService.js     # Field visit scheduling & records
+│   │   ├── internalNoteService.js   # Internal note handling
+│   │   ├── officerPerformanceService.js # Officer performance metrics
+│   │   ├── officerService.js        # Officer-related operations
 │   │   └── reputationService.js     # Reputation system
 │   ├── utils/
 │   │   └── intentDetector.js        # Chatbot intent detection

@@ -11,8 +11,21 @@ import {
   Leaf,
   Shield,
   Clock,
-  CheckCircle
+  CheckCircle,
+  History,
+  FileText,
+  Zap,
+  ClipboardCheck
 } from 'lucide-react';
+import ReportVerificationPanel from './ReportVerificationPanel';
+import OfficerActionLogs from './OfficerActionLogs';
+import PriorityAlerts from './PriorityAlerts';
+import OutbreakGrowthIndicators from './OutbreakGrowthIndicators';
+import SpreadRiskMapping from './SpreadRiskMapping';
+import ReportingCoverageIndex from './ReportingCoverageIndex';
+import OfficerPerformanceDashboard from './OfficerPerformanceDashboard';
+import FieldVisitScheduling from './FieldVisitScheduling';
+import InternalOfficerNotes from './InternalOfficerNotes';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -20,6 +33,9 @@ const OfficerDashboard = ({ user, language = 'en' }) => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [verificationStats, setVerificationStats] = useState(null);
+  const [actionLogTrigger, setActionLogTrigger] = useState(0);
 
   const t = {
     en: {
@@ -39,7 +55,15 @@ const OfficerDashboard = ({ user, language = 'en' }) => {
       trends: 'Trends',
       noData: 'No data available',
       loading: 'Loading dashboard...',
-      refresh: 'Refresh Data'
+      refresh: 'Refresh Data',
+      overview: 'Overview',
+      verification: 'Verify Reports',
+      priorityAlerts: 'Priority Alerts',
+      auditLogs: 'Audit Logs',
+      pendingReview: 'Pending Review',
+      reviewedToday: 'Reviewed Today',
+      emergency: 'Emergency',
+      high: 'High Priority'
     },
     si: {
       title: 'ගෙවැ‍ර්නන්ට නිලධාරී උපකරණ පුවරුව',
@@ -58,15 +82,37 @@ const OfficerDashboard = ({ user, language = 'en' }) => {
       trends: 'ප්‍රවණතා',
       noData: 'දත්ත නොමැත',
       loading: 'උපකරණ පුවරුව පූරණය වෙමින්...',
-      refresh: 'දත්ත නැවුම් කරන්න'
+      refresh: 'දත්ත නැවුම් කරන්න',
+      overview: 'දළ විශ්ලේෂණය',
+      verification: 'වාර්තා සත්‍යාපනය',
+      priorityAlerts: 'ප්‍රමුඛතා අනතුරු ඇඟවීම්',
+      auditLogs: 'විගණන ලොග්',
+      pendingReview: 'පොරොත්තු සමාලෝචනය',
+      reviewedToday: 'අද සමාලෝචනය කළ',
+      emergency: 'හදිසි',
+      high: 'ඉහළ ප්‍රමුඛතාව'
     }
   };
 
   const text = t[language] || t.en;
 
+  const getToken = () => localStorage.getItem('token');
+
   useEffect(() => {
     fetchDashboardStats();
+    fetchVerificationStats();
   }, [user?.district]);
+
+  const fetchVerificationStats = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/officer/stats`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      setVerificationStats(response.data.stats);
+    } catch (err) {
+      console.error('Error fetching verification stats:', err);
+    }
+  };
 
   const fetchDashboardStats = async () => {
     try {
@@ -97,9 +143,23 @@ const OfficerDashboard = ({ user, language = 'en' }) => {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await fetchDashboardStats();
+    await Promise.all([fetchDashboardStats(), fetchVerificationStats()]);
     setRefreshing(false);
   };
+
+  // Tab configuration - Phase 1 + Phase 2 + Phase 3 features
+  const tabs = [
+    { id: 'overview', label: text.overview, icon: Activity },
+    { id: 'priority', label: text.priorityAlerts, icon: Zap },
+    { id: 'verification', label: text.verification, icon: ClipboardCheck },
+    { id: 'growth', label: language === 'si' ? 'වර්ධන දර්ශක' : 'Growth Trends', icon: TrendingUp },
+    { id: 'spread', label: language === 'si' ? 'පැතිරීම් සිතියම' : 'Spread Risk', icon: MapPin },
+    { id: 'coverage', label: language === 'si' ? 'ආවරණ දර්ශකය' : 'Coverage Index', icon: BarChart3 },
+    { id: 'performance', label: language === 'si' ? 'කාර්ය සාධනය' : 'Performance', icon: Users },
+    { id: 'fieldvisits', label: language === 'si' ? 'ක්ෂේත්‍ර සංචාර' : 'Field Visits', icon: MapPin },
+    { id: 'notes', label: language === 'si' ? 'අභ්‍යන්තර සටහන්' : 'Internal Notes', icon: Shield },
+    { id: 'logs', label: text.auditLogs, icon: History }
+  ];
 
   if (loading) {
     return (
@@ -132,6 +192,72 @@ const OfficerDashboard = ({ user, language = 'en' }) => {
         </div>
       </div>
 
+      {/* Verification Stats Row */}
+      {verificationStats && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl border border-yellow-200 p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-yellow-600 font-medium">{text.pendingReview}</p>
+                <p className="text-2xl font-bold text-yellow-700">{verificationStats.pendingCount || 0}</p>
+              </div>
+              <Clock className="text-yellow-500" size={24} />
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-green-200 p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-green-600 font-medium">{text.reviewedToday}</p>
+                <p className="text-2xl font-bold text-green-700">{verificationStats.reviewedToday || 0}</p>
+              </div>
+              <CheckCircle className="text-green-500" size={24} />
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-red-200 p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-red-600 font-medium">{text.emergency}</p>
+                <p className="text-2xl font-bold text-red-700">{verificationStats.priorityBreakdown?.emergency || 0}</p>
+              </div>
+              <AlertTriangle className="text-red-500" size={24} />
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-orange-200 p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-orange-600 font-medium">{text.high}</p>
+                <p className="text-2xl font-bold text-orange-700">{verificationStats.priorityBreakdown?.high || 0}</p>
+              </div>
+              <Zap className="text-orange-500" size={24} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab Navigation */}
+      <div className="bg-white rounded-xl shadow-sm p-2 flex flex-wrap gap-2">
+        {tabs.map(tab => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all ${
+                activeTab === tab.id
+                  ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'overview' && (
+        <>
       {/* Key Stats - Risk Assessment */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Critical Alerts */}
@@ -193,7 +319,7 @@ const OfficerDashboard = ({ user, language = 'en' }) => {
               {stats.diseases.slice(0, 5).map((disease, idx) => (
                 <div key={idx} className="p-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-slate-300 transition-all">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="font-semibold text-slate-800">{disease.name || `Disease ${idx + 1}`}</p>
+                    <p className="font-semibold text-slate-800">{disease.disease || `Disease ${idx + 1}`}</p>
                     <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">
                       {disease.count || 0} {language === 'si' ? 'වාර්තා' : 'reports'}
                     </span>
@@ -258,31 +384,101 @@ const OfficerDashboard = ({ user, language = 'en' }) => {
       <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-2xl border border-slate-200 p-6">
         <h3 className="text-lg font-bold text-slate-800 mb-4">{language === 'si' ? 'ක්ෂණික ක්‍රියා' : 'Quick Actions'}</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="p-4 bg-white border border-slate-200 hover:border-blue-300 rounded-xl transition-all hover:shadow-md text-left">
+          <button 
+            onClick={() => setActiveTab('priority')}
+            className="p-4 bg-white border border-slate-200 hover:border-red-300 rounded-xl transition-all hover:shadow-md text-left"
+          >
             <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle size={18} className="text-red-600" />
-              <span className="font-semibold text-slate-700">{language === 'si' ? 'අনතුරු ඇඟවීම බිම්සැල' : 'Alert Areas'}</span>
+              <Zap size={18} className="text-red-600" />
+              <span className="font-semibold text-slate-700">{language === 'si' ? 'ප්‍රමුඛතා අනතුරු ඇඟවීම්' : 'Priority Alerts'}</span>
             </div>
-            <p className="text-xs text-slate-500">{language === 'si' ? 'ජීවිතාධාර ගරු සිදු නිලධාරීවරුන්ට' : 'Notify affected farmers'}</p>
+            <p className="text-xs text-slate-500">{language === 'si' ? 'හදිසි වාර්තා බලන්න' : 'View urgent reports'}</p>
           </button>
 
-          <button className="p-4 bg-white border border-slate-200 hover:border-green-300 rounded-xl transition-all hover:shadow-md text-left">
+          <button 
+            onClick={() => setActiveTab('verification')}
+            className="p-4 bg-white border border-slate-200 hover:border-green-300 rounded-xl transition-all hover:shadow-md text-left"
+          >
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle size={18} className="text-green-600" />
-              <span className="font-semibold text-slate-700">{language === 'si' ? 'වාර්තා සමීක්ෂණ' : 'Verify Reports'}</span>
+              <ClipboardCheck size={18} className="text-green-600" />
+              <span className="font-semibold text-slate-700">{language === 'si' ? 'වාර්තා සත්‍යාපනය' : 'Verify Reports'}</span>
             </div>
-            <p className="text-xs text-slate-500">{language === 'si' ? 'ඉතිරි වාර්තා සත්‍යතා' : 'Validate pending reports'}</p>
+            <p className="text-xs text-slate-500">{language === 'si' ? 'පොරොත්තු වාර්තා සමාලෝචනය' : 'Review pending reports'}</p>
           </button>
 
-          <button className="p-4 bg-white border border-slate-200 hover:border-purple-300 rounded-xl transition-all hover:shadow-md text-left">
+          <button 
+            onClick={() => setActiveTab('logs')}
+            className="p-4 bg-white border border-slate-200 hover:border-purple-300 rounded-xl transition-all hover:shadow-md text-left"
+          >
             <div className="flex items-center gap-2 mb-2">
-              <TrendingUp size={18} className="text-purple-600" />
-              <span className="font-semibold text-slate-700">{language === 'si' ? 'විස්තෘත විශ්ලේෂණ' : 'View Analysis'}</span>
+              <History size={18} className="text-purple-600" />
+              <span className="font-semibold text-slate-700">{language === 'si' ? 'විගණන ලොග්' : 'Audit Logs'}</span>
             </div>
-            <p className="text-xs text-slate-500">{language === 'si' ? 'සම්පූර්ණ ප්‍රවණතා දර්ශනය' : 'Full trend analysis'}</p>
+            <p className="text-xs text-slate-500">{language === 'si' ? 'ක්‍රියාමාර්ග ඉතිහාසය' : 'View action history'}</p>
           </button>
         </div>
       </div>
+        </>
+      )}
+
+      {/* Priority Alerts Tab */}
+      {activeTab === 'priority' && (
+        <PriorityAlerts 
+          user={user} 
+          language={language} 
+          onViewReport={(id) => {
+            setActiveTab('verification');
+          }}
+        />
+      )}
+
+      {/* Verification Tab */}
+      {activeTab === 'verification' && (
+        <ReportVerificationPanel 
+          user={user} 
+          language={language} 
+          onActionTaken={() => setActionLogTrigger(prev => prev + 1)}
+        />
+      )}
+
+      {/* Growth Trends Tab - Phase 2 */}
+      {activeTab === 'growth' && (
+        <OutbreakGrowthIndicators user={user} language={language} />
+      )}
+
+      {/* Spread Risk Tab - Phase 2 */}
+      {activeTab === 'spread' && (
+        <SpreadRiskMapping user={user} language={language} />
+      )}
+
+      {/* Coverage Index Tab - Phase 2 */}
+      {activeTab === 'coverage' && (
+        <ReportingCoverageIndex user={user} language={language} />
+      )}
+
+      {/* Performance Dashboard Tab - Phase 3 */}
+      {activeTab === 'performance' && (
+        <OfficerPerformanceDashboard user={user} language={language} />
+      )}
+
+      {/* Field Visits Tab - Phase 3 */}
+      {activeTab === 'fieldvisits' && (
+        <FieldVisitScheduling user={user} language={language} />
+      )}
+
+      {/* Internal Notes Tab - Phase 3 */}
+      {activeTab === 'notes' && (
+        <InternalOfficerNotes user={user} language={language} />
+      )}
+
+      {/* Audit Logs Tab */}
+      {activeTab === 'logs' && (
+        <OfficerActionLogs 
+          user={user} 
+          language={language} 
+          refreshTrigger={actionLogTrigger}
+        />
+      )}
     </div>
   );
 };

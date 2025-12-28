@@ -66,11 +66,26 @@ const DiseaseReportSchema = new mongoose.Schema({
     min: 0,
     max: 100
   },
-  // Verification status
+  // Verification status - Extended lifecycle for government workflow
   verificationStatus: {
     type: String,
-    enum: ['pending', 'verified', 'flagged', 'rejected'],
+    enum: ['pending', 'under_review', 'verified', 'rejected', 'flagged', 'needs_field_visit'],
     default: 'pending'
+  },
+  // Priority level for officer attention
+  priority: {
+    type: String,
+    enum: ['info', 'low', 'medium', 'high', 'emergency'],
+    default: 'medium'
+  },
+  // Escalation tracking
+  escalatedAt: {
+    type: Date,
+    default: null
+  },
+  escalatedBy: {
+    type: String,
+    default: null
   },
   // Community confirmations (nearby farmers confirming the same disease)
   communityConfirmations: {

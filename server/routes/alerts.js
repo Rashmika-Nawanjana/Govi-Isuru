@@ -357,8 +357,8 @@ router.put('/reports/:id/review', authMiddleware, async (req, res) => {
   try {
     const { status, flaggedReason } = req.body;
     
-    if (!['verified', 'rejected', 'flagged'].includes(status)) {
-      return res.status(400).json({ error: 'Invalid status. Must be verified, rejected, or flagged' });
+    if (!['pending', 'under_review', 'verified', 'rejected', 'flagged', 'needs_field_visit'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status. Must be pending, under_review, verified, rejected, flagged, or needs_field_visit' });
     }
     
     const report = await alertService.reviewReport(req.params.id, {

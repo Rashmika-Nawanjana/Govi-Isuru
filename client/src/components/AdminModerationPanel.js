@@ -29,12 +29,14 @@ const getTrustColor = (score) => {
   return 'text-red-600 bg-red-100';
 };
 
-// Verification status badges
+// Verification status badges - Extended for government workflow
 const statusConfig = {
-  pending: { color: 'bg-yellow-100 text-yellow-800', icon: Eye, label: 'Pending' },
-  verified: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Verified' },
-  flagged: { color: 'bg-orange-100 text-orange-800', icon: Flag, label: 'Flagged' },
-  rejected: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Rejected' }
+  pending: { color: 'bg-yellow-100 text-yellow-800', icon: Eye, label: 'Pending', labelSi: 'පොරොත්තුවේ' },
+  under_review: { color: 'bg-blue-100 text-blue-800', icon: Eye, label: 'Under Review', labelSi: 'සමාලෝචනය වෙමින්' },
+  verified: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Verified', labelSi: 'සත්‍යාපිත' },
+  flagged: { color: 'bg-orange-100 text-orange-800', icon: Flag, label: 'Flagged', labelSi: 'සලකුණු කළ' },
+  rejected: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Rejected', labelSi: 'ප්‍රතික්ෂේප කළ' },
+  needs_field_visit: { color: 'bg-purple-100 text-purple-800', icon: User, label: 'Needs Field Visit', labelSi: 'ක්ෂේත්‍ර සංචාරය අවශ්‍යයි' }
 };
 
 const AdminModerationPanel = ({ user, language = 'en' }) => {
@@ -197,22 +199,22 @@ const AdminModerationPanel = ({ user, language = 'en' }) => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mt-4">
-          {['pending', 'flagged', 'verified', 'rejected'].map(status => {
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mt-4">
+          {['pending', 'under_review', 'flagged', 'needs_field_visit', 'verified', 'rejected'].map(status => {
             const count = reports.filter(r => r.verificationStatus === status).length;
             const config = statusConfig[status];
             return (
               <button
                 key={status}
                 onClick={() => setFilter(filter === status ? 'all' : status)}
-                className={`p-3 rounded-lg text-center transition-all ${
+                className={`p-2 rounded-lg text-center transition-all ${
                   filter === status 
                     ? 'bg-white text-slate-800' 
                     : 'bg-white/10 hover:bg-white/20'
                 }`}
               >
-                <div className="text-2xl font-bold">{count}</div>
-                <div className="text-xs opacity-80 capitalize">{config.label}</div>
+                <div className="text-xl font-bold">{count}</div>
+                <div className="text-xs opacity-80">{language === 'si' ? config.labelSi : config.label}</div>
               </button>
             );
           })}
@@ -241,7 +243,9 @@ const AdminModerationPanel = ({ user, language = 'en' }) => {
           >
             <option value="all">{text.all}</option>
             <option value="pending">{text.pending}</option>
+            <option value="under_review">{language === 'si' ? 'සමාලෝචනය වෙමින්' : 'Under Review'}</option>
             <option value="flagged">{text.flagged}</option>
+            <option value="needs_field_visit">{language === 'si' ? 'ක්ෂේත්‍ර සංචාරය' : 'Field Visit'}</option>
             <option value="verified">{text.verified}</option>
             <option value="rejected">{text.rejected}</option>
           </select>

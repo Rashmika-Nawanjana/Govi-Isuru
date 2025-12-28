@@ -14,6 +14,9 @@ const alertRoutes = require('./routes/alerts');
 const reputationRoutes = require('./routes/reputation');
 const newsRoutes = require('./routes/news');
 const suitabilityRoutes = require('./routes/suitability');
+const officerRoutes = require('./routes/officer');
+const analyticsRoutes = require('./routes/analytics');
+const officerWorkflowRoutes = require('./routes/officerWorkflow');
 
 const app = express();
 
@@ -35,6 +38,15 @@ app.use('/api/news', newsRoutes);
 
 // Crop Suitability API Routes
 app.use('/api/suitability', suitabilityRoutes);
+
+// Government Officer API Routes
+app.use('/api/officer', officerRoutes);
+
+// Analytics API Routes
+app.use('/api/analytics', analyticsRoutes);
+
+// Officer Workflow API Routes (Performance, Field Visits, Internal Notes)
+app.use('/api/officer-workflow', officerWorkflowRoutes);
 
 // 2. Connect to Database using environment variable
 // We remove the hardcoded string and the deprecated options (no longer needed in Mongoose 6+)
@@ -191,7 +203,14 @@ app.post('/api/register', async (req, res) => {
 
     // 5. Return Token (Login the user immediately)
     const token = jwt.sign(
-      { id: user._id, username: user.username, role: user.role }, 
+      { 
+        id: user._id, 
+        username: user.username, 
+        role: user.role,
+        district: user.district,
+        dsDivision: user.dsDivision,
+        gnDivision: user.gnDivision
+      }, 
       process.env.JWT_SECRET || 'govi_secret', 
       { expiresIn: '24h' }
     );
@@ -233,7 +252,14 @@ app.post('/api/login', async (req, res) => {
 
     // 3. Return Token with role information
     const token = jwt.sign(
-      { id: user._id, username: user.username, role: user.role }, 
+      { 
+        id: user._id, 
+        username: user.username, 
+        role: user.role,
+        district: user.district,
+        dsDivision: user.dsDivision,
+        gnDivision: user.gnDivision
+      }, 
       process.env.JWT_SECRET || 'govi_secret', 
       { expiresIn: '24h' }
     );
