@@ -15,6 +15,7 @@ import NewsWidget from './components/NewsWidget';
 import YieldPrediction from './components/YieldPrediction';
 import HomePage from './components/HomePage';
 import OfficerDashboard from './components/OfficerDashboard';
+import { districtCoordinates } from './data/sriLankaCoordinates';
 
 const translations = {
   en: { 
@@ -66,6 +67,8 @@ export default function App() {
   const t = translations[lang];
 
   useEffect(() => {
+    // Use browser geolocation only when no user is logged in; otherwise use GN/district coords
+    if (user) return;
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -74,7 +77,43 @@ export default function App() {
         (error) => console.error("Location error:", error.message)
       );
     }
-  }, []);
+  }, [user]);
+
+  // Map logged-in user's GN division or district to coordinates for weather (case-insensitive)
+  const resolveUserCoords = (usr) => {
+    if (!usr?.district) return null;
+
+    const norm = (v) => (v || '').toString().trim().toLowerCase();
+    const userDistrict = norm(usr.district);
+    const userGN = norm(usr.gnDivision);
+
+    // Find matching district (case-insensitive)
+    const districtKey = Object.keys(districtCoordinates).find(
+      (d) => norm(d) === userDistrict
+    );
+    if (!districtKey) return null;
+
+    const district = districtCoordinates[districtKey];
+
+    // Try GN match first (case-insensitive)
+    if (userGN && district.gnDivisions) {
+      const gnKey = Object.keys(district.gnDivisions).find(
+        (g) => norm(g) === userGN
+      );
+      if (gnKey) {
+        const gn = district.gnDivisions[gnKey];
+        return { lat: gn.lat, lon: gn.lng };
+      }
+    }
+
+    // Fallback to district center
+    return district.center ? { lat: district.center.lat, lon: district.center.lng } : null;
+  };
+
+  useEffect(() => {
+    const resolved = resolveUserCoords(user);
+    if (resolved) setCoords(resolved);
+  }, [user]);
 
   // Set initial view based on user role (for localStorage-loaded users or on user state change)
   useEffect(() => {

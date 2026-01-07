@@ -360,7 +360,7 @@ async def get_supported_crops():
 @app.post("/predict")
 async def predict_disease(
     file: UploadFile = File(...),
-    crop_type: CropType = Query(default=CropType.rice, description="Type of crop (rice or tea)")
+    crop_type: CropType = Query(default=CropType.rice, description="Type of crop (rice,tea or chili)")
 ):
     """
     Predict crop disease from uploaded image
@@ -395,6 +395,7 @@ async def predict_disease(
         # Read image
         image_bytes = await file.read()
         
+        print("🔄 Prediction in process...")
         # Preprocess
         img_array, original_image = preprocess_image(image_bytes)
         
