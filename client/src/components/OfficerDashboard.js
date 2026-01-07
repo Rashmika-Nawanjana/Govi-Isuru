@@ -21,13 +21,17 @@ import PriorityAlerts from './PriorityAlerts';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-const OfficerDashboard = ({ user, language = 'en' }) => {
+const OfficerDashboard = ({ user, language = 'en', initialTab = 'overview' }) => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(initialTab || 'overview');
   const [verificationStats, setVerificationStats] = useState(null);
   const [actionLogTrigger, setActionLogTrigger] = useState(0);
+
+  useEffect(() => {
+    setActiveTab(initialTab || 'overview');
+  }, [initialTab]);
 
   const t = {
     en: {
@@ -51,7 +55,7 @@ const OfficerDashboard = ({ user, language = 'en' }) => {
       verification: 'Verify Reports',
       priorityAlerts: 'Priority Alerts',
       auditLogs: 'Audit Logs',
-      analytics: 'Area Analytics',
+      analytics: 'Area Reports & Analytics',
       pendingReview: 'Pending Review',
       reviewedToday: 'Reviewed Today',
       emergency: 'Emergency',
@@ -81,7 +85,7 @@ const OfficerDashboard = ({ user, language = 'en' }) => {
       verification: 'වාර්තා සත්‍යාපනය',
       priorityAlerts: 'ප්‍රමුඛතා අනතුරු ඇඟවීම්',
       auditLogs: 'විගණන ලොග්',
-      analytics: 'ප්‍රදේශ විශ්ලේෂණ',
+      analytics: 'ප්‍රදේශ වාර්තා හා විශ්ලේෂණ',
       pendingReview: 'පොරොත්තු සමාලෝචනය',
       reviewedToday: 'අද සමාලෝචනය කළ',
       emergency: 'හදිසි',
@@ -355,7 +359,7 @@ const OfficerDashboard = ({ user, language = 'en' }) => {
         />
       )}
 
-      {/* Area Analytics Tab */}
+      {/* Area Analytics Tab - merged Area Reports + Analytics */}
       {activeTab === 'analytics' && (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-6">
           {/* Header */}
@@ -364,7 +368,32 @@ const OfficerDashboard = ({ user, language = 'en' }) => {
               <TrendingUp className="text-blue-600" size={28} />
               {text.analytics}
             </h2>
-            <p className="text-slate-600">{language === 'si' ? 'ප්‍රදේශ සම්බන්ධ සඳහන් සහ වාර්තා' : 'Area reports and disease analytics'}</p>
+            <p className="text-slate-600">{language === 'si' ? 'ප්‍රදේශ වාර්තා සහ විශ්ලේෂණ එකම නියෝජනයක්' : 'Unified view of area reports and analytics'}</p>
+          </div>
+
+          {/* Area snapshot (reports + coverage + locations) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-500">{language === 'si' ? 'මොහුන් වාර්තා (30 දින)' : 'Total reports (30d)'}</p>
+                <p className="text-3xl font-bold text-slate-800">{stats?.totalReports || 0}</p>
+              </div>
+              <BarChart3 className="text-cyan-600" size={28} />
+            </div>
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-500">{language === 'si' ? 'දූෂණ / රෝග වර්ග' : 'Unique diseases'}</p>
+                <p className="text-3xl font-bold text-slate-800">{stats?.diseases?.length || 0}</p>
+              </div>
+              <Leaf className="text-green-600" size={28} />
+            </div>
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-500">{text.affectedAreas}</p>
+                <p className="text-3xl font-bold text-slate-800">{stats?.affectedLocations || 0}</p>
+              </div>
+              <MapPin className="text-purple-600" size={28} />
+            </div>
           </div>
 
           {/* Disease Distribution */}
