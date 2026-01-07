@@ -20,6 +20,12 @@ export default function CropSuitability({ lang = 'en', user, coords }) {
   const [results, setResults] = useState([]);
   const [error, setError] = useState('');
 
+  const palettes = [
+    { bg: 'from-green-50 to-emerald-50', badge: 'bg-green-100 text-green-700', ring: 'ring-1 ring-green-200' },
+    { bg: 'from-blue-50 to-cyan-50', badge: 'bg-blue-100 text-blue-700', ring: 'ring-1 ring-blue-200' },
+    { bg: 'from-amber-50 to-orange-50', badge: 'bg-amber-100 text-amber-700', ring: 'ring-1 ring-amber-200' }
+  ];
+
   const labels = {
     en: {
       title: 'Crop Suitability Advisor',
@@ -132,16 +138,43 @@ export default function CropSuitability({ lang = 'en', user, coords }) {
 
       {results.length > 0 && (
         <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          {results.map((r) => (
-            <div key={r.crop} className="p-4 bg-slate-50 rounded-xl border">
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-slate-800">{r.crop}</h3>
-                <span className="text-sm bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Score {Math.round(r.score)}</span>
+          {results.map((r, idx) => {
+            const palette = palettes[idx % palettes.length];
+            const bullets = r.reason
+              ? r.reason.split('✓').map(b => b.trim()).filter(Boolean)
+              : [];
+            return (
+              <div
+                key={r.crop}
+                className={`p-4 rounded-2xl border bg-gradient-to-br ${palette.bg} ${palette.ring} shadow-sm hover:shadow-md transition`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-bold text-slate-800">
+                    <span className="text-lg">🌱</span>
+                    <span>{r.crop}</span>
+                  </div>
+                  <span className={`text-sm px-2 py-0.5 rounded-full font-semibold ${palette.badge}`}>
+                    Score {Math.round(r.score)}
+                  </span>
+                </div>
+
+                {bullets.length > 0 ? (
+                  <ul className="mt-3 space-y-1 text-sm text-slate-700">
+                    {bullets.map((b, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="text-green-600 mt-0.5">•</span>
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-slate-600 text-sm mt-3">{r.reason}</p>
+                )}
+
+                {r.notes && <p className="text-slate-500 text-xs mt-3 italic">{r.notes}</p>}
               </div>
-              <p className="text-slate-600 text-sm mt-2">{r.reason}</p>
-              {r.notes && <p className="text-slate-500 text-xs mt-2">{r.notes}</p>}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
