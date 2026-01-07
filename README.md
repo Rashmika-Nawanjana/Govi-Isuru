@@ -23,6 +23,7 @@
 - [Screenshots](#-screenshots)
 - [Contributing](#-contributing)
 - [License](#-license)
+ - [Docker Deploy](#-docker-deploy)
 
 ---
 
@@ -198,6 +199,51 @@
 | MobileNetV2 | Pre-trained | Base Model |
 | Grad-CAM | Custom | Model Explainability |
 | Pillow | Latest | Image Processing |
+
+---
+
+## 🚀 Docker Deploy
+
+- Quick start builds and runs all services (frontend + backend + AI + MongoDB) locally or on an EC2 host.
+
+### Prerequisites
+- Docker and Docker Compose installed
+- For EC2: open security group ports 80 (HTTP). 5000/8000 are optional for direct access.
+
+### Environment
+- Optional (overrides defaults): create a `.env` at repo root with:
+
+```
+JWT_SECRET=your_secret
+MONGO_URI=mongodb+srv://<user>:<pass>@<cluster>/govi_isuru?retryWrites=true&w=majority
+AI_SERVICE_URL=http://ai-service:8000
+NEWS_API_KEY=
+```
+
+If `MONGO_URI` is not provided, a local MongoDB container is used at `mongodb://mongo:27017/govi_isuru`.
+
+### Run
+
+```bash
+docker compose build
+docker compose up -d
+```
+
+- Frontend: http://localhost/ (EC2: http://<ec2-public-ip>/)
+- API (direct): http://localhost:5000/api
+- AI Service (direct): http://localhost:8000/docs
+
+Frontend is served by Nginx and proxies `/api/*` to the backend, so the app works behind a single public port 80.
+
+### Stop
+
+```bash
+docker compose down
+```
+
+### Notes
+- To use MongoDB Atlas on EC2, ensure the EC2 public IP is whitelisted in Atlas or use VPC peering.
+- For production, keep only port 80 open in the security group; 5000/8000 can remain closed.
 | NumPy | Latest | Numerical Computing |
 
 ### DevOps & Deployment

@@ -3,12 +3,14 @@ import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { MapPin, ArrowRightLeft } from 'lucide-react';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const PriceComparison = ({ lang }) => {
     const [data, setData] = useState([]);
     const [selectedCrop, setSelectedCrop] = useState('Rice');
 
     useEffect(() => {
-        axios.get('http://localhost:5000/api/market-prices')
+        axios.get(`${API_BASE}/api/market-prices`)
             .then(res => setData(res.data))
             .catch(err => console.log(err));
     }, []);

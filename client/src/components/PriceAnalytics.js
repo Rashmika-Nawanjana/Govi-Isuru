@@ -3,6 +3,8 @@ import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { TrendingUp, Loader } from 'lucide-react';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const PriceAnalytics = ({ lang }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,7 +13,7 @@ const PriceAnalytics = ({ lang }) => {
     const fetchTrends = async () => {
       try {
         // Fetching from your actual backend API
-        const res = await axios.get('http://localhost:5000/api/price-trends');
+        const res = await axios.get(`${API_BASE}/api/price-trends`);
         setData(res.data);
         setLoading(false);
       } catch (err) {

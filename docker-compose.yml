@@ -1,14 +1,44 @@
 version: '3.8'
 services:
+  mongo:
+    image: mongo:6
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  ai-service:
+    build: ./ai-service
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+
   backend:
     build: ./server
+    restart: unless-stopped
     ports:
       - "5000:5000"
-    env_file: ./server/.env
+    environment:
+      - PORT=5000
+      - JWT_SECRET=${JWT_SECRET:-govi_secret}
+      - MONGO_URI=${MONGO_URI:-mongodb://mongo:27017/govi_isuru}
+      - AI_SERVICE_URL=${AI_SERVICE_URL:-http://ai-service:8000}
+      - NEWS_API_KEY=${NEWS_API_KEY:-}
+    depends_on:
+      - mongo
+      - ai-service
   
   frontend:
-    build: ./client
+    build:
+      context: ./client
+      args:
+        REACT_APP_API_URL: ""
+    restart: unless-stopped
     ports:
       - "80:80"
     depends_on:
       - backend
+
+volumes:
+  mongo_data:

@@ -21,6 +21,7 @@ import {
 import { administrativeData } from '../data/sriLankaData';
 
 const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
+  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
@@ -53,12 +54,14 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/register', formData);
+      const res = await axios.post(`${API_BASE}/api/register`, formData);
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
       onRegisterSuccess(res.data.user);
     } catch (err) {
-      alert(lang === 'si' ? 'ලියාපදිංචි වීම අසාර්ථකයි. කරුණාකර නැවත උත්සාහ කරන්න.' : 'Registration failed. Please try again.');
+      const errorMsg = err.response?.data?.msg || err.message || 'Registration failed';
+      alert(lang === 'si' ? `ලියාපදිංචි අසාර්ථකයි: ${errorMsg}` : `Registration failed: ${errorMsg}`);
+      console.error('Registration error:', err);
     } finally {
       setLoading(false);
     }
