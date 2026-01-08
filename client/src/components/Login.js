@@ -5,7 +5,7 @@ import { User, Lock, ArrowRight, Loader2, KeyRound, Leaf, Sparkles, Sun, Cloud, 
 const Login = ({ onLoginSuccess, switchToRegister, lang }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ username: '', password: '' });
-  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const API_BASE = process.env.REACT_APP_API_URL || '/api';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
