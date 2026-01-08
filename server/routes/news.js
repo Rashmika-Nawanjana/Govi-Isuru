@@ -158,13 +158,18 @@ async function fetchNews(category, forceRefresh = false) {
       }))
       .slice(0, 15); // Limit to 15 articles
 
+    // If API returned nothing, fall back to mock data
+    const finalArticles = processedArticles.length > 0
+      ? processedArticles
+      : mockNews[category] || mockNews.agriculture;
+
     // Update cache
     newsCache[category] = {
-      data: processedArticles,
+      data: finalArticles,
       timestamp: now
     };
 
-    return processedArticles;
+    return finalArticles;
   } catch (error) {
     console.error(`Error fetching ${category} news:`, error.message);
     
