@@ -5,6 +5,11 @@ RUN npm install
 # Allow overriding API base at build (default to empty to use Nginx proxy path '/api')
 ARG REACT_APP_API_URL=""
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
+# Weather API key
+ARG REACT_APP_WEATHER_KEY=""
+ENV REACT_APP_WEATHER_KEY=$REACT_APP_WEATHER_KEY
+
 COPY . .
 RUN npm run build
 
