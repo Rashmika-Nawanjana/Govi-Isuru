@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE = process.env.REACT_APP_API_URL || '';
 
 export default function CropSuitability({ lang = 'en', user, coords }) {
   const [inputs, setInputs] = useState({
