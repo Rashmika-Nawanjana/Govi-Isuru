@@ -7,7 +7,7 @@ import WeatherAdvisor from './components/WeatherAdvisor';
 import MarketTrends from './components/MarketTrends';
 import Register from './components/Register';
 import Login from './components/Login';
-import CropChatbot from './components/CropChatbot';
+import LlamaChatbot from './components/LlamaChatbot';
 import CommunityAlerts from './components/CommunityAlerts';
 import AlertsDashboard from './components/AlertsDashboard';
 import AgriNews from './components/AgriNews';
@@ -385,8 +385,8 @@ export default function App() {
         </footer>
       </main>
 
-      {/* Floating Chatbot - Available on all pages */}
-      <CropChatbot lang={lang} />
+      {/* Llama 3.1 AI Chatbot - Available on all pages */}
+      <LlamaChatbot lang={lang} />
     </div>
   );
 }

@@ -10,6 +10,7 @@ const Listing = require('./models/Listing');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const chatbotRoutes = require('./routes/chatbot');
+const llamaChatbotRoutes = require('./routes/llamaChatbot');
 const alertRoutes = require('./routes/alerts');
 const reputationRoutes = require('./routes/reputation');
 const newsRoutes = require('./routes/news');
@@ -26,6 +27,9 @@ app.use(express.json());
 
 // Chatbot API Routes
 app.use('/api/chatbot', chatbotRoutes);
+
+// Llama 3.1 AI Chatbot API Routes (Hugging Face)
+app.use('/api/llama-chatbot', llamaChatbotRoutes);
 
 // Community Disease Alerts API Routes
 app.use('/api/alerts', alertRoutes);
