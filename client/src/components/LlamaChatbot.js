@@ -209,8 +209,8 @@ export default function LlamaChatbot({ lang = 'en' }) {
           role: 'assistant',
           content:
             chatLang === 'si'
-              ? 'ආයුබෝවන්! මම Llama 3.3 70B AI සහායකයා. වී, තේ සහ මිරිස් ගොවිතැන ගැන ඔබට උදව් කළ හැක. ප්ලැට්ෆෝම් භාවිතය ගැනත් මම උදව් කරන්නම්. ඔබේ ප්‍රශ්නය අහන්න!'
-              : 'Hello! I\'m your Llama 3.3 70B AI assistant. I can help with rice, tea, and chili cultivation, and guide you on using the platform. What would you like to know?',
+              ? 'ආයුබෝවන්! ගොවි ඉසුරු ස්මාර්ට් ගොවිතැන් වේදිකාවට සාදරයෙන් පිළිගනිමු. වී, තේ සහ මිරිස් වගාව පිළිබඳ ඔබට ඇති ඕනෑම ප්‍රශ්නයකට හෝ ගැටලුවකට මෙන්ම වේදිකාවේ විශේෂාංග භාවිතා කිරීමට මම ඔබට උදව් කරන්නම්. අද මට ඔබට කුමක් සඳහා සහාය විය හැකිද?'
+              : 'Hello! Welcome to the Govi Isuru Smart Farming Platform. I\'m here to help you with any questions or concerns you may have about rice, tea, and chili cultivation, as well as navigating the platform\'s features. What can I assist you with today?',
           timestamp: new Date(),
         },
       ]);
