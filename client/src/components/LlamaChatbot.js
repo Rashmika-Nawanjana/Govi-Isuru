@@ -13,12 +13,13 @@ export default function LlamaChatbot({ lang = 'en' }) {
   const [chatLang, setChatLang] = useState('en'); // Internal language state for chatbot
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
+  const lastAiResponseRef = useRef(null);
   const recognitionRef = useRef(null);
   const retryCountRef = useRef(0);
   const manualStopRef = useRef(false);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToLastAiResponse = () => {
+    lastAiResponseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   // Initialize speech recognition (only once on mount)
@@ -197,8 +198,12 @@ export default function LlamaChatbot({ lang = 'en' }) {
     }
   };
 
+  // Auto-scroll to the beginning of the last AI response
   useEffect(() => {
-    scrollToBottom();
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.role === 'assistant') {
+      scrollToLastAiResponse();
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -356,6 +361,7 @@ export default function LlamaChatbot({ lang = 'en' }) {
             {messages.map((message, index) => (
               <div
                 key={index}
+                ref={message.role === 'assistant' && index === messages.length - 1 ? lastAiResponseRef : null}
                 className={`flex ${
                   message.role === 'user' ? 'justify-end' : 'justify-start'
                 }`}
