@@ -3,7 +3,13 @@
 Yes, you can deploy without Dockerfiles! Railway uses **Nixpacks** to automatically detect and build your application based on files like `package.json` and `requirements.txt`.
 
 ## Prerequisites
-1. Push your latest code to GitHub (including the `package.json` updates I just made).
+1. **CRITICAL**: I have just deleted the `Dockerfile`s from your local project. **You MUST commit and push these deletions to GitHub** now.
+   ```bash
+   git add .
+   git commit -m "Remove Dockerfiles for Railway Nixpacks"
+   git push origin <your-branch-name>
+   ```
+   *Railway will only switch to Nixpacks if it sees these files are gone from the repo.*
 2. Create a [Railway](https://railway.app/) account.
 
 ## Step-by-Step Deployment Guide
