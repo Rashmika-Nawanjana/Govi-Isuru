@@ -34,6 +34,8 @@ const UserProfile = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
+  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
   // Derived state for dropdowns
   const districts = Object.keys(administrativeData);
   const dsDivisions = formData.district ? Object.keys(administrativeData[formData.district] || {}) : [];
@@ -48,7 +50,7 @@ const UserProfile = () => {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('/api/auth/user/profile', {
+      const res = await fetch(`${API_BASE}/api/auth/user/profile`, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
       });
 
@@ -112,7 +114,7 @@ const UserProfile = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('/api/auth/user/profile', {
+      const res = await fetch(`${API_BASE}/api/auth/user/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -272,8 +274,8 @@ const UserProfile = () => {
                     onChange={(e) => setConfirmEmail(e.target.value)}
                     placeholder="Re-enter your new email"
                     className={`w-full p-4 bg-white border-2 rounded-xl transition-all outline-none font-medium text-gray-700 ${confirmEmail && confirmEmail === formData.email
-                        ? 'border-green-500 focus:ring-4 ring-green-500/10'
-                        : 'border-green-300 focus:border-green-500'
+                      ? 'border-green-500 focus:ring-4 ring-green-500/10'
+                      : 'border-green-300 focus:border-green-500'
                       }`}
                     required
                   />
