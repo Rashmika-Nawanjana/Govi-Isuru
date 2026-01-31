@@ -1,19 +1,11 @@
 [phases.setup]
-nixPkgs = [
-  "python311",
-  "libglvnd",
-  "glib",
-  "mesa",
-  "xorg.libxcb",
-  "xorg.libX11",
-  "xorg.libXext",
-  "xorg.libXrender",
-  "xorg.libSM",
-  "xorg.libICE"
-]
+nixPkgs = ["python311"]
 
 [phases.install]
-cmds = ["python -m pip install -r requirements.txt"]
+cmds = [
+  "apt-get update && apt-get install -y libgl1-mesa-glx libglib2.0-0 libxcb1 libx11-6 libxext6 libxrender1 libsm6 libice6 || true",
+  "python -m pip install -r requirements.txt"
+]
 
 [start]
 cmd = "uvicorn main:app --host 0.0.0.0 --port $PORT"
