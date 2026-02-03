@@ -211,12 +211,28 @@ function MainApp() {
     
     // Show Login, Register, Forgot Password, etc.
     return (
-      <div className="min-h-screen bg-green-900 flex flex-col items-center justify-center p-4">
-        <div className="mb-8 text-center text-white animate-in fade-in zoom-in duration-1000">
+      <div className="min-h-screen flex flex-col items-center justify-center p-4" style={{
+        backgroundImage: 'url(/backgrounds/farming-training.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}>
+        {/* Dark overlay */}
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 0
+        }} />
+        <div className="mb-8 text-center text-white animate-in fade-in zoom-in duration-1000" style={{ position: 'relative', zIndex: 1 }}>
           <Leaf className="h-16 w-16 text-green-300 mx-auto mb-2" />
           <h1 className="text-4xl font-black tracking-tighter">GOVI ISURU</h1>
         </div>
         
+        <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '480px' }}>
         {view === 'login' && (
           <Login 
             onLoginSuccess={handleRegisterSuccess} 
@@ -254,11 +270,13 @@ function MainApp() {
             lang={lang} 
           />
         )}
+        </div>
         
         {/* Back to Home button */}
         <button
           onClick={() => setView('home')}
           className="mt-6 text-white/80 hover:text-white text-sm font-medium transition-colors"
+          style={{ position: 'relative', zIndex: 1 }}
         >
           ← {lang === 'si' ? 'මුල් පිටුවට' : 'Back to Home'}
         </button>
@@ -309,11 +327,39 @@ function MainApp() {
 
   const navItems = getNavItems();
 
+  // Get background image based on user role
+  const getBackgroundImage = () => {
+    if (user?.role === 'officer') {
+      return '/backgrounds/rice-fields-sunrise.jpg';
+    } else if (user?.role === 'buyer') {
+      return '/backgrounds/village-community.jpg';
+    } else {
+      // Farmer or no specific role
+      return '/backgrounds/harvest-sunset.jpg';
+    }
+  };
+
   // 4. MAIN APP DASHBOARD
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-green-50/30 font-sans flex flex-col md:flex-row">
+    <div className="min-h-screen font-sans flex flex-col md:flex-row" style={{
+      backgroundImage: `url(${getBackgroundImage()})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
+      {/* Dark overlay */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(255, 255, 255, 0.15)',
+        zIndex: 0,
+        pointerEvents: 'none'
+      }} />
       {/* Sidebar Navigation - Enhanced */}
-      <nav className="w-full md:w-72 bg-gradient-to-b from-green-800 to-green-900 text-white shadow-2xl flex-shrink-0 flex flex-col">
+      <nav className="w-full md:w-72 bg-gradient-to-b from-green-800 to-green-900 text-white shadow-2xl flex-shrink-0 flex flex-col" style={{ position: 'relative', zIndex: 1 }}>
         {/* Logo Header */}
         <div className="p-6 flex items-center gap-3 border-b border-green-700/50 bg-green-800/50">
           <div className="p-2 bg-green-600 rounded-xl shadow-lg">
@@ -391,7 +437,7 @@ function MainApp() {
       </nav>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-gradient-to-br from-slate-50 via-white to-green-50/20">
+      <main className="flex-1 overflow-y-auto p-4 md:p-8" style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', position: 'relative', zIndex: 1 }}>
         <div className="max-w-5xl mx-auto">
           {/* Welcome Header - Enhanced */}
           <div className="mb-6 p-5 bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
