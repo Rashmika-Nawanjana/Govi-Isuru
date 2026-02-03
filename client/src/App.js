@@ -475,7 +475,7 @@ function MainApp() {
               <>
                 {view === 'doctor' && <AIDoctor lang={lang} user={user} />}
                 {view === 'market' && <Marketplace lang={lang} currentUser={user} />}
-                {view === 'weather' && <WeatherAdvisor lang={lang} lat={coords.lat} lon={coords.lon} />}
+                {view === 'weather' && <WeatherAdvisor lang={lang} lat={coords.lat} lon={coords.lon} user={user} />}
                 {view === 'trends' && <MarketTrends lang={lang} />}
                 {view === 'alerts' && <AlertsDashboard user={user} language={lang} />}
                 {view === 'news' && <AgriNews lang={lang} user={user} />}

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 
 const AI_API = process.env.REACT_APP_AI_URL || 'http://localhost:8000';
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const AIDoctor = ({ lang, user }) => {
   const [file, setFile] = useState(null);
@@ -16,6 +17,7 @@ const AIDoctor = ({ lang, user }) => {
   const [result, setResult] = useState(null);
   const [showGradCam, setShowGradCam] = useState(false);
   const [cropType, setCropType] = useState('rice'); // 'rice', 'tea', or 'chili'
+  const [reportSaved, setReportSaved] = useState(false);
 
   const t = {
     en: {
@@ -90,6 +92,7 @@ const AIDoctor = ({ lang, user }) => {
     setPreview(URL.createObjectURL(selectedFile));
     setResult(null);
     setAnalysisStep(0);
+    setReportSaved(false);
   };
 
   const handleAnalyze = async () => {
@@ -125,7 +128,10 @@ const AIDoctor = ({ lang, user }) => {
       
       setResult(mappedResult);
       
-      // Process prediction result
+      // Automatically save disease report if user is logged in and disease detected
+      if (user && data.prediction && !data.prediction.toLowerCase().includes('healthy')) {
+        await saveDiseaseReport(data, cropType);
+      }
     } catch (error) {
       console.error("Error connecting to AI service", error);
       alert(lang === 'en' 
@@ -134,6 +140,48 @@ const AIDoctor = ({ lang, user }) => {
     } finally {
       setLoading(false);
       setAnalysisStep(0);
+    }
+  };
+
+  const saveDiseaseReport = async (predictionData, crop) => {
+    try {
+      const token = localStorage.getItem('token');
+      const reportData = {
+        crop: crop,
+        disease: predictionData.prediction,
+        confidence: predictionData.confidence || 0,
+        district: user.district || 'Unknown',
+        dsDivision: user.dsDivision || 'Unknown',
+        gnDivision: user.gnDivision || 'Unknown',
+        treatment: Array.isArray(predictionData.treatment) 
+          ? predictionData.treatment.join('; ') 
+          : predictionData.treatment || '',
+        farmerUsername: user.username
+      };
+
+      const response = await axios.post(
+        `${API_BASE}/api/alerts/disease-report`,
+        reportData,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        }
+      );
+
+      if (response.data.success) {
+        setReportSaved(true);
+        console.log('Disease report saved:', response.data);
+        
+        // Show alert notification if outbreak was triggered
+        if (response.data.alertsTriggered > 0) {
+          alert(lang === 'en'
+            ? `⚠️ Alert: ${response.data.alertsTriggered} disease outbreak(s) detected in your area! Check Community Alerts for details.`
+            : `⚠️ අනතුරු ඇඟවීම: ඔබගේ ප්‍රදේශයේ රෝග පිපිරීම් ${response.data.alertsTriggered}ක් හඳුනාගෙන ඇත! විස්තර සඳහා ප්‍රජා අනතුරු ඇඟවීම් පරීක්ෂා කරන්න.`
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error saving disease report:', error);
+      // Don't show error to user - silent fail for better UX
     }
   };
 
@@ -312,6 +360,19 @@ const AIDoctor = ({ lang, user }) => {
       {/* Results - Medical Report Style */}
       {result && (
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden animate-fade-in">
+          {/* Report Saved Status */}
+          {reportSaved && user && (
+            <div className="bg-green-600 text-white px-6 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5" />
+                <span className="font-medium">
+                  {lang === 'en' 
+                    ? '✓ Report automatically saved and sent to government officers in your area' 
+                    : '✓ වාර්තාව ස්වයංක්‍රීයව සුරකින ලද අතර ඔබගේ ප්‍රදේශයේ රජයේ නිලධාරීන් වෙත යවන ලදී'}
+                </span>
+              </div>
+            </div>
+          )}
           {/* Report Header */}
           <div className={`px-6 py-4 border-b-2 ${getSeverityStyle(result.severity).bg} ${getSeverityStyle(result.severity).border}`}>
             <div className="flex items-center justify-between">

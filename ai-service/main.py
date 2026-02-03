@@ -103,7 +103,16 @@ def load_crop_model(crop_type: str):
     if os.path.exists(config["class_indices_path"]):
         with open(config["class_indices_path"], 'r') as f:
             class_indices[crop_type] = json.load(f)
-        class_names[crop_type] = {int(k): v for k, v in class_indices[crop_type].items()}
+        
+        # Handle both formats: {"class_name": 0} or {"0": "class_name"}
+        first_key = next(iter(class_indices[crop_type].keys()))
+        if first_key.isdigit():
+            # Format: {"0": "class_name"} - already correct
+            class_names[crop_type] = {int(k): v for k, v in class_indices[crop_type].items()}
+        else:
+            # Format: {"class_name": 0} - need to swap
+            class_names[crop_type] = {v: k for k, v in class_indices[crop_type].items()}
+        
         print(f"✅ {crop_type.title()} class indices loaded: {list(class_names[crop_type].values())}")
     else:
         print(f"⚠️ {crop_type.title()} class indices not found")

@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { CloudRain, Wind, AlertCircle, Thermometer, MapPin, Calendar, CloudSun, Droplets, Sun } from 'lucide-react';
 
-const WeatherAdvisor = ({ lat, lon, lang }) => {
+const WeatherAdvisor = ({ lat, lon, lang, user }) => {
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
   const API_KEY = process.env.REACT_APP_WEATHER_KEY;
+  
+  // Use user's GN Division or weather.name as fallback
+  const locationName = user?.gnDivision || weather?.name || 'Your Location';
 
   useEffect(() => {
     const fetchAllWeather = async () => {
@@ -55,7 +58,7 @@ const WeatherAdvisor = ({ lat, lon, lang }) => {
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
         <div className="bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-4 text-white">
           <div className="flex items-center gap-2 text-blue-100 text-sm mb-1">
-            <MapPin size={14} /> {weather.name}
+            <MapPin size={14} /> {locationName}
           </div>
           <h3 className="text-lg font-bold">{lang === 'si' ? 'වත්මන් තත්ත්වය' : 'Current Weather'}</h3>
         </div>
