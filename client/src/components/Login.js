@@ -18,7 +18,7 @@ const Login = ({ onLoginSuccess, switchToRegister, switchToForgotPassword, lang 
     setError('');
     setShowResendVerification(false);
     try {
-      const res = await axios.post(`${API_BASE}/api/login`, formData);
+      const res = await axios.post(`${API_BASE}/api/auth/login`, formData);
       if (res.data && res.data.token && res.data.user) {
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
