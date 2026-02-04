@@ -5,7 +5,7 @@ import { CloudRain, Wind, AlertCircle, Thermometer, MapPin, Calendar, CloudSun, 
 const WeatherAdvisor = ({ lat, lon, lang, user }) => {
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
-  const API_KEY = process.env.REACT_APP_WEATHER_KEY;
+  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
   
   // Use user's GN Division or weather.name as fallback
   const locationName = user?.gnDivision || weather?.name || 'Your Location';
@@ -16,12 +16,12 @@ const WeatherAdvisor = ({ lat, lon, lang, user }) => {
 
       try {
         // 1. Fetch Current Weather
-        const currentUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`;
+        const currentUrl = `${API_BASE}/weather/current?lat=${lat}&lon=${lon}&units=metric`;
         const currentRes = await axios.get(currentUrl);
         setWeather(currentRes.data);
 
         // 2. Fetch 5-Day Forecast
-        const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`;
+        const forecastUrl = `${API_BASE}/weather/forecast?lat=${lat}&lon=${lon}&units=metric`;
         const forecastRes = await axios.get(forecastUrl);
         
         // Filter to get midday (12:00) forecast for the next 5 days
@@ -67,7 +67,7 @@ const WeatherAdvisor = ({ lat, lon, lang, user }) => {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <img 
-                src={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} 
+                src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} 
                 alt="weather" 
                 className="w-20 h-20"
               />
@@ -123,7 +123,7 @@ const WeatherAdvisor = ({ lat, lon, lang, user }) => {
                 {new Date(day.dt * 1000).toLocaleDateString(undefined, { weekday: 'short' })}
               </p>
               <img 
-                src={`http://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`} 
+                src={`https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`} 
                 alt="weather icon" 
                 className="w-14 h-14 mx-auto"
               />

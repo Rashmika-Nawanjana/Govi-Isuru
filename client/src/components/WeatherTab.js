@@ -10,7 +10,7 @@ const WeatherTab = ({ lang }) => {
   
   // 1. Get the registered user data
   const user = JSON.parse(localStorage.getItem('user'));
-  const API_KEY = process.env.REACT_APP_WEATHER_KEY;
+  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
     // 2. Priority check: Use GN Division from profile
@@ -28,7 +28,7 @@ const WeatherTab = ({ lang }) => {
       setLoading(true);
       // 3. Geocode the GN name to get specific coordinates
       const geoRes = await axios.get(
-        `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=1&appid=${API_KEY}`
+        `${API_BASE}/weather/geocode?query=${encodeURIComponent(query)}`
       );
 
       if (geoRes.data.length > 0) {
@@ -37,7 +37,7 @@ const WeatherTab = ({ lang }) => {
       } else {
         // 4. Fallback: If GN name is too specific, use the District
         const fallbackRes = await axios.get(
-          `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(user.district + ', LK')}&limit=1&appid=${API_KEY}`
+          `${API_BASE}/weather/geocode?query=${encodeURIComponent(user.district + ', LK')}`
         );
         const { lat, lon } = fallbackRes.data[0];
         getFinalWeatherData(lat, lon);
@@ -51,12 +51,12 @@ const WeatherTab = ({ lang }) => {
   const getFinalWeatherData = async (lat, lon) => {
     try {
       const currentRes = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
+        `${API_BASE}/weather/current?lat=${lat}&lon=${lon}&units=metric`
       );
       setWeather(currentRes.data);
 
       const forecastRes = await axios.get(
-        `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
+        `${API_BASE}/weather/forecast?lat=${lat}&lon=${lon}&units=metric`
       );
       const dailyData = forecastRes.data.list.filter(reading => reading.dt_txt.includes("12:00:00"));
       setForecast(dailyData);

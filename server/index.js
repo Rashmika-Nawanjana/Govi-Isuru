@@ -19,6 +19,7 @@ const officerRoutes = require('./routes/officer');
 const analyticsRoutes = require('./routes/analytics');
 const officerWorkflowRoutes = require('./routes/officerWorkflow');
 const authRoutes = require('./routes/auth');
+const weatherRoutes = require('./routes/weather');
 
 const app = express();
 
@@ -55,6 +56,9 @@ app.use('/api/officer-workflow', officerWorkflowRoutes);
 
 // Authentication API Routes (Login, Register, Email Verification, Password Reset)
 app.use('/api/auth', authRoutes);
+
+// Weather Proxy API Routes (OpenWeatherMap via backend)
+app.use('/api/weather', weatherRoutes);
 
 // 2. Connect to Database using environment variable
 // We remove the hardcoded string and the deprecated options (no longer needed in Mongoose 6+)

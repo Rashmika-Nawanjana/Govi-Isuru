@@ -35,6 +35,7 @@ services:
       - MONGO_URI=${MONGO_URI}
       - AI_SERVICE_URL=http://ai-service:8000
       - NEWS_API_KEY=${NEWS_API_KEY}
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
       - SMTP_USER=${SMTP_USER}
