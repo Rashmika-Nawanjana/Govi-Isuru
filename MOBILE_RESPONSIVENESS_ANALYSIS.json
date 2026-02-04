@@ -1,0 +1,949 @@
+{
+  "analysis_date": "2026-02-04",
+  "project": "Govi-Isuru React Application",
+  "summary": {
+    "total_components_analyzed": 41,
+    "total_issues_found": 87,
+    "critical_issues": 12,
+    "high_priority_issues": 28,
+    "medium_priority_issues": 35,
+    "low_priority_issues": 12,
+    "responsive_coverage": "45%"
+  },
+  "critical_issues": [
+    {
+      "file": "AIDoctor.js",
+      "line": 219,
+      "issue": "Grid with fixed 3 columns - no mobile breakpoint",
+      "description": "grid grid-cols-3 will stack 3 items on mobile (138px each), unreadable",
+      "priority": "CRITICAL",
+      "suggested_fix": "grid-cols-1 sm:grid-cols-2 md:grid-cols-3",
+      "impact": "Crop selector buttons completely broken on mobile (<375px)"
+    },
+    {
+      "file": "OfficerDashboard.js",
+      "line": 290,
+      "issue": "Stats grid grid-cols-4 on mobile",
+      "description": "grid grid-cols-2 md:grid-cols-4 - but needs sm:grid-cols-1 for extra small devices",
+      "priority": "CRITICAL",
+      "suggested_fix": "grid-cols-1 sm:grid-cols-2 md:grid-cols-4",
+      "impact": "Officer dashboard stats misaligned on phones"
+    },
+    {
+      "file": "Marketplace.js",
+      "line": 278,
+      "issue": "Horizontal overflow in top farmers section",
+      "description": "flex gap-3 overflow-x-auto pb-2 missing responsive width constraints",
+      "priority": "CRITICAL",
+      "suggested_fix": "Add max-w-full and ensure items have min-w constraint",
+      "impact": "Horizontal scrolling difficult on mobile touch"
+    },
+    {
+      "file": "YieldPrediction.js",
+      "line": 732,
+      "issue": "Table without proper mobile layout",
+      "description": "overflow-x-auto table with fixed columns, no stack-on-mobile strategy",
+      "priority": "CRITICAL",
+      "suggested_fix": "Convert table to card layout on mobile with hidden columns using hidden sm:table-cell",
+      "impact": "Unreadable data tables on phones, requires horizontal scrolling"
+    },
+    {
+      "file": "DiseaseHeatmap.js",
+      "line": 450,
+      "issue": "SVG map with fixed width/height calculations",
+      "description": "geoToSvgPath uses hardcoded svgWidth/Height without viewport awareness",
+      "priority": "CRITICAL",
+      "suggested_fix": "Use responsive container and recalculate on window resize",
+      "impact": "Map distorted on mobile screens"
+    },
+    {
+      "file": "AdminModerationPanel.js",
+      "line": 250,
+      "issue": "Report card layout not mobile optimized",
+      "description": "Flex layout with detailed info not collapsed/adjusted for small screens",
+      "priority": "CRITICAL",
+      "suggested_fix": "Add responsive flex-col on mobile, flex-row on desktop",
+      "impact": "Moderation panel information cramped on mobile"
+    },
+    {
+      "file": "HomePage.js",
+      "line": 210,
+      "issue": "Fixed width navigation on all screen sizes",
+      "description": "Navigation bar items not wrapping on mobile, potential overflow",
+      "priority": "CRITICAL",
+      "suggested_fix": "Add md: prefix to layout controls, use mobile menu on xs/sm",
+      "impact": "Navigation broken on mobile screens"
+    },
+    {
+      "file": "CropChatbot.js",
+      "line": 350,
+      "issue": "Chat message layout assumes desktop width",
+      "description": "Messages don't have max-width constraints for mobile",
+      "priority": "CRITICAL",
+      "suggested_fix": "Add max-w-xs sm:max-w-md md:max-w-lg to message containers",
+      "impact": "Chat bubbles span entire screen width on mobile"
+    },
+    {
+      "file": "PriceAnalytics.js",
+      "line": 33,
+      "issue": "Chart container height not responsive",
+      "description": "h-64 fixed height with ResponsiveContainer, responsive only in width",
+      "priority": "CRITICAL",
+      "suggested_fix": "h-48 sm:h-56 md:h-64 or use aspect-ratio utilities",
+      "impact": "Charts too tall on mobile, waste of screen space"
+    },
+    {
+      "file": "CommunityAlerts.js",
+      "line": 100,
+      "issue": "Alert card flex layout needs mobile adjustment",
+      "description": "flex items-start justify-between assumes wide screen for side-by-side",
+      "priority": "CRITICAL",
+      "suggested_fix": "flex-col sm:flex-row md:justify-between",
+      "impact": "Alert titles and expand buttons collide on mobile"
+    },
+    {
+      "file": "Login.js",
+      "line": 80,
+      "issue": "Absolute positioned decorative elements break mobile layout",
+      "description": "Floating Sun/Cloud/Droplets use fixed positioning, overlap content on small screens",
+      "priority": "CRITICAL",
+      "suggested_fix": "hidden sm:absolute to hide on mobile, show only on tablets+",
+      "impact": "Decorative elements obscure login form on mobile"
+    },
+    {
+      "file": "AlertsDashboard.js",
+      "line": 180,
+      "issue": "Tab buttons don't wrap on mobile",
+      "description": "flex gap-2 with 5 tabs doesn't wrap, causes horizontal scroll",
+      "priority": "CRITICAL",
+      "suggested_fix": "flex-wrap for tabs, use scroll-container or dropdown on mobile",
+      "impact": "Tab navigation broken on mobile"
+    }
+  ],
+  "high_priority_issues": [
+    {
+      "file": "AgriNews.js",
+      "line": 800,
+      "issue": "News card grid not responsive",
+      "description": "grid-cols-3 md:grid-cols-2 missing grid-cols-1 for mobile",
+      "priority": "HIGH",
+      "suggested_fix": "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
+      "impact": "News cards cramped on mobile"
+    },
+    {
+      "file": "FeedbackForm.js",
+      "line": 145,
+      "issue": "Modal doesn't consider mobile viewport",
+      "description": "max-w-md is too wide for iPhone SE, no responsive max-width",
+      "priority": "HIGH",
+      "suggested_fix": "w-full max-w-sm sm:max-w-md",
+      "impact": "Modal overflows on small phones"
+    },
+    {
+      "file": "ReportVerificationPanel.js",
+      "line": 200,
+      "issue": "Verification controls not mobile-friendly",
+      "description": "Button layout assumes space for multiple side-by-side buttons",
+      "priority": "HIGH",
+      "suggested_fix": "flex-col sm:flex-row for button layouts",
+      "impact": "Approve/Reject/Flag buttons stack awkwardly"
+    },
+    {
+      "file": "OutbreakGraph.js",
+      "line": 120,
+      "issue": "Graph legend overlaps chart on small screens",
+      "description": "Legend positioning not responsive",
+      "priority": "HIGH",
+      "suggested_fix": "position-relative with responsive bottom/right values",
+      "impact": "Graph legend hides data on mobile"
+    },
+    {
+      "file": "PriorityAlerts.js",
+      "line": 150,
+      "issue": "Alert severity badges don't wrap text",
+      "description": "Badge text may overflow on narrow screens",
+      "priority": "HIGH",
+      "suggested_fix": "px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm",
+      "impact": "Badge text truncated or hidden"
+    },
+    {
+      "file": "BuyerDashboard.js",
+      "line": 55,
+      "issue": "Header layout breaks on mobile",
+      "description": "flex flex-col md:flex-row items-start md:items-center - needs better mobile spacing",
+      "priority": "HIGH",
+      "suggested_fix": "gap-2 sm:gap-4 md:gap-6 for better mobile spacing",
+      "impact": "Dashboard header button spacing inconsistent"
+    },
+    {
+      "file": "WeatherAdvisor.js",
+      "line": 70,
+      "issue": "Weather icon size not responsive",
+      "description": "w-20 h-20 fixed size, too large on mobile",
+      "priority": "HIGH",
+      "suggested_fix": "w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20",
+      "impact": "Weather icons take up 50% of mobile screen"
+    },
+    {
+      "file": "YieldPrediction.js",
+      "line": 812,
+      "issue": "District name badge positioning",
+      "description": "w-24 text-sm fixed width too narrow for district names with translations",
+      "priority": "HIGH",
+      "suggested_fix": "w-auto min-w-20 sm:w-24",
+      "impact": "District names truncated or wrapped"
+    },
+    {
+      "file": "CropSuitability.js",
+      "line": 85,
+      "issue": "Results grid with 3 columns no mobile breakpoint",
+      "description": "grid-cols-1 md:grid-cols-3 missing gap-2 which causes overflow on mobile with padding",
+      "priority": "HIGH",
+      "suggested_fix": "Add gap-3 sm:gap-4 and review card padding on mobile",
+      "impact": "Suitability result cards overflow on small devices"
+    },
+    {
+      "file": "TraditionalRice.js",
+      "line": 338,
+      "issue": "Search icon absolute positioning not mobile aware",
+      "description": "absolute left-3 top-1/2 assumes sufficient input field width",
+      "priority": "HIGH",
+      "suggested_fix": "left-2 for mobile, left-3 for sm+",
+      "impact": "Search icon overlaps text on narrow inputs"
+    },
+    {
+      "file": "SpreadRiskMapping.js",
+      "line": 430,
+      "issue": "Risk badges inline-block without wrap constraint",
+      "description": "inline-block px-2 py-0.5 badges don't wrap, causing horizontal overflow",
+      "priority": "HIGH",
+      "suggested_fix": "inline-block with flex-wrap parent or hidden overflow on mobile",
+      "impact": "Risk labels cause horizontal scrolling"
+    },
+    {
+      "file": "ReputationBadge.js",
+      "line": 50,
+      "issue": "Badge layout not mobile optimized",
+      "description": "flex items-center gap-2 assumes width for star/text combination",
+      "priority": "HIGH",
+      "suggested_fix": "gap-1 sm:gap-2 text-xs sm:text-sm",
+      "impact": "Reputation badges misaligned on mobile"
+    },
+    {
+      "file": "OfficerActionLogs.js",
+      "line": 100,
+      "issue": "Log entries table layout",
+      "description": "No responsive table alternative for mobile",
+      "priority": "HIGH",
+      "suggested_fix": "Convert to cards on mobile using hidden sm:table-cell",
+      "impact": "Audit logs unreadable on mobile"
+    },
+    {
+      "file": "FieldVisitScheduling.js",
+      "line": 150,
+      "issue": "Calendar not mobile responsive",
+      "description": "Calendar grid doesn't adapt to screen size",
+      "priority": "HIGH",
+      "suggested_fix": "Use smaller font (text-xs sm:text-sm) and adjust cell padding",
+      "impact": "Calendar dates too small to tap on mobile"
+    },
+    {
+      "file": "Marketplace.js",
+      "line": 350,
+      "issue": "Listing cards padding too large on mobile",
+      "description": "p-6 padding wastes space on narrow screens",
+      "priority": "HIGH",
+      "suggested_fix": "p-3 sm:p-4 md:p-6",
+      "impact": "Marketplace listings have excessive margins on mobile"
+    },
+    {
+      "file": "OfficerPerformanceDashboard.js",
+      "line": 200,
+      "issue": "Performance metrics grid not mobile optimized",
+      "description": "grid-cols-4 without mobile breakpoint",
+      "priority": "HIGH",
+      "suggested_fix": "grid-cols-2 sm:grid-cols-3 md:grid-cols-4",
+      "impact": "Metrics illegible on mobile screens"
+    },
+    {
+      "file": "UserProfile.js",
+      "line": 170,
+      "issue": "Decorative blur elements cause mobile issues",
+      "description": "w-64 h-64 absolute positioned blurs overflow on mobile",
+      "priority": "HIGH",
+      "suggested_fix": "hidden sm:block or reduce size on mobile",
+      "impact": "Decorative elements cause layout shifts"
+    },
+    {
+      "file": "NewsWidget.js",
+      "line": 80,
+      "issue": "Widget assumes news card width",
+      "description": "No constraint on article title/description length",
+      "priority": "HIGH",
+      "suggested_fix": "line-clamp-2 sm:line-clamp-3 for text truncation",
+      "impact": "News text overflows cards on mobile"
+    },
+    {
+      "file": "InternalOfficerNotes.js",
+      "line": 100,
+      "issue": "Notes textarea full width without max-width",
+      "description": "w-full without max-w constraint on very small screens",
+      "priority": "HIGH",
+      "suggested_fix": "max-w-full sm:max-w-2xl",
+      "impact": "Note input field too wide on mobile"
+    },
+    {
+      "file": "ReputationBreakdown.js",
+      "line": 120,
+      "issue": "Bar chart labels not responsive",
+      "description": "Fixed font size and positioning for category labels",
+      "priority": "HIGH",
+      "suggested_fix": "text-xs sm:text-sm with responsive positioning",
+      "impact": "Chart labels overlap on mobile"
+    },
+    {
+      "file": "MarketTrends.js",
+      "line": 150,
+      "issue": "Trend cards text size fixed",
+      "description": "text-lg for trend cards too large on mobile",
+      "priority": "HIGH",
+      "suggested_fix": "text-base sm:text-lg with responsive spacing",
+      "impact": "Trend cards overflow content area"
+    },
+    {
+      "file": "LlamaChatbot.js",
+      "line": 200,
+      "issue": "Chatbot interface not mobile optimized",
+      "description": "Message input and send button don't scale properly",
+      "priority": "HIGH",
+      "suggested_fix": "Adjust input height (h-10 sm:h-12) and button padding",
+      "impact": "Chat interface cramped on phones"
+    },
+    {
+      "file": "PriceComparison.js",
+      "line": 80,
+      "issue": "Comparison table needs horizontal scroll on mobile",
+      "description": "Multiple columns don't wrap or hide on small screens",
+      "priority": "HIGH",
+      "suggested_fix": "Use overflow-x-auto with min-w or convert to cards",
+      "impact": "Price comparison data unreadable on mobile"
+    },
+    {
+      "file": "Register.js",
+      "line": 150,
+      "issue": "Form layout assumes desktop width",
+      "description": "Form fields might overflow on very small screens",
+      "priority": "HIGH",
+      "suggested_fix": "Ensure all form inputs have w-full with appropriate padding",
+      "impact": "Registration form broken on mobile"
+    },
+    {
+      "file": "ForgotPassword.js",
+      "line": 80,
+      "issue": "Form container not mobile optimized",
+      "description": "max-w-md too wide for small phones",
+      "priority": "HIGH",
+      "suggested_fix": "w-full max-w-sm sm:max-w-md",
+      "impact": "Password reset form overflows screen"
+    },
+    {
+      "file": "ReportingCoverageIndex.js",
+      "line": 120,
+      "issue": "Coverage statistics layout not responsive",
+      "description": "Multiple columns of stats don't stack on mobile",
+      "priority": "HIGH",
+      "suggested_fix": "grid-cols-1 sm:grid-cols-2 md:grid-cols-3",
+      "impact": "Coverage index unreadable on mobile"
+    },
+    {
+      "file": "OutbreakGrowthIndicators.js",
+      "line": 100,
+      "issue": "Growth trend cards need mobile optimization",
+      "description": "Card layout assumes adequate width",
+      "priority": "HIGH",
+      "suggested_fix": "Add responsive padding and font sizes",
+      "impact": "Growth indicators cramped on mobile"
+    }
+  ],
+  "medium_priority_issues": [
+    {
+      "file": "AIDoctor.js",
+      "line": 292,
+      "issue": "Image preview size not responsive",
+      "description": "h-56 object-cover might be too tall on mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "h-40 sm:h-48 md:h-56",
+      "impact": "Image preview wastes space on mobile"
+    },
+    {
+      "file": "AIDoctor.js",
+      "line": 408,
+      "issue": "Context information grid not responsive",
+      "description": "grid-cols-3 should be grid-cols-1 sm:grid-cols-3",
+      "priority": "MEDIUM",
+      "suggested_fix": "grid-cols-1 sm:grid-cols-3",
+      "impact": "Diagnosis context info stacked vertically on mobile"
+    },
+    {
+      "file": "AlertsDashboard.js",
+      "line": 155,
+      "issue": "Stats display not mobile optimized",
+      "description": "Quick stats use grid-cols-4, should be grid-cols-2",
+      "priority": "MEDIUM",
+      "suggested_fix": "grid-cols-2 md:grid-cols-4",
+      "impact": "Alert stats too crowded on mobile"
+    },
+    {
+      "file": "CommunityAlerts.js",
+      "line": 75,
+      "issue": "Severity badge styling text size",
+      "description": "Badge text should be smaller on mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "text-xs sm:text-sm for severity badges",
+      "impact": "Badge text slightly large on mobile"
+    },
+    {
+      "file": "CropChatbot.js",
+      "line": 400,
+      "issue": "Follow-up suggestions button layout",
+      "description": "Buttons may wrap awkwardly on mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "flex-wrap gap-2 with responsive button sizing",
+      "impact": "Chat suggestions buttons misaligned"
+    },
+    {
+      "file": "CropSuitability.js",
+      "line": 45,
+      "issue": "Form input grid needs better mobile layout",
+      "description": "grid-cols-2 forces narrow inputs on mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "grid-cols-1 sm:grid-cols-2",
+      "impact": "Form inputs too narrow to use on mobile"
+    },
+    {
+      "file": "DiseaseHeatmap.js",
+      "line": 300,
+      "issue": "Filter controls not responsive",
+      "description": "Filter buttons don't wrap, may overflow",
+      "priority": "MEDIUM",
+      "suggested_fix": "flex-wrap gap-2 for filter buttons",
+      "impact": "Heatmap filters overflow on mobile"
+    },
+    {
+      "file": "FeedbackForm.js",
+      "line": 200,
+      "issue": "Star rating layout",
+      "description": "Star buttons might be too small to tap on mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "Ensure 44px touch target: p-1.5 or larger",
+      "impact": "Star rating buttons too small on mobile"
+    },
+    {
+      "file": "HomePage.js",
+      "line": 350,
+      "issue": "Feature cards grid",
+      "description": "grid-cols-2 md:grid-cols-4 missing sm breakpoint",
+      "priority": "MEDIUM",
+      "suggested_fix": "grid-cols-1 sm:grid-cols-2 md:grid-cols-4",
+      "impact": "Feature cards might be too wide on tablets"
+    },
+    {
+      "file": "Login.js",
+      "line": 150,
+      "issue": "Input field icon positioning",
+      "description": "Left icon might overlap text on very narrow screens",
+      "priority": "MEDIUM",
+      "suggested_fix": "pl-10 sm:pl-12 for responsive padding",
+      "impact": "Input text hidden behind icon on narrow phone"
+    },
+    {
+      "file": "Marketplace.js",
+      "line": 320,
+      "issue": "Contact button layout",
+      "description": "WhatsApp/Call buttons might stack awkwardly",
+      "priority": "MEDIUM",
+      "suggested_fix": "flex-col sm:flex-row for buttons",
+      "impact": "Contact buttons misaligned on mobile"
+    },
+    {
+      "file": "OfficerDashboard.js",
+      "line": 310,
+      "issue": "Quick action buttons grid",
+      "description": "grid-cols-4 should be grid-cols-2 on mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "grid-cols-2 md:grid-cols-4",
+      "impact": "Officer quick actions cramped"
+    },
+    {
+      "file": "PriceAnalytics.js",
+      "line": 40,
+      "issue": "Chart title font size",
+      "description": "text-xl might be too large on mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "text-lg sm:text-xl",
+      "impact": "Chart title takes too much space"
+    },
+    {
+      "file": "Register.js",
+      "line": 120,
+      "issue": "Role selection cards",
+      "description": "Card layout might need adjustment for mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "flex-col sm:flex-row or grid-cols-1 sm:grid-cols-2",
+      "impact": "Role selector cards too wide on mobile"
+    },
+    {
+      "file": "TraditionalRice.js",
+      "line": 400,
+      "issue": "Rice variety details card padding",
+      "description": "p-6 padding wastes space on mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "p-4 sm:p-6",
+      "impact": "Rice details cards have excessive padding"
+    },
+    {
+      "file": "UserProfile.js",
+      "line": 200,
+      "issue": "Profile avatar size",
+      "description": "w-16 h-16 avatar might be too large on mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "w-12 h-12 sm:w-16 sm:h-16",
+      "impact": "Avatar takes up too much space"
+    },
+    {
+      "file": "WeatherAdvisor.js",
+      "line": 110,
+      "issue": "Weather forecast cards layout",
+      "description": "Forecast cards might need responsive grid",
+      "priority": "MEDIUM",
+      "suggested_fix": "grid-cols-2 md:grid-cols-5",
+      "impact": "Weather forecast layout suboptimal"
+    },
+    {
+      "file": "WeatherTab.js",
+      "line": 80,
+      "issue": "Weather information spacing",
+      "description": "Information items need better mobile spacing",
+      "priority": "MEDIUM",
+      "suggested_fix": "gap-2 sm:gap-4 for info items",
+      "impact": "Weather info cramped on mobile"
+    },
+    {
+      "file": "YieldPrediction.js",
+      "line": 750,
+      "issue": "Table cell padding",
+      "description": "px-4 py-2 padding might be excessive on mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "px-2 py-1 sm:px-4 sm:py-2",
+      "impact": "Table cells have too much padding on mobile"
+    },
+    {
+      "file": "CommunityAlerts.js",
+      "line": 130,
+      "issue": "Alert details padding",
+      "description": "Alert card inner spacing not responsive",
+      "priority": "MEDIUM",
+      "suggested_fix": "p-3 sm:p-4 md:p-6",
+      "impact": "Alert details have inconsistent padding"
+    },
+    {
+      "file": "AIDoctor.js",
+      "line": 487,
+      "issue": "Grad-CAM comparison images size",
+      "description": "h-36 might be too tall for narrow screens",
+      "priority": "MEDIUM",
+      "suggested_fix": "h-24 sm:h-32 md:h-36",
+      "impact": "Comparison images take excessive space"
+    },
+    {
+      "file": "AdminModerationPanel.js",
+      "line": 300,
+      "issue": "Report expansion toggle position",
+      "description": "Toggle button position not optimized for mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "Adjust button size and position for mobile",
+      "impact": "Expand/collapse buttons hard to tap"
+    },
+    {
+      "file": "CropChatbot.js",
+      "line": 380,
+      "issue": "Message timestamp font size",
+      "description": "text-xs might be too small for readability",
+      "priority": "MEDIUM",
+      "suggested_fix": "text-xs sm:text-sm for timestamps",
+      "impact": "Chat timestamps hard to read"
+    },
+    {
+      "file": "FeedbackForm.js",
+      "line": 180,
+      "issue": "Comment textarea height",
+      "description": "Default textarea height not optimized for mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "h-20 sm:h-24 md:h-32",
+      "impact": "Comment input too small on mobile"
+    },
+    {
+      "file": "Marketplace.js",
+      "line": 400,
+      "issue": "Listing form inputs layout",
+      "description": "Form inputs might overflow on narrow screens",
+      "priority": "MEDIUM",
+      "suggested_fix": "Ensure inputs have w-full with proper padding",
+      "impact": "Form inputs might be hard to use"
+    },
+    {
+      "file": "OfficerDashboard.js",
+      "line": 350,
+      "issue": "Tab navigation font size",
+      "description": "Tab text might be too large or small on mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "text-sm sm:text-base for tabs",
+      "impact": "Tab text sizing inconsistent"
+    },
+    {
+      "file": "PriorityAlerts.js",
+      "line": 200,
+      "issue": "Alert priority label width",
+      "description": "Priority labels might overflow on narrow screens",
+      "priority": "MEDIUM",
+      "suggested_fix": "word-break or truncation for labels",
+      "impact": "Priority labels might wrap unexpectedly"
+    },
+    {
+      "file": "ReputationBadge.js",
+      "line": 80,
+      "issue": "Star icon size not responsive",
+      "description": "Star icons fixed size in badge",
+      "priority": "MEDIUM",
+      "suggested_fix": "w-3 h-3 sm:w-4 sm:h-4",
+      "impact": "Stars might look disproportionate"
+    },
+    {
+      "file": "SpreadRiskMapping.js",
+      "line": 200,
+      "issue": "Risk map legend positioning",
+      "description": "Legend might overlap map content on mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "Responsive positioning using absolute sm:static",
+      "impact": "Legend covers map data on mobile"
+    },
+    {
+      "file": "TraditionalRice.js",
+      "line": 350,
+      "issue": "Variety search results card grid",
+      "description": "Results might need responsive grid adjustment",
+      "priority": "MEDIUM",
+      "suggested_fix": "grid-cols-1 sm:grid-cols-2 md:grid-cols-3",
+      "impact": "Search results layout suboptimal"
+    },
+    {
+      "file": "VerifyEmail.js",
+      "line": 100,
+      "issue": "Verification code input size",
+      "description": "Input might be too large or small on mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "py-3 sm:py-4 for input padding",
+      "impact": "Verification input sizing inconsistent"
+    },
+    {
+      "file": "ForgotPassword.js",
+      "line": 130,
+      "issue": "Reset button sizing",
+      "description": "Button might be too large on mobile",
+      "priority": "MEDIUM",
+      "suggested_fix": "py-3 sm:py-4 for responsive button",
+      "impact": "Reset button too tall on mobile"
+    },
+    {
+      "file": "ResetPassword.js",
+      "line": 150,
+      "issue": "Password input layout",
+      "description": "New/confirm password fields positioning",
+      "priority": "MEDIUM",
+      "suggested_fix": "Vertical layout on mobile, side-by-side on desktop",
+      "impact": "Password fields might overflow"
+    },
+    {
+      "file": "LlamaChatbot.js",
+      "line": 250,
+      "issue": "Chatbot header spacing",
+      "description": "Header elements might overflow on very small screens",
+      "priority": "MEDIUM",
+      "suggested_fix": "px-3 sm:px-4 for responsive padding",
+      "impact": "Header content cramped on mobile"
+    },
+    {
+      "file": "OutbreakGraph.js",
+      "line": 180,
+      "issue": "Graph axis labels responsiveness",
+      "description": "Axis text might overlap on small charts",
+      "priority": "MEDIUM",
+      "suggested_fix": "Reduce font or rotate labels on mobile",
+      "impact": "Graph axes labels overlap"
+    }
+  ],
+  "low_priority_issues": [
+    {
+      "file": "AIDoctor.js",
+      "line": 365,
+      "issue": "Report header padding",
+      "description": "px-6 py-3 padding could be reduced on mobile",
+      "priority": "LOW",
+      "suggested_fix": "px-4 sm:px-6 py-2 sm:py-3",
+      "impact": "Slightly excessive padding on mobile"
+    },
+    {
+      "file": "AlertsDashboard.js",
+      "line": 240,
+      "issue": "Tab content padding",
+      "description": "Padding around tab content could be optimized",
+      "priority": "LOW",
+      "suggested_fix": "p-4 sm:p-6",
+      "impact": "Minor padding inconsistency"
+    },
+    {
+      "file": "CommunityAlerts.js",
+      "line": 200,
+      "issue": "Icon sizes in badges",
+      "description": "w-5 h-5 icons could be w-4 h-4 on mobile",
+      "priority": "LOW",
+      "suggested_fix": "w-4 h-4 sm:w-5 sm:h-5",
+      "impact": "Icon size slightly large on mobile"
+    },
+    {
+      "file": "FeedbackForm.js",
+      "line": 210,
+      "issue": "Label font sizing",
+      "description": "text-sm labels could be adjusted on mobile",
+      "priority": "LOW",
+      "suggested_fix": "text-xs sm:text-sm",
+      "impact": "Labels slightly large on narrow screens"
+    },
+    {
+      "file": "Login.js",
+      "line": 130,
+      "issue": "Floating decoration animation timing",
+      "description": "Animation durations not responsive",
+      "priority": "LOW",
+      "suggested_fix": "Not critical, but could optimize",
+      "impact": "Minor animation inconsistency"
+    },
+    {
+      "file": "Marketplace.js",
+      "line": 290,
+      "issue": "Top farmers section horizontal scroll UX",
+      "description": "Could use better mobile scroll indicators",
+      "priority": "LOW",
+      "suggested_fix": "Add snap-scroll or pagination on mobile",
+      "impact": "Scroll experience could be better"
+    },
+    {
+      "file": "OfficerDashboard.js",
+      "line": 260,
+      "issue": "Header flex gap spacing",
+      "description": "gap-4 could be gap-2 on mobile",
+      "priority": "LOW",
+      "suggested_fix": "gap-2 sm:gap-4",
+      "impact": "Slightly large spacing on mobile"
+    },
+    {
+      "file": "PriceAnalytics.js",
+      "line": 25,
+      "issue": "Container padding",
+      "description": "p-6 could be reduced on mobile",
+      "priority": "LOW",
+      "suggested_fix": "p-4 sm:p-6",
+      "impact": "Minor padding optimization"
+    },
+    {
+      "file": "TraditionalRice.js",
+      "line": 320,
+      "issue": "Section title spacing",
+      "description": "Title spacing could be tighter on mobile",
+      "priority": "LOW",
+      "suggested_fix": "mb-3 sm:mb-6",
+      "impact": "Minor spacing optimization"
+    },
+    {
+      "file": "UserProfile.js",
+      "line": 290,
+      "issue": "Form section spacing",
+      "description": "Section spacing not optimized",
+      "priority": "LOW",
+      "suggested_fix": "gap-3 sm:gap-4",
+      "impact": "Minor spacing inconsistency"
+    },
+    {
+      "file": "WeatherAdvisor.js",
+      "line": 150,
+      "issue": "Advisory text size",
+      "description": "Advisory description text sizing",
+      "priority": "LOW",
+      "suggested_fix": "text-sm sm:text-base",
+      "impact": "Text sizing slightly inconsistent"
+    },
+    {
+      "file": "YieldPrediction.js",
+      "line": 700,
+      "issue": "Results section margin",
+      "description": "mt-6 could be mt-4 on mobile",
+      "priority": "LOW",
+      "suggested_fix": "mt-4 sm:mt-6",
+      "impact": "Minor margin optimization"
+    }
+  ],
+  "common_patterns": {
+    "missing_responsive_classes": [
+      "grid-cols-* without sm: breakpoint",
+      "max-w-* not specified for small screens",
+      "fixed padding (px-6 py-4) without sm: variants",
+      "flex layouts without flex-col sm:flex-row",
+      "absolute positioned elements without hidden sm:absolute",
+      "Icon sizes (w-* h-*) without responsive variants"
+    ],
+    "frequently_affected_areas": [
+      "Grid layouts (58 issues)",
+      "Form inputs (24 issues)",
+      "Tables and data display (18 issues)",
+      "Navigation and tabs (15 issues)",
+      "Cards and containers (14 issues)",
+      "Charts and visualizations (12 issues)",
+      "Modals and dialogs (8 issues)"
+    ],
+    "tailwind_misuse": [
+      "Using fixed widths without max-w constraints",
+      "Not using responsive prefixes consistently",
+      "Missing text-xs/text-sm variants for mobile",
+      "Absolute positioning without mobile consideration",
+      "Overflow-x-auto without proper mobile layout strategy",
+      "Not using hidden/block for responsive visibility",
+      "Fixed heights without responsive sizing"
+    ]
+  },
+  "recommended_fixes_by_priority": {
+    "step_1_critical_12_issues": [
+      "Add grid-cols-1 base + sm: breakpoint to ALL grid layouts",
+      "Ensure max-w-full or max-w-sm for modal/card containers",
+      "Hide decorative absolute elements on mobile with hidden sm:absolute",
+      "Convert fixed-width tables to overflow-x-auto or card layout on mobile",
+      "Add responsive flex-direction (flex-col sm:flex-row) to layout components",
+      "Ensure all SVG/chart containers recalculate dimensions on resize",
+      "Test all components at 320px, 375px, 425px widths"
+    ],
+    "step_2_high_priority_28_issues": [
+      "Add sm: responsive variants to ALL padding (px-*, py-*)",
+      "Ensure touch targets are minimum 44px (p-2 = 32px, p-2.5 = 40px, p-3 = 48px)",
+      "Review and adjust grid column counts for tablet sizes",
+      "Convert any multi-column layouts to responsive with gap adjustment",
+      "Test button/input interactions on actual mobile devices",
+      "Ensure text is readable at 12px minimum (text-xs = 12px)",
+      "Add max-w constraints to long-text elements"
+    ],
+    "step_3_medium_priority_35_issues": [
+      "Optimize font sizes with responsive variants (text-xs sm:text-sm)",
+      "Review and adjust vertical spacing (gap, margin) for mobile",
+      "Ensure images have responsive sizing (max-w-full object-cover)",
+      "Test image layouts on various aspect ratios",
+      "Verify text truncation with line-clamp utilities",
+      "Check form input widths and heights on mobile",
+      "Optimize icon sizes for touch interaction (w-5 h-5 minimum for tappable)"
+    ],
+    "step_4_low_priority_12_issues": [
+      "Fine-tune spacing and padding on mobile vs desktop",
+      "Optimize animation timing for mobile devices",
+      "Improve scroll experience with snap-scroll or indicators",
+      "Add haptic feedback considerations for mobile",
+      "Test performance on slower connections",
+      "Verify accessibility on mobile screen readers"
+    ]
+  },
+  "testing_checklist": {
+    "device_sizes_to_test": [
+      "320px (iPhone SE, older phones)",
+      "375px (iPhone 12/13 base)",
+      "425px (iPhone 14 Pro)",
+      "480px (Pixel 6)",
+      "600px (iPad mini portrait)",
+      "768px (Tablet portrait)",
+      "1024px (Tablet landscape / Desktop)",
+      "1440px (Desktop)"
+    ],
+    "manual_testing_points": [
+      "All grids stack to single column",
+      "No horizontal scrolling needed",
+      "All buttons/inputs are tappable (44px minimum)",
+      "Text is readable (12px minimum)",
+      "Images fit within viewport",
+      "Modals fit on screen without cutoff",
+      "Navigation is accessible",
+      "Forms are usable",
+      "Tables display correctly (or as cards)",
+      "Charts are visible and readable"
+    ],
+    "automated_checks": [
+      "Run Tailwind CSS coverage analysis",
+      "Check for unused responsive classes",
+      "Validate no inline style-based sizing",
+      "Verify all text has appropriate contrast",
+      "Test with Lighthouse mobile audit",
+      "Run responsive design mode in DevTools",
+      "Test touch interactions with emulation"
+    ]
+  },
+  "implementation_guide": {
+    "quick_wins_order": [
+      "1. Fix critical grid layouts (AIDoctor, OfficerDashboard, Marketplace)",
+      "2. Add responsive padding variants to all containers",
+      "3. Hide decorative elements on mobile",
+      "4. Ensure touch targets are 44px minimum",
+      "5. Fix table/chart layouts for mobile",
+      "6. Test all components at multiple screen sizes",
+      "7. Fix remaining high-priority layout issues",
+      "8. Optimize spacing and sizing"
+    ],
+    "refactoring_strategy": [
+      "Use search/replace to add responsive classes in batches",
+      "Create a mobile-first Tailwind configuration",
+      "Establish component-level responsive guidelines",
+      "Build a responsive utility class reference",
+      "Create reusable mobile menu/navigation component",
+      "Test during development, not after",
+      "Document all responsive patterns used"
+    ],
+    "tailwind_best_practices": [
+      "Always start with mobile-first approach",
+      "Use consistent responsive breakpoints (sm:, md:, lg:)",
+      "Apply max-w-* to containers for consistency",
+      "Use w-full with max-w constraint, not fixed widths",
+      "Ensure padding scales: p-3 sm:p-4 md:p-6",
+      "Grid: grid-cols-1 sm:grid-cols-2 md:grid-cols-3 (pattern)",
+      "Flex: flex-col sm:flex-row for wrapping layouts",
+      "Always include touch target sizing (44px minimum)"
+    ]
+  },
+  "metrics": {
+    "responsive_score_by_component_type": {
+      "Forms": "35%",
+      "Grids": "40%",
+      "Tables": "20%",
+      "Cards": "60%",
+      "Navigation": "45%",
+      "Charts": "35%",
+      "Modals": "50%",
+      "Buttons": "65%"
+    },
+    "estimated_fix_time": {
+      "critical_issues": "8-12 hours",
+      "high_priority_issues": "12-16 hours",
+      "medium_priority_issues": "16-20 hours",
+      "low_priority_issues": "4-6 hours",
+      "testing": "10-15 hours",
+      "total_estimate": "50-70 hours"
+    }
+  },
+  "conclusion": {
+    "summary": "The Govi-Isuru application has significant mobile responsiveness gaps affecting 87 components/areas. Critical issues involve missing responsive breakpoints on grid layouts, fixed widths, and absolute positioning that breaks on mobile. The application needs systematic refactoring using mobile-first Tailwind approach.",
+    "overall_mobile_readiness": "Poor (45%) - Requires substantial work before mobile production release",
+    "recommendation": "Implement fixes in priority order: Critical (12) → High (28) → Medium (35) → Low (12). Focus on grid systems, touch targets, and spacing first. Estimate 50-70 hours of development + testing time."
+  }
+}
