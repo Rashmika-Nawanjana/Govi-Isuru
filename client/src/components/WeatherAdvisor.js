@@ -32,7 +32,7 @@ const WeatherAdvisor = ({ lat, lon, lang, user }) => {
       }
     };
     fetchAllWeather();
-  }, [lat, lon, API_KEY]);
+  }, [lat, lon]);
 
   if (!weather) return (
     <div className="p-10 text-center">
