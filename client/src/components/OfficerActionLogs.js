@@ -155,7 +155,7 @@ const OfficerActionLogs = ({ user, language = 'en', refreshTrigger = 0 }) => {
         params.actionType = filter;
       }
       
-      const response = await axios.get(`${API_BASE}/api/officer/action-logs`, {
+      const response = await axios.get(`${API_BASE}/officer/action-logs`, {
         headers: { Authorization: `Bearer ${getToken()}` },
         params
       });

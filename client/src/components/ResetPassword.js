@@ -124,7 +124,7 @@ const ResetPassword = ({ switchToLogin, lang }) => {
     setLoading(true);
     
     try {
-      await axios.post(`${API_BASE}/api/auth/reset-password`, { 
+      await axios.post(`${API_BASE}/auth/reset-password`, { 
         token, 
         password 
       });

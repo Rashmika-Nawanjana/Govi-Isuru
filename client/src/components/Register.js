@@ -102,7 +102,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
     }
 
     try {
-      const res = await axios.post(`${API_BASE}/api/auth/register`, formData);
+      const res = await axios.post(`${API_BASE}/auth/register`, formData);
       // Registration successful - show verification message
       setRegisteredEmail(formData.email);
       setRegistrationComplete(true);

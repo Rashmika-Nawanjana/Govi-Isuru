@@ -446,7 +446,7 @@ export default function CropChatbot({ lang = 'en' }) {
       // Add current message to history
       history.push({ role: 'user', content: text.trim() });
 
-      const response = await axios.post(`${API_BASE}/api/chatbot/chat`, {
+      const response = await axios.post(`${API_BASE}/chatbot/chat`, {
         message: text.trim(),
         language: lang,
         history: history.slice(-10) // Send last 10 messages for context

@@ -107,7 +107,7 @@ const OfficerDashboard = ({ user, language = 'en', initialTab = 'overview' }) =>
 
   const fetchVerificationStats = async () => {
     try {
-      const response = await axios.get(`${API_BASE}/api/officer/stats`, {
+      const response = await axios.get(`${API_BASE}/officer/stats`, {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       setVerificationStats(response.data.stats);
@@ -119,7 +119,7 @@ const OfficerDashboard = ({ user, language = 'en', initialTab = 'overview' }) =>
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE}/api/alerts/outbreak-summary`, {
+      const response = await axios.get(`${API_BASE}/alerts/outbreak-summary`, {
         params: { 
           district: user?.district,
           days: 30

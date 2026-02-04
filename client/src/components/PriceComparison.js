@@ -10,7 +10,7 @@ const PriceComparison = ({ lang }) => {
     const [selectedCrop, setSelectedCrop] = useState('Rice');
 
     useEffect(() => {
-        axios.get(`${API_BASE}/api/market-prices`)
+        axios.get(`${API_BASE}/market-prices`)
             .then(res => setData(res.data))
             .catch(err => console.log(err));
     }, []);

@@ -120,7 +120,7 @@ const OutbreakGrowthIndicators = ({ user, language = 'en' }) => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE}/api/analytics/growth-indicators`, {
+      const response = await axios.get(`${API_BASE}/analytics/growth-indicators`, {
         headers: { Authorization: `Bearer ${getToken()}` },
         params: { days }
       });

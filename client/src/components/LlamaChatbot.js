@@ -243,7 +243,7 @@ export default function LlamaChatbot({ lang = 'en' }) {
         content: msg.content,
       }));
 
-      const response = await axios.post(`${API_BASE}/api/llama-chatbot/chat`, {
+      const response = await axios.post(`${API_BASE}/llama-chatbot/chat`, {
         message: userMessage.content,
         history: history,
         options: {

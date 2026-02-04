@@ -205,7 +205,7 @@ const ReportVerificationPanel = ({ user, language = 'en', onActionTaken }) => {
   const fetchReports = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE}/api/officer/reports`, {
+      const response = await axios.get(`${API_BASE}/officer/reports`, {
         headers: { Authorization: `Bearer ${getToken()}` },
         params: { 
           status: filter !== 'all' ? filter : undefined,
@@ -223,7 +223,7 @@ const ReportVerificationPanel = ({ user, language = 'en', onActionTaken }) => {
   // Fetch stats
   const fetchStats = async () => {
     try {
-      const response = await axios.get(`${API_BASE}/api/officer/stats`, {
+      const response = await axios.get(`${API_BASE}/officer/stats`, {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       setStats(response.data.stats);
@@ -242,7 +242,7 @@ const ReportVerificationPanel = ({ user, language = 'en', onActionTaken }) => {
     try {
       setActionLoading(reportId);
       await axios.put(
-        `${API_BASE}/api/officer/reports/${reportId}/status`,
+        `${API_BASE}/officer/reports/${reportId}/status`,
         { status: newStatus, reason },
         { headers: { Authorization: `Bearer ${getToken()}` } }
       );
@@ -252,7 +252,7 @@ const ReportVerificationPanel = ({ user, language = 'en', onActionTaken }) => {
         try {
           const report = reports.find(r => r._id === reportId);
           await axios.post(
-            `${API_BASE}/api/officer-workflow/field-visits`,
+            `${API_BASE}/officer-workflow/field-visits`,
             {
               reportId,
               purpose: `Verify disease report: ${report?.disease || 'Unknown disease'}`,
@@ -293,7 +293,7 @@ const ReportVerificationPanel = ({ user, language = 'en', onActionTaken }) => {
     try {
       setActionLoading(reportId);
       await axios.put(
-        `${API_BASE}/api/officer/reports/${reportId}/priority`,
+        `${API_BASE}/officer/reports/${reportId}/priority`,
         { priority: newPriority },
         { headers: { Authorization: `Bearer ${getToken()}` } }
       );
@@ -312,7 +312,7 @@ const ReportVerificationPanel = ({ user, language = 'en', onActionTaken }) => {
   const fetchHistory = async (reportId) => {
     try {
       const response = await axios.get(
-        `${API_BASE}/api/officer/report/${reportId}/history`,
+        `${API_BASE}/officer/report/${reportId}/history`,
         { headers: { Authorization: `Bearer ${getToken()}` } }
       );
       setReportHistory(response.data.history || []);

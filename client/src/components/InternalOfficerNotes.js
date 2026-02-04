@@ -135,10 +135,10 @@ const InternalOfficerNotes = ({ user, language = 'en' }) => {
     try {
       setLoading(true);
       const [entitiesRes, statsRes] = await Promise.all([
-        axios.get(`${API_BASE}/api/officer-workflow/flagged-entities`, {
+        axios.get(`${API_BASE}/officer-workflow/flagged-entities`, {
           headers: { Authorization: `Bearer ${getToken()}` }
         }),
-        axios.get(`${API_BASE}/api/officer-workflow/internal-notes/stats`, {
+        axios.get(`${API_BASE}/officer-workflow/internal-notes/stats`, {
           headers: { Authorization: `Bearer ${getToken()}` }
         })
       ]);
@@ -164,7 +164,7 @@ const InternalOfficerNotes = ({ user, language = 'en' }) => {
 
     try {
       await axios.post(
-        `${API_BASE}/api/officer-workflow/internal-notes`,
+        `${API_BASE}/officer-workflow/internal-notes`,
         {
           ...newNote,
           targetId: newNote.targetId || '000000000000000000000000' // Placeholder for farmer/location notes

@@ -183,10 +183,10 @@ const PriorityAlerts = ({ user, language = 'en', onViewReport }) => {
       
       // Fetch reports grouped by priority
       const [reportsRes, escalationsRes] = await Promise.all([
-        axios.get(`${API_BASE}/api/officer/reports`, {
+        axios.get(`${API_BASE}/officer/reports`, {
           headers: { Authorization: `Bearer ${getToken()}` }
         }),
-        axios.get(`${API_BASE}/api/officer/escalations`, {
+        axios.get(`${API_BASE}/officer/escalations`, {
           headers: { Authorization: `Bearer ${getToken()}` }
         }).catch(() => ({ data: { escalations: [] } }))
       ]);

@@ -104,7 +104,7 @@ const OutbreakGraph = ({ user, language = 'en' }) => {
       if (filters.disease !== 'all') params.append('disease', filters.disease);
       if (user?.district) params.append('district', user.district);
 
-      const response = await axios.get(`${API_BASE}/api/alerts/timeseries?${params}`);
+      const response = await axios.get(`${API_BASE}/alerts/timeseries?${params}`);
       setTimeSeriesData(response.data);
       setError(null);
     } catch (err) {

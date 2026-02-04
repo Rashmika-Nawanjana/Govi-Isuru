@@ -164,17 +164,17 @@ const CommunityAlerts = ({ user, language = 'en' }) => {
     try {
       setLoading(true);
       const [alertsRes, notifRes, statsRes] = await Promise.all([
-        axios.get(`${API_BASE}/api/alerts/active`, {
+        axios.get(`${API_BASE}/alerts/active`, {
           params: {
             gnDivision: user.gnDivision,
             dsDivision: user.dsDivision,
             district: user.district
           }
         }),
-        axios.get(`${API_BASE}/api/alerts/notifications`, {
+        axios.get(`${API_BASE}/alerts/notifications`, {
           params: { gnDivision: user.gnDivision }
         }),
-        axios.get(`${API_BASE}/api/alerts/stats`, {
+        axios.get(`${API_BASE}/alerts/stats`, {
           params: { district: user.district }
         })
       ]);

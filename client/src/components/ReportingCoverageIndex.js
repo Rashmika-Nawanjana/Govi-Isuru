@@ -132,7 +132,7 @@ const ReportingCoverageIndex = ({ user, language = 'en' }) => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE}/api/analytics/coverage-index`, {
+      const response = await axios.get(`${API_BASE}/analytics/coverage-index`, {
         headers: { Authorization: `Bearer ${getToken()}` },
         params: { days }
       });

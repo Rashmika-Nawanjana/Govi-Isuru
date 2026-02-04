@@ -134,11 +134,11 @@ const FieldVisitScheduling = ({ user, language = 'en' }) => {
     try {
       setLoading(true);
       const [visitsRes, statsRes] = await Promise.all([
-        axios.get(`${API_BASE}/api/officer-workflow/field-visits`, {
+        axios.get(`${API_BASE}/officer-workflow/field-visits`, {
           headers: { Authorization: `Bearer ${getToken()}` },
           params: { status: filter !== 'all' ? filter : undefined }
         }),
-        axios.get(`${API_BASE}/api/officer-workflow/field-visit-stats`, {
+        axios.get(`${API_BASE}/officer-workflow/field-visit-stats`, {
           headers: { Authorization: `Bearer ${getToken()}` }
         })
       ]);
@@ -159,7 +159,7 @@ const FieldVisitScheduling = ({ user, language = 'en' }) => {
   const updateStatus = async (visitId, status) => {
     try {
       await axios.put(
-        `${API_BASE}/api/officer-workflow/field-visits/${visitId}/status`,
+        `${API_BASE}/officer-workflow/field-visits/${visitId}/status`,
         { status },
         { headers: { Authorization: `Bearer ${getToken()}` } }
       );
@@ -175,7 +175,7 @@ const FieldVisitScheduling = ({ user, language = 'en' }) => {
     
     try {
       await axios.post(
-        `${API_BASE}/api/officer-workflow/field-visits/${visitId}/notes`,
+        `${API_BASE}/officer-workflow/field-visits/${visitId}/notes`,
         { note: newNote },
         { headers: { Authorization: `Bearer ${getToken()}` } }
       );
@@ -191,7 +191,7 @@ const FieldVisitScheduling = ({ user, language = 'en' }) => {
   const saveFindings = async (visitId) => {
     try {
       await axios.put(
-        `${API_BASE}/api/officer-workflow/field-visits/${visitId}/findings`,
+        `${API_BASE}/officer-workflow/field-visits/${visitId}/findings`,
         findings,
         { headers: { Authorization: `Bearer ${getToken()}` } }
       );

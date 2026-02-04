@@ -213,7 +213,7 @@ const DiseaseHeatmap = ({ user, language = 'en' }) => {
       if (filters.severity !== 'all') params.append('severity', filters.severity);
       // Don't filter by district to show island-wide data
 
-      const response = await axios.get(`${API_BASE}/api/alerts/heatmap?${params}`);
+      const response = await axios.get(`${API_BASE}/alerts/heatmap?${params}`);
       let data = response.data.data || [];
       
       // If data has no coordinates, assign district coordinates

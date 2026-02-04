@@ -44,7 +44,7 @@ const VerifyEmail = ({ switchToLogin, lang }) => {
       }
 
       try {
-        await axios.get(`${API_BASE}/api/auth/verify-email/${token}`);
+        await axios.get(`${API_BASE}/auth/verify-email/${token}`);
         setVerified(true);
       } catch (err) {
         setError(err.response?.data?.msg || 'Verification failed');

@@ -82,7 +82,7 @@ const FeedbackForm = ({
 
       const token = localStorage.getItem('token');
       await axios.post(
-        `${API_BASE}/api/reputation/feedback`,
+        `${API_BASE}/reputation/feedback`,
         {
           listing_id: listing._id,
           farmer_id: listing.farmer_id?._id || listing.farmer_id,
