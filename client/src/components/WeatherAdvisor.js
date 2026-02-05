@@ -63,29 +63,29 @@ const WeatherAdvisor = ({ lat, lon, lang, user }) => {
           <h3 className="text-lg font-bold">{lang === 'si' ? 'වත්මන් තත්ත්වය' : 'Current Weather'}</h3>
         </div>
         
-        <div className="p-6">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
+        <div className="p-4 md:p-6">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            <div className="flex items-center gap-3 md:gap-4">
               <img 
                 src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} 
                 alt="weather" 
-                className="w-20 h-20"
+                className="w-16 h-16 md:w-20 md:h-20 flex-shrink-0"
               />
               <div>
-                <p className="text-5xl font-black text-gray-800">{Math.round(weather.main.temp)}°C</p>
-                <p className="text-gray-500 capitalize font-medium">{weather.weather[0].description}</p>
+                <p className="text-4xl md:text-5xl font-black text-gray-800">{Math.round(weather.main.temp)}°C</p>
+                <p className="text-xs md:text-sm text-gray-500 capitalize font-medium">{weather.weather[0].description}</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-orange-50 px-4 py-3 rounded-xl border border-orange-100 text-center">
-                <Droplets size={18} className="text-blue-500 mx-auto mb-1"/>
-                <p className="text-xs text-gray-500">Humidity</p>
-                <p className="text-lg font-bold text-gray-800">{weather.main.humidity}%</p>
+            <div className="grid grid-cols-2 gap-2 md:gap-3">
+              <div className="bg-orange-50 px-3 py-2 md:px-4 md:py-3 rounded-xl border border-orange-100 text-center">
+                <Droplets size={16} className="text-blue-500 mx-auto mb-1"/>
+                <p className="text-[10px] md:text-xs text-gray-500">Humidity</p>
+                <p className="text-base md:text-lg font-bold text-gray-800">{weather.main.humidity}%</p>
               </div>
-              <div className="bg-blue-50 px-4 py-3 rounded-xl border border-blue-100 text-center">
-                <Wind size={18} className="text-blue-400 mx-auto mb-1"/>
-                <p className="text-xs text-gray-500">Wind</p>
-                <p className="text-lg font-bold text-gray-800">{weather.wind.speed} m/s</p>
+              <div className="bg-blue-50 px-3 py-2 md:px-4 md:py-3 rounded-xl border border-blue-100 text-center">
+                <Wind size={16} className="text-blue-400 mx-auto mb-1"/>
+                <p className="text-[10px] md:text-xs text-gray-500">Wind</p>
+                <p className="text-base md:text-lg font-bold text-gray-800">{weather.wind.speed} m/s</p>
               </div>
             </div>
           </div>

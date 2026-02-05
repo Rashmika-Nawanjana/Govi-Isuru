@@ -213,7 +213,7 @@ const AIDoctor = ({ lang, user }) => {
         <p className="text-[10px] md:text-sm text-slate-500 mt-0.5">{text.subtitle}</p>
       </div>
 
-      {/* Crop Type Selector - Tight Mobile Layout */}
+      {/* Crop Type Selector - Show Names with Emojis */}
       <div className="mb-2 md:mb-4">
         <label className="block text-[10px] md:text-sm font-semibold text-gray-700 mb-1.5 px-0.5">{text.selectCrop}</label>
         <div className="grid grid-cols-3 gap-1.5 md:gap-3">{/* Rice Button */}
@@ -229,8 +229,8 @@ const AIDoctor = ({ lang, user }) => {
               <Leaf className="h-3.5 w-3.5 md:h-5 md:w-5" />
             </div>
             <div className="text-center">
-              <div className={`font-semibold text-[9px] md:text-sm ${cropType === 'rice' ? 'text-green-700' : 'text-slate-700'}`}>
-                🌾
+              <div className={`font-semibold text-[10px] md:text-sm ${cropType === 'rice' ? 'text-green-700' : 'text-slate-700'}`}>
+                🌾 {text.rice}
               </div>
             </div>
           </button>
@@ -248,8 +248,8 @@ const AIDoctor = ({ lang, user }) => {
               <Coffee className="h-3.5 w-3.5 md:h-5 md:w-5" />
             </div>
             <div className="text-center">
-              <div className={`font-semibold text-[9px] md:text-sm ${cropType === 'tea' ? 'text-green-700' : 'text-slate-700'}`}>
-                🍵
+              <div className={`font-semibold text-[10px] md:text-sm ${cropType === 'tea' ? 'text-green-700' : 'text-slate-700'}`}>
+                🍵 {text.tea}
               </div>
             </div>
           </button>
@@ -267,8 +267,8 @@ const AIDoctor = ({ lang, user }) => {
               <Flame className="h-3.5 w-3.5 md:h-5 md:w-5" />
             </div>
             <div className="text-center">
-              <div className={`font-semibold text-[9px] md:text-sm ${cropType === 'chili' ? 'text-red-700' : 'text-slate-700'}`}>
-                🌶️
+              <div className={`font-semibold text-[10px] md:text-sm ${cropType === 'chili' ? 'text-red-700' : 'text-slate-700'}`}>
+                🌶️ {text.chili}
               </div>
             </div>
           </button>
