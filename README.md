@@ -1,29 +1,64 @@
 # 🌾 Govi Isuru - Smart Farming Platform for Sri Lanka
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![React](https://img.shields.io/badge/React-19.x-blue.svg)](https://reactjs.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-Python-green.svg)](https://fastapi.tiangolo.com/)
-[![Node.js](https://img.shields.io/badge/Node.js-Express-brightgreen.svg)](https://nodejs.org/)
-[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://tensorflow.org/)
+[![React](https://img.shields.io/badge/React-19.2.3-blue.svg)](https://reactjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green.svg)](https://fastapi.tiangolo.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-22.x-brightgreen.svg)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-5.2.1-lightgrey.svg)](https://expressjs.com/)
+[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.20.0-orange.svg)](https://tensorflow.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green.svg)](https://www.mongodb.com/atlas)
+[![Docker](https://img.shields.io/badge/Docker-Enabled-blue.svg)](https://www.docker.com/)
 
 **Govi Isuru** (Sinhala: ගොවි ඉසුරු) is a comprehensive digital farming platform designed to empower Sri Lankan farmers with AI-driven crop disease detection, real-time market intelligence, weather advisory, community disease alerts, and a peer-to-peer marketplace. The name "Govi Isuru" translates to "Farmer's Fortune" in Sinhala, reflecting our mission to bring prosperity to the agricultural community.
+
+🌟 **Key Statistics:**
+- 🤖 **3 ML Models** - Rice (8 classes), Tea (5 classes), Chili (4 classes)
+- 📊 **10 Years** of yield prediction data (2015-2024)
+- 🗺️ **25 Districts** covered across Sri Lanka
+- 🌐 **Full Bilingual** support (English & Sinhala)
+- 👥 **3 User Roles** - Farmers, Buyers, Government Officers
+- 🎯 **40+ Components** - Comprehensive feature set
 
 ---
 
 ## 📋 Table of Contents
 
 - [Features](#-features)
+  - [AI Crop Doctor](#-ai-crop-doctor-with-grad-cam-explainability)
+  - [Agricultural News](#-agricultural-news-feed-with-ai-features)
+  - [Community Alerts](#-community-disease-alert-system)
+  - [Market Intelligence](#-market-intelligence-dashboard)
+  - [Marketplace](#-agrolink-marketplace-with-reputation-system)
+  - [Weather Advisory](#-weather-advisory)
+  - [Yield Prediction](#-yield-prediction--analytics)
+  - [AI Chatbot](#-ai-crop-chatbot-with-advanced-features)
+  - [Crop Suitability](#-crop-suitability-advisor)
+  - [Traditional Rice Guide](#-traditional-rice-varieties-guide)
+  - [User System](#-user-authentication--profiles)
+  - [Government Officer Features](#-government-officer-features)
+  - [Buyer Dashboard](#-buyer-dashboard)
 - [Tech Stack](#-tech-stack)
 - [Architecture](#-architecture)
 - [Getting Started](#-getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Quick Start Guide](#quick-start-guide)
+  - [Development Setup](#development-setup)
+  - [Docker Deployment](#-docker-deployment)
 - [Project Structure](#-project-structure)
 - [API Documentation](#-api-documentation)
 - [AI Model Information](#-ai-model-information)
 - [Environment Variables](#-environment-variables)
-- [Docker & Deployment](#-docker--deployment)
+- [Testing](#-testing)
+- [Deployment](#-deployment)
 - [Screenshots](#-screenshots)
+- [Key Innovations](#-key-innovations)
 - [Contributing](#-contributing)
+- [Troubleshooting](#-troubleshooting)
+- [FAQ](#-faq)
+- [Roadmap](#-future-roadmap)
 - [License](#-license)
+- [Authors](#-authors)
+- [Contact](#-contact)
 
 ---
 
@@ -149,6 +184,39 @@
 - **Sinhala Unicode Support**: Complete Sinhala text rendering
 - **Localized Terminology**: Culturally appropriate agricultural terms
 
+### 🌱 Crop Suitability Advisor
+- **ML-Powered Recommendations**: Find best-fit crops for your land based on:
+  - Soil type, pH level, and drainage
+  - Climate zone and rainfall patterns
+  - Temperature ranges and irrigation availability
+  - District and seasonal considerations
+- **Comprehensive Analysis**: Evaluates soil properties, topography, and environmental factors
+- **Confidence Scoring**: Each recommendation includes suitability percentage
+- **Multi-Crop Support**: Recommendations for rice, tea, chili, and other major crops
+- **Interactive Form**: Easy-to-use interface with dropdown selections
+
+### 🌾 Traditional Rice Varieties Guide
+- **Comprehensive Database**: 20+ traditional and modern Sri Lankan rice varieties including:
+  - Samba, Keeri Samba, Suwandel, Madathawalu, Kalu Heenati, Rathdhal
+  - Bg varieties (Bg 300, Bg 352, Bg 357, Bg 366, At 362, At 405)
+- **Detailed Information**:
+  - Growth duration and suitable climate zones
+  - Disease susceptibility and prevention methods
+  - Nutrition requirements and fertilizer schedules
+  - Harvesting guidelines and post-harvest care
+  - Special features and traditional uses
+- **Search & Filter**: Find varieties by name, type (traditional/modern), or category
+- **Expandable Details**: Click to view comprehensive farming guides
+- **Bilingual Content**: Full English and Sinhala support
+
+### 🛍️ Buyer Dashboard
+- **Buyer-Specific Interface**: Dedicated dashboard for agricultural product buyers
+- **Quick Actions**: Browse marketplace, view agricultural news
+- **Saved Listings**: Bookmark interesting products for later (coming soon)
+- **Price Alerts**: Get notified about price drops (beta feature)
+- **Seller Discovery**: Find trusted sellers with high ratings
+- **Market Insights**: Access to market trends and price analytics
+
 ---
 
 ## **Government Officer Features**
@@ -172,33 +240,62 @@
 
 ## 🛠️ Tech Stack
 
-### Frontend
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| React | 19.x | UI Framework with Hooks |
-| Tailwind CSS | 3.4.x | Utility-first Styling |
-| Lucide React | Latest | Icon Library |
-| Recharts | 3.6.x | Data Visualization |
-| Axios | 1.13.x | HTTP Client |
+### Frontend (React)
+| Technology | Version | Purpose | Key Features |
+|------------|---------|---------|--------------|
+| React | 19.2.3 | UI Framework | Hooks, Context API, Virtual DOM |
+| React Router DOM | 7.13.0 | Client Routing | Dynamic routing, URL parameters |
+| Tailwind CSS | 3.4.1 | Utility Styling | Responsive, mobile-first design |
+| Lucide React | 0.561.0 | Icon Library | 1000+ icons, tree-shakeable |
+| Recharts | 3.6.0 | Charts & Analytics | Line, bar, area charts |
+| Axios | 1.13.2 | HTTP Client | API requests, interceptors |
+| PostCSS | 8.4.31 | CSS Processing | Autoprefixer, transformations |
 
 ### Backend (Node.js Server)
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| Node.js | 22.x | Runtime Environment |
-| Express | 5.x | Web Framework |
-| MongoDB | Atlas | Cloud Database |
-| Mongoose | 9.x | ODM for MongoDB |
-| JWT | 9.x | Authentication |
-| Bcrypt.js | 3.x | Password Hashing |
+| Technology | Version | Purpose | Key Features |
+|------------|---------|---------|--------------|
+| Node.js | 22.x | Runtime | Event-driven, non-blocking I/O |
+| Express | 5.2.1 | Web Framework | REST API, middleware support |
+| MongoDB Atlas | Cloud | Database | NoSQL, flexible schema, cloud |
+| Mongoose | 9.0.2 | MongoDB ODM | Schema validation, middleware |
+| JWT | 9.0.3 | Authentication | Stateless auth, token-based |
+| Bcrypt.js | 3.0.3 | Password Hashing | Secure password storage |
+| Nodemailer | 7.0.13 | Email Service | Verification, password reset |
+| Web Push | 3.6.7 | Push Notifications | Real-time alerts |
+| CORS | 2.8.5 | Cross-Origin | Enable cross-origin requests |
+| Dotenv | 17.2.3 | Environment Config | Secure configuration |
 
-### AI Service (Python)
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| FastAPI | Latest | High-performance API |
-| TensorFlow/Keras | 2.x | Deep Learning |
-| MobileNetV2 | Pre-trained | Base Model |
-| Grad-CAM | Custom | Model Explainability |
-| Pillow | Latest | Image Processing |
+### AI Service (Python/FastAPI)
+| Technology | Version | Purpose | Key Features |
+|------------|---------|---------|--------------|
+| FastAPI | 0.127.1 | API Framework | High performance, auto docs |
+| TensorFlow | 2.20.0 | Deep Learning | Model training & inference |
+| Keras | 3.13.0 | Neural Networks | High-level API for TensorFlow |
+| MobileNetV2 | Pre-trained | Base Model | Transfer learning, efficient |
+| NumPy | 2.2.6 | Numerical Computing | Array operations, linear algebra |
+| Pandas | 2.3.3 | Data Analysis | Yield data processing |
+| Scikit-learn | 1.8.0 | Machine Learning | Yield forecasting models |
+| OpenCV | 4.12.0 | Image Processing | Grad-CAM heatmap generation |
+| Pillow | 12.0.0 | Image Handling | Image loading, preprocessing |
+| Pydantic | 2.12.5 | Data Validation | Request/response validation |
+| Uvicorn | Latest | ASGI Server | Production-ready server |
+
+### External APIs & Services
+| Service | Purpose | Features |
+|---------|---------|----------|
+| OpenWeatherMap | Weather Data | 5-day forecast, current conditions |
+| NewsAPI.org | Agricultural News | Multi-category news aggregation |
+| MyMemory Translation | Sinhala Translation | AI-powered English to Sinhala |
+| Google Translate TTS | Text-to-Speech | Sinhala voice synthesis |
+| MongoDB Atlas | Cloud Database | Auto-scaling, backups, security |
+
+### DevOps & Deployment
+| Technology | Version | Purpose | Features |
+|------------|---------|---------|----------|
+| Docker | Latest | Containerization | Isolated environments |
+| Docker Compose | 3.8 | Orchestration | Multi-container management |
+| Nginx | Latest | Reverse Proxy | Load balancing, static files |
+| Git | 2.x | Version Control | Source code management |
 
 ---
 
@@ -948,6 +1045,288 @@ REACT_APP_WEATHER_KEY=your_openweathermap_api_key
 
 ### Weather Advisory
 *5-day weather forecast with agricultural recommendations*
+
+---
+
+## 🧪 Testing
+
+### Manual Testing
+```bash
+# Test Backend API Endpoints
+# Use Postman or curl to test:
+curl -X GET http://localhost:5000/api/listings
+curl -X POST http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"username":"test","password":"Test@1234",...}'
+
+# Test AI Service
+curl -X POST http://localhost:8000/predict/rice -F "file=@leaf_image.jpg"
+```
+
+### Frontend Testing
+```bash
+cd client
+npm test
+```
+
+### AI Model Testing
+```bash
+cd ai-service
+python test_model.py
+```
+
+### Test User Accounts
+Create test accounts with different roles to test functionality:
+- **Farmer Account**: Regular user with full feature access
+- **Officer Account**: Government officer with verification powers
+- **Buyer Account**: Buyer with marketplace focus
+
+---
+
+## 🚀 Deployment
+
+### Production Checklist
+- [ ] Update all API keys and secrets
+- [ ] Set strong JWT_SECRET (32+ characters)
+- [ ] Whitelist production IPs in MongoDB Atlas
+- [ ] Enable MongoDB backup and monitoring
+- [ ] Set up SSL/TLS certificates
+- [ ] Configure environment variables
+- [ ] Test all API endpoints
+- [ ] Enable CORS only for production domain
+- [ ] Set up monitoring and logging
+- [ ] Configure rate limiting
+- [ ] Enable database indexing for performance
+
+### Docker Production Deployment
+```bash
+# Build for production
+docker-compose -f docker-compose.prod.yml up -d
+
+# Check logs
+docker-compose logs -f
+
+# Scale services
+docker-compose up -d --scale backend=3
+```
+
+### Cloud Deployment Options
+
+#### AWS EC2
+1. Launch EC2 instance (t2.medium or higher recommended)
+2. Install Docker and Docker Compose
+3. Configure security groups (open ports 80, 443)
+4. Clone repository and set environment variables
+5. Run `docker-compose up -d`
+6. Configure Elastic IP for static address
+7. Set up CloudWatch for monitoring
+
+#### DigitalOcean
+1. Create Droplet (4GB RAM recommended)
+2. Install Docker
+3. Configure firewall rules
+4. Deploy using Docker Compose
+5. Set up managed MongoDB if not using Atlas
+6. Configure domain and SSL
+
+#### Heroku
+- Use Heroku Container Registry for Docker deployment
+- Set up MongoDB Atlas (Heroku doesn't provide MongoDB)
+- Configure environment variables in Heroku dashboard
+- Use Heroku CLI for deployment
+
+### Environment-Specific Configurations
+
+#### Development
+```env
+NODE_ENV=development
+DEBUG=true
+LOG_LEVEL=debug
+```
+
+#### Production
+```env
+NODE_ENV=production
+DEBUG=false
+LOG_LEVEL=error
+RATE_LIMIT_ENABLED=true
+```
+
+---
+
+## ❓ FAQ
+
+### General Questions
+
+**Q: Is Govi Isuru free to use?**
+A: Yes, completely free for all Sri Lankan farmers.
+
+**Q: Which crops are supported?**
+A: Currently supports Rice, Tea, and Chili for disease detection. Market data available for 20+ crops.
+
+**Q: Do I need internet connection?**
+A: Yes, currently requires internet. Offline mode is planned for future releases.
+
+**Q: Which browsers are supported?**
+A: Chrome, Firefox, Safari, Edge (latest versions). Mobile browsers fully supported.
+
+### Technical Questions
+
+**Q: Why is AI prediction slow?**
+A: First-time predictions load the model. Subsequent predictions are faster. Consider upgrading server resources.
+
+**Q: How accurate is the disease detection?**
+A: Rice: ~54%, Tea: varies by model. Grad-CAM visualization shows confidence areas.
+
+**Q: Can I use my own MongoDB instance?**
+A: Yes, update MONGO_URI in environment variables to point to your instance.
+
+**Q: How do I reset my password?**
+A: Use "Forgot Password" link on login page. Email verification required.
+
+### Troubleshooting Common Issues
+
+**Q: "Cannot connect to database" error**
+A: Check if MongoDB Atlas IP whitelist includes your IP. Verify MONGO_URI format.
+
+**Q: Images not uploading in AI Doctor**
+A: Check file size (max 10MB). Ensure AI service is running on port 8000.
+
+**Q: Weather data not loading**
+A: Verify REACT_APP_WEATHER_KEY is set correctly. Check OpenWeatherMap API quota.
+
+**Q: Sinhala text not displaying**
+A: Ensure browser supports Unicode. Try different browser.
+
+---
+
+## 🐛 Troubleshooting
+
+### Common Issues and Solutions
+
+#### Backend Issues
+
+**Port 5000 already in use**
+```bash
+# Windows
+netstat -ano | findstr :5000
+taskkill /PID <PID> /F
+
+# Linux/Mac
+lsof -i :5000
+kill -9 <PID>
+```
+
+**MongoDB Connection Failed**
+```bash
+# Check MongoDB Atlas
+- Verify IP whitelist (0.0.0.0/0 for testing)
+- Check username/password in connection string
+- Ensure database name is correct
+- Test connection using MongoDB Compass
+```
+
+**JWT Token Invalid**
+```bash
+# Clear browser localStorage
+localStorage.clear()
+
+# Regenerate JWT_SECRET in .env
+# Restart server
+```
+
+#### Frontend Issues
+
+**npm install fails**
+```bash
+# Clear npm cache
+npm cache clean --force
+
+# Delete node_modules and package-lock.json
+rm -rf node_modules package-lock.json
+
+# Reinstall
+npm install
+```
+
+**API calls failing (CORS errors)**
+```bash
+# Ensure backend CORS is configured
+# Check API_BASE URL in React app
+# Verify backend is running on correct port
+```
+
+#### AI Service Issues
+
+**TensorFlow not found**
+```bash
+# Ensure virtual environment is activated
+.\venv\Scripts\Activate.ps1  # Windows
+source venv/bin/activate     # Linux/Mac
+
+# Reinstall dependencies
+pip install -r requirements.txt
+```
+
+**Model files missing**
+```bash
+# Download pre-trained models
+# Or train models using train_model.py scripts
+python train_model.py
+python train_tea_model.py
+python train_chili_model.py
+```
+
+**Grad-CAM heatmap not generating**
+```bash
+# Check OpenCV installation
+pip install opencv-python==4.12.0.88
+
+# Verify image format (JPEG/PNG)
+# Check image size (recommended: 224x224)
+```
+
+#### Docker Issues
+
+**Docker containers not starting**
+```bash
+# Check Docker logs
+docker-compose logs
+
+# Rebuild containers
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+**Volume permission errors**
+```bash
+# Linux: Fix permissions
+sudo chown -R $USER:$USER .
+
+# Windows: Run Docker Desktop as Administrator
+```
+
+### Performance Optimization
+
+**Slow API responses**
+```bash
+# Enable MongoDB indexing
+# Add indexes to frequently queried fields:
+db.listings.createIndex({ farmer_id: 1, date: -1 })
+db.alerts.createIndex({ gnDivision: 1, district: 1, createdAt: -1 })
+
+# Use Redis for caching (future enhancement)
+```
+
+**Large bundle size (Frontend)**
+```bash
+# Analyze bundle
+npm run build
+# Use code splitting and lazy loading
+
+# Optimize images
+# Use WebP format
+# Compress assets
+```
 
 ---
 
