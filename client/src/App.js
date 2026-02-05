@@ -275,7 +275,10 @@ function MainApp() {
         
         {/* Back to Home button */}
         <button
-          onClick={() => setView('home')}
+          onClick={() => {
+            setView('home');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
           className="mt-6 text-white/80 hover:text-white text-sm font-medium transition-colors"
           style={{ position: 'relative', zIndex: 1 }}
         >

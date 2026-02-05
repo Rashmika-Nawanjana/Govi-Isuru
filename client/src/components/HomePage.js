@@ -31,6 +31,11 @@ const HomePage = ({ onLogin, onRegister }) => {
   const [scrollY, setScrollY] = useState(0);
   const [lang, setLang] = useState('en');
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
