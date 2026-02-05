@@ -40,36 +40,36 @@ const BuyerDashboard = ({ user, language = 'en', onNavigate }) => {
   const text = t[language] || t.en;
 
   return (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-emerald-500 rounded-2xl p-8 text-white shadow-xl">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div className="space-y-4 md:space-y-6">
+      <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-emerald-500 rounded-lg md:rounded-2xl p-4 md:p-8 text-white shadow-xl">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-4">
           <div>
-            <p className="text-sm text-white/80">{user?.username}</p>
-            <h1 className="text-3xl font-black">{text.title}</h1>
-            <p className="text-white/80 mt-1">{text.subtitle}</p>
+            <p className="text-xs md:text-sm text-white/80">{user?.username}</p>
+            <h1 className="text-xl md:text-3xl font-black">{text.title}</h1>
+            <p className="text-xs md:text-sm text-white/80 mt-0.5 md:mt-1">{text.subtitle}</p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2 md:gap-3">
             <button
               onClick={() => onNavigate && onNavigate('marketplace')}
-              className="bg-white/15 hover:bg-white/25 text-white px-4 py-2 rounded-xl flex items-center gap-2 backdrop-blur transition"
+              className="bg-white/15 hover:bg-white/25 active:scale-95 text-white px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm rounded-lg md:rounded-xl flex items-center gap-1 md:gap-2 backdrop-blur transition"
             >
-              <ShoppingBag size={18} /> {text.marketplace}
+              <ShoppingBag size={14} className="md:w-[18px] md:h-[18px]" /> {text.marketplace}
             </button>
             <button
               onClick={() => onNavigate && onNavigate('news')}
-              className="bg-white/15 hover:bg-white/25 text-white px-4 py-2 rounded-xl flex items-center gap-2 backdrop-blur transition"
+              className="bg-white/15 hover:bg-white/25 active:scale-95 text-white px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm rounded-lg md:rounded-xl flex items-center gap-1 md:gap-2 backdrop-blur transition"
             >
-              <Newspaper size={18} /> {text.news}
+              <Newspaper size={14} className="md:w-[18px] md:h-[18px]" /> {text.news}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Quick actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Quick actions - Mobile Responsive */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
         <button
           onClick={() => onNavigate && onNavigate('marketplace')}
-          className="p-4 rounded-xl border border-amber-200 bg-amber-50 hover:border-amber-300 hover:shadow-md transition text-left"
+          className="p-3 md:p-4 rounded-lg md:rounded-xl border border-amber-200 bg-amber-50 hover:border-amber-300 hover:shadow-md transition text-left active:scale-95"
         >
           <div className="flex items-center gap-2 mb-2">
             <Compass className="text-amber-600" size={18} />

@@ -165,38 +165,38 @@ const OfficerDashboard = ({ user, language = 'en', initialTab = 'overview' }) =>
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl shadow-lg p-8 text-white">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="space-y-4 md:space-y-6">
+      {/* Header - Mobile Optimized */}
+      <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg md:rounded-2xl shadow-lg p-4 md:p-8 text-white">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">{text.title}</h1>
-            <p className="text-blue-100 flex items-center gap-2">
-              <MapPin size={18} />
+            <h1 className="text-xl md:text-3xl font-bold mb-1 md:mb-2">{text.title}</h1>
+            <p className="text-xs md:text-sm text-blue-100 flex items-center gap-1 md:gap-2">
+              <MapPin size={14} className="md:w-[18px] md:h-[18px]" />
               {language === 'si' ? `${user.district} දිස්ත්‍රික්කය` : `${user.district} District`}
             </p>
           </div>
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all disabled:opacity-50 active:scale-95"
           >
-            <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
+            <RefreshCw size={14} className={`md:w-[18px] md:h-[18px] ${refreshing ? 'animate-spin' : ''}`} />
             {text.refresh}
           </button>
         </div>
       </div>
 
-      {/* Verification Stats Row */}
+      {/* Verification Stats Row - Mobile Responsive */}
       {verificationStats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl border border-yellow-200 p-4 shadow-sm">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+          <div className="bg-white rounded-lg md:rounded-xl border border-yellow-200 p-3 md:p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-yellow-600 font-medium">{text.pendingReview}</p>
-                <p className="text-2xl font-bold text-yellow-700">{verificationStats.pendingCount || 0}</p>
+                <p className="text-[10px] md:text-xs text-yellow-600 font-medium truncate">{text.pendingReview}</p>
+                <p className="text-lg md:text-2xl font-bold text-yellow-700">{verificationStats.pendingCount || 0}</p>
               </div>
-              <Clock className="text-yellow-500" size={24} />
+              <Clock className="text-yellow-500 flex-shrink-0" size={20} />
             </div>
           </div>
           <div className="bg-white rounded-xl border border-green-200 p-4 shadow-sm">
