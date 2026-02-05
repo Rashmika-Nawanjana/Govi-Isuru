@@ -165,14 +165,14 @@ const OfficerDashboard = ({ user, language = 'en', initialTab = 'overview' }) =>
   }
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      {/* Header - Mobile Optimized */}
-      <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg md:rounded-2xl shadow-lg p-4 md:p-8 text-white">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
+    <div className="space-y-2 md:space-y-6">
+      {/* Header - Tight Mobile Layout */}
+      <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg md:rounded-2xl shadow-lg p-3 md:p-8 text-white">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-4">
           <div>
-            <h1 className="text-xl md:text-3xl font-bold mb-1 md:mb-2">{text.title}</h1>
-            <p className="text-xs md:text-sm text-blue-100 flex items-center gap-1 md:gap-2">
-              <MapPin size={14} className="md:w-[18px] md:h-[18px]" />
+            <h1 className="text-base md:text-3xl font-bold mb-0.5 md:mb-2">{text.title}</h1>
+            <p className="text-[10px] md:text-sm text-blue-100 flex items-center gap-1 md:gap-2">
+              <MapPin size={12} className="md:w-[18px] md:h-[18px]" />
               {language === 'si' ? `${user.district} දිස්ත්‍රික්කය` : `${user.district} District`}
             </p>
           </div>

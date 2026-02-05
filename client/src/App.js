@@ -443,61 +443,85 @@ function MainApp() {
         </div>
       </nav>
 
-      {/* Main Content Area - Cleaner Mobile Layout */}
-      <main className="flex-1 overflow-y-auto bg-slate-50" style={{ position: 'relative', zIndex: 1 }}>
+      {/* Main Content Area - Full Mobile Layout */}
+      <main className="flex-1 overflow-y-auto bg-white" style={{ position: 'relative', zIndex: 1 }}>
         <div className="w-full h-full flex flex-col">
-          {/* Mobile Top Bar - Cleaner Design */}
-          <div className="md:hidden sticky top-0 z-20 bg-white shadow-sm">
-            <div className="flex items-center justify-between px-4 py-3">
+          {/* Mobile Top Bar - Minimal */}
+          <div className="md:hidden sticky top-0 z-20 bg-white shadow-sm border-b border-slate-100">
+            <div className="flex items-center justify-between px-3 py-2.5">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-green-600 rounded-lg">
+                <div className="p-1 bg-green-600 rounded-md">
                   <Leaf className="h-4 w-4 text-white" />
                 </div>
-                <span className="text-base font-bold text-green-900">{t.title}</span>
+                <span className="text-sm font-bold text-green-900">{t.title}</span>
               </div>
               <button
-                className="p-2 rounded-lg bg-green-50 hover:bg-green-100 transition-colors active:scale-95"
+                className="p-1.5 rounded-lg bg-green-50 hover:bg-green-100 transition-colors active:scale-95"
                 onClick={() => setIsSidebarOpen(true)}
                 aria-label="Open menu"
               >
-                <LayoutDashboard size={20} className="text-green-700" />
+                <LayoutDashboard size={18} className="text-green-700" />
               </button>
+            </div>
+            
+            {/* Mobile Horizontal Tabs - Scrollable */}
+            <div className="md:hidden overflow-x-auto px-3 py-2 border-t border-slate-100">
+              <div className="flex gap-2 min-w-min pb-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = view === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setView(item.id)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-medium transition-all active:scale-95 flex-shrink-0 ${
+                        isActive
+                          ? 'bg-green-600 text-white shadow-sm'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      <Icon size={14} />
+                      <span className="hidden xs:inline">{item.emoji}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          {/* Content Wrapper - Better Mobile Spacing */}
+          {/* Content Wrapper - Minimal Mobile Spacing */}
           <div className="flex-1 overflow-y-auto">
             <div className="w-full mx-auto">
-              {/* Welcome Header - Compact & Clean */}
-              <div className="bg-white border-b border-slate-100 px-4 py-3 md:m-4 md:rounded-xl md:border md:shadow-sm">
-                <div className="flex flex-col gap-2">
+              {/* Welcome Header - Super Compact Mobile */}
+              <div className="bg-slate-50 border-b border-slate-200 px-3 py-2 md:m-4 md:rounded-xl md:border md:shadow-sm">
+                <div className="flex flex-col gap-1">
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-slate-500">
+                      <p className="text-[10px] text-slate-500">
                         {lang === 'si' ? 'ආයුබෝවන්' : 'Welcome back'},
                       </p>
-                      <p className="text-lg md:text-xl font-bold text-slate-800 truncate">{user.username}</p>
+                      <p className="text-base md:text-xl font-bold text-slate-800 truncate">{user.username}</p>
                     </div>
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <div className="flex items-center gap-1 flex-shrink-0">
                       {user?.role === 'officer' ? (
-                        <span className="text-[10px] md:text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-semibold whitespace-nowrap">
-                          📍 {user.district}
+                        <span className="text-[9px] md:text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded-full font-semibold whitespace-nowrap">
+                          {user.district}
                         </span>
                       ) : (
-                        <span className="text-[10px] md:text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full font-semibold whitespace-nowrap max-w-[120px] truncate">
-                          📍 {user.gnDivision}
+                        <span className="text-[9px] md:text-xs bg-green-50 text-green-700 px-1.5 py-0.5 rounded-full font-semibold whitespace-nowrap max-w-[100px] truncate">
+                          {user.gnDivision}
                         </span>
                       )}
                     </div>
                   </div>
-                  <span className="text-[10px] md:text-xs text-slate-400 font-medium">
+                  <span className="text-[9px] md:text-xs text-slate-400 font-medium">
                     {new Date().toLocaleDateString(lang === 'si' ? 'si-LK' : 'en-LK', { weekday: 'short', day: 'numeric', month: 'short' })}
                   </span>
                 </div>
               </div>
 
-              {/* Main Content - Proper Padding */}
-              <div className="px-4 py-4 md:px-8 md:py-6 space-y-4 md:space-y-6">
+              {/* Main Content - Minimal Mobile Padding */}
+              <div className="px-3 py-3 md:px-8 md:py-6 space-y-3 md:space-y-6">
                 {/* Farmer Views */}
                 {(!user?.role || user?.role === 'farmer') && (
                   <>
