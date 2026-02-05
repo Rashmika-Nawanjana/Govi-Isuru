@@ -317,46 +317,46 @@ export default function LlamaChatbot({ lang = 'en' }) {
         </button>
       )}
 
-      {/* Chat Window */}
+      {/* Chat Window - Full Screen on Mobile */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-2xl shadow-2xl flex flex-col z-50 border border-slate-200 overflow-hidden">
+        <div className="fixed inset-0 md:bottom-6 md:right-6 md:top-auto md:left-auto md:w-96 md:h-[600px] w-full h-full bg-white md:rounded-2xl shadow-2xl flex flex-col z-50 border-0 md:border md:border-slate-200 overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-br from-emerald-500 via-green-500 to-emerald-600 text-white p-5 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="bg-white/20 backdrop-blur-sm p-2 rounded-xl">
-                <Sparkles size={20} className="drop-shadow-sm" />
+          <div className="bg-gradient-to-br from-emerald-500 via-green-500 to-emerald-600 text-white p-4 md:p-5 flex justify-between items-center">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="bg-white/20 backdrop-blur-sm p-1.5 md:p-2 rounded-lg md:rounded-xl">
+                <Sparkles size={18} className="md:w-5 md:h-5 drop-shadow-sm" />
               </div>
               <div>
-                <h3 className="font-bold text-lg drop-shadow-sm">AI Farming Assistant</h3>
-                <p className="text-xs text-emerald-50 flex items-center gap-1">
-                  <span className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></span>
+                <h3 className="font-bold text-base md:text-lg drop-shadow-sm">AI Farming Assistant</h3>
+                <p className="text-[10px] md:text-xs text-emerald-50 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-300 rounded-full animate-pulse"></span>
                   Powered by Llama 3.3
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 md:gap-2">
               {/* Language Toggle Button */}
               <button
                 onClick={() => setChatLang(chatLang === 'en' ? 'si' : 'en')}
-                className="hover:bg-white/20 backdrop-blur-sm p-2 rounded-xl transition-all duration-200 flex items-center gap-1.5 border border-white/10"
+                className="hover:bg-white/20 backdrop-blur-sm p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all duration-200 flex items-center gap-1 md:gap-1.5 border border-white/10"
                 aria-label="Toggle language"
                 title={chatLang === 'en' ? 'Switch to Sinhala' : 'Switch to English'}
               >
-                <Languages size={18} />
-                <span className="text-xs font-semibold">{chatLang === 'en' ? 'EN' : 'සිං'}</span>
+                <Languages size={16} className="md:w-[18px] md:h-[18px]" />
+                <span className="text-[10px] md:text-xs font-semibold">{chatLang === 'en' ? 'EN' : 'සිං'}</span>
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="hover:bg-white/20 backdrop-blur-sm p-2 rounded-xl transition-all duration-200 border border-white/10"
+                className="hover:bg-white/20 backdrop-blur-sm p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all duration-200 border border-white/10"
                 aria-label="Close chat"
               >
-                <X size={22} />
+                <X size={20} className="md:w-[22px] md:h-[22px]" />
               </button>
             </div>
           </div>
 
           {/* Messages Container */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gradient-to-b from-slate-50 to-white">
+          <div className="flex-1 overflow-y-auto p-3 md:p-5 space-y-3 md:space-y-4 bg-gradient-to-b from-slate-50 to-white">
             {messages.map((message, index) => (
               <div
                 key={index}
@@ -413,9 +413,9 @@ export default function LlamaChatbot({ lang = 'en' }) {
           </div>
 
           {/* Input Area */}
-          <div className="p-5 border-t border-slate-200 bg-white">
+          <div className="p-3 md:p-5 border-t border-slate-200 bg-white">
             {error && (
-              <div className="mb-3 text-xs text-red-700 bg-red-50 p-3 rounded-xl border border-red-200 flex items-start gap-2">
+              <div className="mb-2 md:mb-3 text-xs text-red-700 bg-red-50 p-2 md:p-3 rounded-xl border border-red-200 flex items-start gap-2">
                 <AlertTriangle size={14} className="mt-0.5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -433,7 +433,7 @@ export default function LlamaChatbot({ lang = 'en' }) {
                         ? 'ඔබගේ ප්‍රශ්නය ටයිප් කරන්න...'
                         : 'Type your question...')
                 }
-                className="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-slate-50 text-slate-800 placeholder-slate-400"
+                className="flex-1 px-3 md:px-4 py-2 md:py-3 text-sm md:text-base border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-slate-50 text-slate-800 placeholder-slate-400"
                 disabled={isLoading || isListening}
               />
               {/* Voice input - show on HTTPS or localhost/127.0.0.1 */}
@@ -447,28 +447,28 @@ export default function LlamaChatbot({ lang = 'en' }) {
                     isListening
                       ? 'bg-gradient-to-br from-red-500 to-red-600 animate-pulse shadow-lg'
                       : 'bg-gradient-to-br from-blue-500 to-blue-600 hover:shadow-lg'
-                  } text-white p-3 rounded-xl disabled:bg-slate-300 disabled:cursor-not-allowed transition-all duration-200 border border-transparent`}
+                  } text-white p-2 md:p-3 rounded-xl disabled:bg-slate-300 disabled:cursor-not-allowed transition-all duration-200 border border-transparent`}
                   aria-label={isListening ? 'Stop recording' : 'Start voice input'}
                   title={isListening ? 'Stop recording' : 'Voice input'}
                 >
-                  {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+                  {isListening ? <MicOff size={18} className="md:w-5 md:h-5" /> : <Mic size={18} className="md:w-5 md:h-5" />}
                 </button>
               )}
               <button
                 onClick={sendMessage}
                 disabled={!input.trim() || isLoading}
-                className="bg-gradient-to-br from-emerald-500 to-green-600 text-white p-3 rounded-xl hover:shadow-lg disabled:bg-slate-300 disabled:cursor-not-allowed transition-all duration-200 border border-transparent"
+                className="bg-gradient-to-br from-emerald-500 to-green-600 text-white p-2 md:p-3 rounded-xl hover:shadow-lg disabled:bg-slate-300 disabled:cursor-not-allowed transition-all duration-200 border border-transparent"
                 aria-label="Send message"
               >
                 {isLoading ? (
-                  <Loader2 size={20} className="animate-spin" />
+                  <Loader2 size={18} className="md:w-5 md:h-5 animate-spin" />
                 ) : (
-                  <Send size={20} />
+                  <Send size={18} className="md:w-5 md:h-5" />
                 )}
               </button>
             </div>
-            <p className="text-xs text-slate-400 mt-3 text-center flex items-center justify-center gap-1">
-              <Sparkles size={12} className="text-emerald-500" />
+            <p className="text-[10px] md:text-xs text-slate-400 mt-2 md:mt-3 text-center flex items-center justify-center gap-1">
+              <Sparkles size={10} className="md:w-3 md:h-3 text-emerald-500" />
               Powered by Meta Llama 3.3 via Hugging Face
             </p>
           </div>
