@@ -330,7 +330,7 @@ const Marketplace = ({ lang, currentUser }) => {
 
               {/* Rate Seller & Mark Sold Buttons */}
               <div className="grid grid-cols-2 gap-2">
-                {!isOwnListing && (
+                {!isOwnListing && currentUser && currentUser._id !== item.farmer_id?._id && (
                   <button
                     onClick={() => setFeedbackListing(item)}
                     className="flex items-center justify-center gap-1 bg-amber-100 text-amber-700 py-2 rounded-xl font-bold text-xs hover:bg-amber-200 transition"

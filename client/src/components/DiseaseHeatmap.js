@@ -100,7 +100,11 @@ const DiseaseHeatmap = ({ user, language = 'en' }) => {
       medium: 'Medium Risk',
       low: 'Low Risk',
       hotspots: 'Hotspots',
-      clickToView: 'Click on markers to view details'
+      clickToView: 'Click on markers to view details',
+      critical: 'Critical',
+      status_high: 'High',
+      status_medium: 'Medium',
+      status_low: 'Low'
     },
     si: {
       title: 'රෝග පැතිරීම් සිතියම',
@@ -118,6 +122,10 @@ const DiseaseHeatmap = ({ user, language = 'en' }) => {
       affectedAreas: 'බලපෑමට ලක්වූ ප්‍රදේශ',
       refresh: 'නැවුම් කරන්න',
       legend: 'සංකේත',
+      critical: 'සමාලෝචනීය',
+      status_high: 'උच්චල',
+      status_medium: 'මධ්‍යම',
+      status_low: 'අඩු',
       high: 'ඉහළ අවදානම',
       medium: 'මධ්‍යම අවදානම',
       low: 'අඩු අවදානම',
@@ -373,10 +381,10 @@ const DiseaseHeatmap = ({ user, language = 'en' }) => {
           className="px-3 py-1.5 bg-white border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
         >
           <option value="all">{text.all} {text.severity}</option>
-          <option value="critical">Critical</option>
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
+          <option value="critical">{text.critical}</option>
+          <option value="high">{text.status_high}</option>
+          <option value="medium">{text.status_medium}</option>
+          <option value="low">{text.status_low}</option>
         </select>
         
         <div className="flex items-center gap-2">
@@ -543,7 +551,7 @@ const DiseaseHeatmap = ({ user, language = 'en' }) => {
           </div>
           
           {/* Legend & Selected Point Info */}
-          <div className="p-4 bg-gray-50 border-l">
+          <div className="p-4 bg-gray-50 border-l max-h-[600px] overflow-y-auto">
             {/* Severity Legend */}
             <div className="mb-6">
               <h3 className="font-bold text-gray-700 mb-3 flex items-center gap-2">
