@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import axios from 'axios';
 import {
   User,
@@ -90,13 +90,13 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
 
     // Client-side validation
     if (!passwordValidation.isValid) {
-      setError(lang === 'si' ? 'මුරපදය සියලු අවශ්‍යතා සපුරා ලිය යුතුය' : 'Password must meet all requirements');
+      setError(lang === 'si' ? '?????? ????? ???????? ????? ??? ?????' : 'Password must meet all requirements');
       setLoading(false);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError(lang === 'si' ? 'මුරපද ගැළපෙන්නේ නැත' : 'Passwords do not match');
+      setError(lang === 'si' ? '????? ????????? ???' : 'Passwords do not match');
       setLoading(false);
       return;
     }
@@ -169,51 +169,51 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
       resendEmail: 'Resend Verification Email'
     },
     si: {
-      selectRole: 'මම',
-      farmer: 'ගොවියෙක්',
-      officer: 'රජයේ නිලධාරියෙක්',
-      buyer: 'ගැණුම්කරු',
-      fullName: 'සම්පූර්ණ නම',
-      fullNamePlaceholder: 'උදා: නාමල් පෙරේරා',
-      username: 'පරිශීලක නාමය',
-      usernamePlaceholder: 'උදා: namal_perera',
-      email: 'විද්‍යුත් තැපැල් ලිපිනය',
+      selectRole: '??',
+      farmer: '????????',
+      officer: '???? ???????????',
+      buyer: '?????????',
+      fullName: '???????? ??',
+      fullNamePlaceholder: '???: ????? ??????',
+      username: '??????? ????',
+      usernamePlaceholder: '???: namal_perera',
+      email: '????????? ?????? ??????',
       emailPlaceholder: 'your@email.com',
-      password: 'මුරපදය',
-      confirmPassword: 'මුරපදය තහවුරු කරන්න',
+      password: '??????',
+      confirmPassword: '?????? ?????? ?????',
       passwordRequirements: {
-        title: 'මුරපදයේ අඩංගු විය යුතුය:',
-        minLength: 'අවම අක්ෂර 8ක්',
-        uppercase: 'එක් ලොකු අකුරක්',
-        lowercase: 'එක් කුඩා අකුරක්',
-        number: 'එක් අංකයක්',
-        special: 'එක් විශේෂ අක්ෂරයක් (!@#$%^&*)'
+        title: '??????? ????? ??? ?????:',
+        minLength: '??? ????? 8??',
+        uppercase: '??? ???? ??????',
+        lowercase: '??? ???? ??????',
+        number: '??? ??????',
+        special: '??? ????? ???????? (!@#$%^&*)'
       },
       passwordStrength: {
-        weak: 'දුර්වල',
-        medium: 'මධ්‍යම',
-        strong: 'ශක්තිමත්'
+        weak: '??????',
+        medium: '??????',
+        strong: '????????'
       },
-      passwordsMatch: 'මුරපද ගැළපේ',
-      passwordsNoMatch: 'මුරපද ගැළපෙන්නේ නැත',
-      district: 'දිස්ත්‍රික්කය',
-      dsDivision: 'ප්‍රාදේශීය ලේකම් කොට්ඨාසය',
-      gnDivision: 'ග්‍රාම නිලධාරී කොට්ඨාසය',
-      officerId: 'නිලධාරී හැඳුනුම්පත් අංකය',
-      officerIdPlaceholder: 'උදා: AGR/2024/001',
-      department: 'දෙපාර්තමේන්තුව',
-      departmentPlaceholder: 'උදා: කෘෂිකර්ම දෙපාර්තමේන්තුව',
-      designation: 'තනතුර',
-      designationPlaceholder: 'උදා: කෘෂිකර්ම උපදේශක',
-      register: 'ගිණුම සාදන්න',
-      haveAccount: 'දැනටමත් ගිණුමක් තිබේද?',
-      login: 'මෙතනින් ප්‍රවිෂ්ට වන්න',
-      verifyEmailTitle: 'ඔබගේ විද්‍යුත් තැපෑල තහවුරු කරන්න',
-      verifyEmailMessage: 'අපි තහවුරු කිරීමේ සබැඳියක් යැව්වා',
-      checkInbox: 'කරුණාකර ඔබගේ inbox පරීක්ෂා කර ඔබගේ ගිණුම තහවුරු කිරීමට සබැඳිය ක්ලික් කරන්න.',
-      checkSpam: 'එය නොපෙනේ නම්, ඔබගේ spam ෆෝල්ඩරය පරීක්ෂා කරන්න.',
-      goToLogin: 'පිවිසුමට යන්න',
-      resendEmail: 'තහවුරු කිරීමේ විද්‍යුත් තැපෑල නැවත යවන්න'
+      passwordsMatch: '????? ?????',
+      passwordsNoMatch: '????? ????????? ???',
+      district: '?????????????',
+      dsDivision: '?????????? ????? ????????',
+      gnDivision: '?????? ??????? ????????',
+      officerId: '??????? ??????????? ????',
+      officerIdPlaceholder: '???: AGR/2024/001',
+      department: '??????????????',
+      departmentPlaceholder: '???: ???????? ??????????????',
+      designation: '?????',
+      designationPlaceholder: '???: ???????? ??????',
+      register: '????? ??????',
+      haveAccount: '??????? ??????? ??????',
+      login: '??????? ????????? ????',
+      verifyEmailTitle: '???? ????????? ????? ?????? ?????',
+      verifyEmailMessage: '??? ?????? ?????? ???????? ??????',
+      checkInbox: '??????? ???? inbox ??????? ?? ???? ????? ?????? ?????? ?????? ?????? ?????.',
+      checkSpam: '?? ?????? ???, ???? spam ??????? ??????? ?????.',
+      goToLogin: '???????? ????',
+      resendEmail: '?????? ?????? ????????? ????? ???? ?????'
     }
   };
 
@@ -282,10 +282,10 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
               <Sprout className="h-10 w-10 text-white drop-shadow-lg" />
             </div>
             <h2 className="text-3xl font-black text-white mb-2 tracking-tight drop-shadow-lg">
-              {lang === 'si' ? ' ගණමක සදනන' : ' Create Your Profile'}
+              {lang === 'si' ? ' ???? ????' : ' Create Your Profile'}
             </h2>
             <p className="text-green-100 text-sm font-medium">
-              {lang === 'si' ? 'ශර ලකය කෂකරමක පරජවට එකත වනන' : "Join Sri Lanka's Digital Farming Revolution"}
+              {lang === 'si' ? '?? ??? ?????? ????? ??? ???' : "Join Sri Lanka's Digital Farming Revolution"}
             </p>
           </div>
         </div>
@@ -302,7 +302,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
           {/* Role Selection */}
           <div className="mb-4">
             <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider mb-3 block flex items-center gap-2">
-              <span className="text-lg">👤</span>
+              <span className="text-lg">??</span>
               {t.selectRole}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -378,7 +378,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                   onChange={handleChange}
                   className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-green-500 focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
                 />
-                <p className="text-xs text-gray-400 ml-1">{lang === 'si' ? 'පිවිසීම සඳහා භාවිතා කරයි' : 'Used for login'}</p>
+                <p className="text-xs text-gray-400 ml-1">{lang === 'si' ? '??????? ???? ?????? ????' : 'Used for login'}</p>
               </div>
             </div>
 
@@ -408,7 +408,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 type={showPassword ? 'text' : 'password'}
                 name="password"
                 required
-                placeholder="••••••••"
+                placeholder="��������"
                 value={formData.password}
                 onChange={handleChange}
                 className="w-full p-4 pr-12 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-green-500 focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
@@ -483,7 +483,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 type={showConfirmPassword ? 'text' : 'password'}
                 name="confirmPassword"
                 required
-                placeholder="••••••••"
+                placeholder="��������"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 className={`w-full p-4 pr-12 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 ${
@@ -515,7 +515,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
             <div className="space-y-4 p-5 bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-50 rounded-2xl border-2 border-blue-200 shadow-lg shadow-blue-100/50 animate-in fade-in slide-in-from-top duration-300">
               <div className="flex items-center gap-2 text-blue-700 font-bold mb-2">
                 <Building2 size={18} className="drop-shadow" />
-                <span className="text-sm"> {lang === 'si' ? 'රජය නලධර තරතර' : 'Government Officer Information'}</span>
+                <span className="text-sm"> {lang === 'si' ? '??? ???? ????' : 'Government Officer Information'}</span>
               </div>
 
               <div className="space-y-1.5">
@@ -569,7 +569,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
               <div className="p-2 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl shadow-sm">
                 <MapPin className="text-green-600" size={16} />
               </div>
-              <span className="text-sm font-bold text-gray-700">{lang === 'si' ? '📍 ඔබේ ස්ථානය' : '📍 Your Location'}</span>
+              <span className="text-sm font-bold text-gray-700">{lang === 'si' ? '?? ??? ??????' : '?? Your Location'}</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -634,21 +634,21 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
           {/* Features List */}
           <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-2xl p-5 border-2 border-green-200 shadow-lg shadow-green-100/50">
             <p className="text-xs font-bold text-green-800 mb-3 flex items-center gap-2">
-              <span className="text-lg">✨</span>
-              {lang === 'si' ? 'ඔබට ලැබෙන සේවා:' : "What you'll get:"}
+              <span className="text-lg">?</span>
+              {lang === 'si' ? '??? ????? ????:' : "What you'll get:"}
             </p>
             <div className="grid grid-cols-2 gap-2.5 text-xs text-green-700 font-medium">
               <span className="flex items-center gap-1.5">
-                <CheckCircle size={14} className="text-green-600" /> {lang === 'si' ? 'AI රග හඳනගනම' : 'AI Disease Detection'}
+                <CheckCircle size={14} className="text-green-600" /> {lang === 'si' ? 'AI ?? ??????' : 'AI Disease Detection'}
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle size={14} className="text-green-600" /> {lang === 'si' ? 'වළඳපල මල ඇඟවම' : 'Market Price Alerts'}
+                <CheckCircle size={14} className="text-green-600" /> {lang === 'si' ? '????? ?? ????' : 'Market Price Alerts'}
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle size={14} className="text-green-600" /> {lang === 'si' ? 'කලගණ උපදස' : 'Weather Advisories'}
+                <CheckCircle size={14} className="text-green-600" /> {lang === 'si' ? '???? ????' : 'Weather Advisories'}
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle size={14} className="text-green-600" /> {lang === 'si' ? 'පරජ ජලය' : 'Community Network'}
+                <CheckCircle size={14} className="text-green-600" /> {lang === 'si' ? '??? ???' : 'Community Network'}
               </span>
             </div>
           </div>
@@ -661,11 +661,11 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
             {loading ? (
               <>
                 <Loader2 className="animate-spin h-5 w-5" />
-                <span>{lang === 'si' ? 'සදමන...' : 'Creating...'}</span>
+                <span>{lang === 'si' ? '????...' : 'Creating...'}</span>
               </>
             ) : (
               <>
-                <span>{lang === 'si' ? 'ලයපදචය අවසන කරනන' : 'Create My Account'}</span>
+                <span>{lang === 'si' ? '?????? ???? ????' : 'Create My Account'}</span>
                 <ArrowRight size={20} />
               </>
             )}
@@ -686,14 +686,14 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
             className="w-full py-4 px-6 border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 font-bold rounded-2xl hover:bg-gradient-to-r hover:from-green-100 hover:to-emerald-100 hover:border-green-400 transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
           >
             <KeyRound size={18} />
-            {lang === 'si' ? 'දනටමත ගණමක තබද? ඇතළ වනන' : 'Already have an account? Login'}
+            {lang === 'si' ? '????? ???? ???? ??? ???' : 'Already have an account? Login'}
           </button>
         </form>
       </div>
 
       <p className="text-center mt-6 text-white/80 text-xs font-medium flex items-center justify-center gap-2">
-        <span className="text-lg">🔒</span>
-        {lang === 'si' ? 'ආරක්ෂිත ඩිජිටල් ගොවිතැන පද්ධතිය' : 'Safe & Secure Digital Farming Ecosystem'}
+        <span className="text-lg">??</span>
+        {lang === 'si' ? '??????? ??????? ??????? ???????' : 'Safe & Secure Digital Farming Ecosystem'}
       </p>
     </div>
   );

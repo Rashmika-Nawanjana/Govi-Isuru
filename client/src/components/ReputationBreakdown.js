@@ -68,7 +68,7 @@ const ReputationBreakdown = ({ farmerId, lang = 'en', showDetails = true }) => {
   const fetchReputation = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_BASE}/reputation/farmer/${farmerId}`);
+      const res = await axios.get(`${API_BASE}/api/reputation/farmer/${farmerId}`);
       setReputation(res.data.reputation);
       setError(null);
     } catch (err) {

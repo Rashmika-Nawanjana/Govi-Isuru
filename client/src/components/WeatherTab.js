@@ -28,7 +28,7 @@ const WeatherTab = ({ lang }) => {
       setLoading(true);
       // 3. Geocode the GN name to get specific coordinates
       const geoRes = await axios.get(
-        `${API_BASE}/weather/geocode?query=${encodeURIComponent(query)}`
+        `${API_BASE}/api/weather/geocode?query=${encodeURIComponent(query)}`
       );
 
       if (geoRes.data.length > 0) {
@@ -37,7 +37,7 @@ const WeatherTab = ({ lang }) => {
       } else {
         // 4. Fallback: If GN name is too specific, use the District
         const fallbackRes = await axios.get(
-          `${API_BASE}/weather/geocode?query=${encodeURIComponent(user.district + ', LK')}`
+          `${API_BASE}/api/weather/geocode?query=${encodeURIComponent(user.district + ', LK')}`
         );
         const { lat, lon } = fallbackRes.data[0];
         getFinalWeatherData(lat, lon);
@@ -51,12 +51,12 @@ const WeatherTab = ({ lang }) => {
   const getFinalWeatherData = async (lat, lon) => {
     try {
       const currentRes = await axios.get(
-        `${API_BASE}/weather/current?lat=${lat}&lon=${lon}&units=metric`
+        `${API_BASE}/api/weather/current?lat=${lat}&lon=${lon}&units=metric`
       );
       setWeather(currentRes.data);
 
       const forecastRes = await axios.get(
-        `${API_BASE}/weather/forecast?lat=${lat}&lon=${lon}&units=metric`
+        `${API_BASE}/api/weather/forecast?lat=${lat}&lon=${lon}&units=metric`
       );
       const dailyData = forecastRes.data.list.filter(reading => reading.dt_txt.includes("12:00:00"));
       setForecast(dailyData);

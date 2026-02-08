@@ -13,7 +13,7 @@ const PriceAnalytics = ({ lang }) => {
     const fetchTrends = async () => {
       try {
         // Fetching from your actual backend API
-        const res = await axios.get(`${API_BASE}/price-trends`);
+        const res = await axios.get(`${API_BASE}/api/price-trends`);
         setData(res.data);
         setLoading(false);
       } catch (err) {

@@ -56,8 +56,8 @@ const FeedbackList = ({ listing, onClose, lang = 'en' }) => {
         const farmerId = listing.farmer_id?._id || listing.farmer_id;
         
         const [feedbackRes, reputationRes] = await Promise.all([
-          axios.get(`${API_BASE}/reputation/farmer/${farmerId}/feedbacks?limit=20`),
-          axios.get(`${API_BASE}/reputation/farmer/${farmerId}`)
+          axios.get(`${API_BASE}/api/reputation/farmer/${farmerId}/feedbacks?limit=20`),
+          axios.get(`${API_BASE}/api/reputation/farmer/${farmerId}`)
         ]);
         
         setFeedbacks(feedbackRes.data.feedbacks || []);
@@ -65,7 +65,7 @@ const FeedbackList = ({ listing, onClose, lang = 'en' }) => {
       } else {
         // No farmer_id, fetch by listing_id instead
         try {
-          const feedbackRes = await axios.get(`${API_BASE}/reputation/listing/${listing._id}/feedbacks`);
+          const feedbackRes = await axios.get(`${API_BASE}/api/reputation/listing/${listing._id}/feedbacks`);
           setFeedbacks(feedbackRes.data.feedbacks || []);
         } catch (err) {
           setFeedbacks([]);

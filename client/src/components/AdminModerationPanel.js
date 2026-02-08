@@ -114,7 +114,7 @@ const AdminModerationPanel = ({ user, language = 'en' }) => {
   const fetchReports = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE}/alerts/flagged`, {
+      const response = await axios.get(`${API_BASE}/api/alerts/flagged`, {
         headers: { Authorization: `Bearer ${getToken()}` },
         params: { district: user?.district }
       });
@@ -137,7 +137,7 @@ const AdminModerationPanel = ({ user, language = 'en' }) => {
     try {
       setReviewingId(reportId);
       await axios.put(
-        `${API_BASE}/alerts/reports/${reportId}/review`,
+        `${API_BASE}/api/alerts/reports/${reportId}/review`,
         { status, flaggedReason },
         { headers: { Authorization: `Bearer ${getToken()}` } }
       );

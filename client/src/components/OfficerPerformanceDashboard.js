@@ -103,14 +103,14 @@ const OfficerPerformanceDashboard = ({ user, language = 'en' }) => {
     try {
       setLoading(true);
       const [perfRes, monthlyRes, leaderRes] = await Promise.all([
-        axios.get(`${API_BASE}/officer-workflow/performance`, {
+        axios.get(`${API_BASE}/api/officer-workflow/performance`, {
           headers: { Authorization: `Bearer ${getToken()}` },
           params: { days }
         }),
-        axios.get(`${API_BASE}/officer-workflow/performance/monthly`, {
+        axios.get(`${API_BASE}/api/officer-workflow/performance/monthly`, {
           headers: { Authorization: `Bearer ${getToken()}` }
         }),
-        axios.get(`${API_BASE}/officer-workflow/leaderboard`, {
+        axios.get(`${API_BASE}/api/officer-workflow/leaderboard`, {
           headers: { Authorization: `Bearer ${getToken()}` },
           params: { days, limit: 10 }
         })

@@ -123,7 +123,7 @@ const SpreadRiskMapping = ({ user, language = 'en' }) => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE}/analytics/spread-risk`, {
+      const response = await axios.get(`${API_BASE}/api/analytics/spread-risk`, {
         headers: { Authorization: `Bearer ${getToken()}` },
         params: { days }
       });

@@ -78,7 +78,7 @@ const NewsWidget = ({ lang = 'en', onViewAll, maxItems = 4 }) => {
       if (isRefresh) setRefreshing(true);
       setError(null);
 
-      const response = await axios.get(`${API_BASE}/news/headlines`);
+      const response = await axios.get(`${API_BASE}/api/news/headlines`);
       
       if (response.data.success) {
         setNews(response.data.headlines || []);
@@ -124,7 +124,7 @@ const NewsWidget = ({ lang = 'en', onViewAll, maxItems = 4 }) => {
   // Handle article click
   const handleClick = (article) => {
     // Track click
-    axios.post(`${API_BASE}/news/click`, {
+    axios.post(`${API_BASE}/api/news/click`, {
       articleId: article.id,
       category: article.category
     }).catch(() => {});

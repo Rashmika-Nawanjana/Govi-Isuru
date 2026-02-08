@@ -16,12 +16,12 @@ const WeatherAdvisor = ({ lat, lon, lang, user }) => {
 
       try {
         // 1. Fetch Current Weather
-        const currentUrl = `${API_BASE}/weather/current?lat=${lat}&lon=${lon}&units=metric`;
+        const currentUrl = `${API_BASE}/api/weather/current?lat=${lat}&lon=${lon}&units=metric`;
         const currentRes = await axios.get(currentUrl);
         setWeather(currentRes.data);
 
         // 2. Fetch 5-Day Forecast
-        const forecastUrl = `${API_BASE}/weather/forecast?lat=${lat}&lon=${lon}&units=metric`;
+        const forecastUrl = `${API_BASE}/api/weather/forecast?lat=${lat}&lon=${lon}&units=metric`;
         const forecastRes = await axios.get(forecastUrl);
         
         // Filter to get midday (12:00) forecast for the next 5 days

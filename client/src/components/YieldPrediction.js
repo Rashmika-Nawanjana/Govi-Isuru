@@ -208,7 +208,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
         ...(area && { area_ha: area.toString() })
       });
       
-      const response = await fetch(`${API_BASE}/yield/predict?${params}`);
+      const response = await fetch(`${API_BASE}/api/yield/predict?${params}`);
       const data = await response.json();
       
       if (data.success) {
@@ -238,7 +238,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
         ...(pricePerKg && { price_per_kg: pricePerKg })
       });
       
-      const response = await fetch(`${API_BASE}/yield/profit?${params}`);
+      const response = await fetch(`${API_BASE}/api/yield/profit?${params}`);
       const data = await response.json();
       
       if (data.success) {
@@ -255,7 +255,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
   const fetchWarning = async () => {
     try {
       const params = new URLSearchParams({ district, season, year: year.toString() });
-      const response = await fetch(`${API_BASE}/yield/warning?${params}`);
+      const response = await fetch(`${API_BASE}/api/yield/warning?${params}`);
       const data = await response.json();
       
       if (data.success) {
@@ -271,7 +271,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_BASE}/yield/rankings`);
+      const response = await fetch(`${API_BASE}/api/yield/rankings`);
       const data = await response.json();
       
       if (data.success && Array.isArray(data.rankings)) {
@@ -297,7 +297,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
         ...(district && { district }),
         ...(season && { season })
       });
-      const response = await fetch(`${API_BASE}/yield/trends?${params}`);
+      const response = await fetch(`${API_BASE}/api/yield/trends?${params}`);
       const data = await response.json();
       
       if (data.success && Array.isArray(data.trends)) {

@@ -69,7 +69,7 @@ const Marketplace = ({ lang, currentUser }) => {
 
   const fetchListings = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/listings`);
+      const res = await axios.get(`${API_BASE}/api/listings`);
       setListings(res.data);
     } catch (err) {
       console.error("Failed to fetch market data", err);
@@ -78,7 +78,7 @@ const Marketplace = ({ lang, currentUser }) => {
 
   const fetchTopFarmers = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/reputation/top-farmers?limit=5`);
+      const res = await axios.get(`${API_BASE}/api/reputation/top-farmers?limit=5`);
       setTopFarmers(res.data.farmers || []);
     } catch (err) {
       console.error("Failed to fetch top farmers", err);
@@ -97,7 +97,7 @@ const Marketplace = ({ lang, currentUser }) => {
         return;
       }
       await axios.put(
-        `${API_BASE}/reputation/listing/${listingId}/sold`,
+        `${API_BASE}/api/reputation/listing/${listingId}/sold`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -116,7 +116,7 @@ const Marketplace = ({ lang, currentUser }) => {
     try {
       const token = localStorage.getItem('token');
       await axios.delete(
-        `${API_BASE}/listings/${listingId}`,
+        `${API_BASE}/api/listings/${listingId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchListings();
@@ -142,7 +142,7 @@ const Marketplace = ({ lang, currentUser }) => {
 
     try {
       await axios.post(
-        `${API_BASE}/listings`,
+        `${API_BASE}/api/listings`,
         {
           ...form,
           farmerName: currentUser?.username || 'Anonymous'

@@ -75,7 +75,7 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
     try {
       setLoading(true);
       // First try with user's district, then fallback to all data
-      let response = await axios.get(`${API_BASE}/alerts/outbreak-summary`, {
+      let response = await axios.get(`${API_BASE}/api/alerts/outbreak-summary`, {
         params: { 
           district: user?.district,
           days: 30 // Extend to 30 days for more data
@@ -85,7 +85,7 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
       // If no data for user's district, fetch all data
       if (!response.data.summary?.diseaseBreakdown?.length && 
           !response.data.summary?.topLocations?.length) {
-        response = await axios.get(`${API_BASE}/alerts/outbreak-summary`, {
+        response = await axios.get(`${API_BASE}/api/alerts/outbreak-summary`, {
           params: { days: 30 }
         });
       }

@@ -281,7 +281,7 @@ const useTTS = () => {
         const chunk = encodeURIComponent(chunks[i]);
         const ttsLang = lang === 'si' ? 'si' : 'en';
         // Use server-side proxy to avoid CORS issues
-        const audioUrl = `${API_BASE}/news/tts-audio?text=${chunk}&lang=${ttsLang}`;
+        const audioUrl = `${API_BASE}/api/news/tts-audio?text=${chunk}&lang=${ttsLang}`;
         
         await new Promise((resolve, reject) => {
           const audio = new Audio(audioUrl);
@@ -312,7 +312,7 @@ const useTTS = () => {
 
     try {
       // Get prepared text from server
-      const response = await axios.post(`${API_BASE}/news/prepare-tts`, {
+      const response = await axios.post(`${API_BASE}/api/news/prepare-tts`, {
         article,
         lang
       });
@@ -472,7 +472,7 @@ const usePushNotifications = () => {
       }
 
       // Get VAPID public key
-      const keyResponse = await axios.get(`${API_BASE}/news/vapid-public-key`);
+      const keyResponse = await axios.get(`${API_BASE}/api/news/vapid-public-key`);
       const vapidPublicKey = keyResponse.data.publicKey;
 
       // Convert VAPID key
@@ -491,7 +491,7 @@ const usePushNotifications = () => {
       });
 
       // Send subscription to server
-      await axios.post(`${API_BASE}/news/subscribe`, subscription);
+      await axios.post(`${API_BASE}/api/news/subscribe`, subscription);
 
       setIsSubscribed(true);
       setLoading(false);
@@ -516,7 +516,7 @@ const usePushNotifications = () => {
         await subscription.unsubscribe();
 
         // Notify server
-        await axios.post(`${API_BASE}/news/unsubscribe`, {
+        await axios.post(`${API_BASE}/api/news/unsubscribe`, {
           endpoint: subscription.endpoint
         });
       }
@@ -847,7 +847,7 @@ const AgriNews = ({ lang = 'en', user }) => {
     setSummaryModal({ isOpen: true, article, summary: null, loading: true });
     
     try {
-      const response = await axios.post(`${API_BASE}/news/summarize`, {
+      const response = await axios.post(`${API_BASE}/api/news/summarize`, {
         article,
         lang
       });
@@ -882,7 +882,7 @@ const AgriNews = ({ lang = 'en', user }) => {
     try {
       setError(null);
       
-      const response = await axios.get(`${API_BASE}/news`, {
+      const response = await axios.get(`${API_BASE}/api/news`, {
         params: { category, refresh: forceRefresh }
       });
 
@@ -914,7 +914,7 @@ const AgriNews = ({ lang = 'en', user }) => {
   // Fetch headlines
   const fetchHeadlines = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE}/news/headlines`);
+      const response = await axios.get(`${API_BASE}/api/news/headlines`);
       if (response.data.success) {
         setHeadlines(response.data.headlines);
       }
@@ -922,7 +922,7 @@ const AgriNews = ({ lang = 'en', user }) => {
       console.error('Error fetching headlines:', err);
       // Use first articles from demo as headlines
       try {
-        const demoResponse = await axios.get(`${API_BASE}/news/demo`);
+        const demoResponse = await axios.get(`${API_BASE}/api/news/demo`);
         setHeadlines(demoResponse.data.articles?.slice(0, 2) || []);
       } catch (demoErr) {
         setHeadlines([]);
@@ -960,7 +960,7 @@ const AgriNews = ({ lang = 'en', user }) => {
   // Track article click
   const handleArticleRead = async (article) => {
     try {
-      await axios.post(`${API_BASE}/news/click`, {
+      await axios.post(`${API_BASE}/api/news/click`, {
         articleId: article.id,
         category: article.category,
         userId: user?.id
@@ -977,7 +977,7 @@ const AgriNews = ({ lang = 'en', user }) => {
 
     setLoading(true);
     try {
-      const response = await axios.get(`${API_BASE}/news/search`, {
+      const response = await axios.get(`${API_BASE}/api/news/search`, {
         params: { q: searchQuery, crop: user?.preferredCrop }
       });
       if (response.data.success) {

@@ -48,7 +48,7 @@ const HomePage = ({ onLogin, onRegister }) => {
 
   const fetchLatestNews = async () => {
     try {
-      const response = await axios.get(`${API_BASE}/news/agriculture`);
+      const response = await axios.get(`${API_BASE}/api/news/agriculture`);
       setNews(response.data.articles.slice(0, 3));
     } catch (error) {
       console.error('Failed to fetch news:', error);
