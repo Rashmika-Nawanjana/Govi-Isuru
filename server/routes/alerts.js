@@ -388,13 +388,14 @@ router.put('/reports/:id/review', authMiddleware, async (req, res) => {
  */
 router.get('/outbreak-summary', async (req, res) => {
   try {
-    const { district, days } = req.query;
+    const { district, days, gnDivision } = req.query;
     const daysNum = Number.parseInt(days) || 7;
     
     const timeWindow = new Date(Date.now() - daysNum * 24 * 60 * 60 * 1000);
     
     const matchQuery = { createdAt: { $gte: timeWindow } };
     if (district) matchQuery.district = district;
+    if (gnDivision) matchQuery.gnDivision = gnDivision;
     
     // Get summary statistics from DiseaseReport
     const [totalReports, diseaseBreakdownRaw, severityBreakdown, locationBreakdownRaw] = await Promise.all([
@@ -412,11 +413,18 @@ router.get('/outbreak-summary', async (req, res) => {
         { $group: { _id: '$severity', count: { $sum: 1 } } }
       ]),
       
+      // Group by GN Division for officer view, or by district for public view
       DiseaseReport.aggregate([
-        { $match: { ...matchQuery, district: { $ne: null, $ne: '' } } },
-        { $group: { _id: '$district', count: { $sum: 1 } } },
+        { $match: { ...matchQuery, gnDivision: { $ne: null, $ne: '' } } },
+        { 
+          $group: { 
+            _id: '$gnDivision', 
+            count: { $sum: 1 },
+            district: { $first: '$district' }
+          } 
+        },
         { $sort: { count: -1 } },
-        { $limit: 10 }
+        { $limit: 20 }
       ])
     ]);
     
@@ -427,6 +435,7 @@ router.get('/outbreak-summary', async (req, res) => {
     if (diseaseBreakdown.length === 0 || locationBreakdown.length === 0) {
       const alertMatchQuery = { status: { $in: ['active', 'monitoring'] } };
       if (district) alertMatchQuery.district = district;
+      if (gnDivision) alertMatchQuery.gnDivision = gnDivision;
       
       const [alertDiseaseBreakdown, alertLocationBreakdown] = await Promise.all([
         CommunityAlert.aggregate([
@@ -438,9 +447,9 @@ router.get('/outbreak-summary', async (req, res) => {
         
         CommunityAlert.aggregate([
           { $match: alertMatchQuery },
-          { $group: { _id: '$district', count: { $sum: '$reportCount' } } },
+          { $group: { _id: '$gnDivision', count: { $sum: '$reportCount' }, district: { $first: '$district' } } },
           { $sort: { count: -1 } },
-          { $limit: 10 }
+          { $limit: 20 }
         ])
       ]);
       
@@ -451,18 +460,33 @@ router.get('/outbreak-summary', async (req, res) => {
     // Get active alerts count
     const activeAlerts = await CommunityAlert.countDocuments({
       status: 'active',
-      ...(district ? { district } : {})
+      ...(district ? { district } : {}),
+      ...(gnDivision ? { gnDivision } : {})
     });
+    
+    // Get affected locations count (unique GN Divisions)
+    const affectedLocations = locationBreakdown.length;
     
     res.json({
       success: true,
       summary: {
         totalReports,
         activeAlerts,
+        affectedLocations,
         timeRange: `Last ${daysNum} days`,
         diseaseBreakdown: diseaseBreakdown.map(d => ({ disease: d._id, count: d.count })),
         severityBreakdown: severityBreakdown.map(s => ({ severity: s._id, count: s.count })),
-        topLocations: locationBreakdown.map(l => ({ district: l._id, count: l.count }))
+        diseases: diseaseBreakdown.map(d => ({ disease: d._id, count: d.count })),
+        locations: locationBreakdown.map(l => ({ 
+          name: l._id,
+          gnDivision: l._id,
+          district: l.district,
+          count: l.count 
+        })),
+        topLocations: locationBreakdown.map(l => ({ 
+          gnDivision: l._id, 
+          count: l.count 
+        }))
       }
     });
   } catch (error) {

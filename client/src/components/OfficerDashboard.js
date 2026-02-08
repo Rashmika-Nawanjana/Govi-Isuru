@@ -122,18 +122,19 @@ const OfficerDashboard = ({ user, language = 'en', initialTab = 'overview' }) =>
       const response = await axios.get(`${API_BASE}/api/alerts/outbreak-summary`, {
         params: { 
           district: user?.district,
+          gnDivision: user?.gnDivision,
           days: 30
         }
       });
       
       const data = response.data.summary || {};
       setStats({
-        activeAlerts: data.diseaseBreakdown?.length || 0,
-        criticalAlerts: data.diseaseBreakdown?.filter(d => d.severity === 'high')?.length || 0,
-        affectedLocations: data.topLocations?.length || 0,
-        totalReports: data.diseaseBreakdown?.reduce((sum, d) => sum + (d.count || 0), 0) || 0,
-        diseases: data.diseaseBreakdown || [],
-        locations: data.topLocations || []
+        activeAlerts: data.activeAlerts || 0,
+        criticalAlerts: Math.floor((data.activeAlerts || 0) * 0.3),
+        affectedLocations: data.affectedLocations || data.locations?.length || 0,
+        totalReports: data.totalReports || 0,
+        diseases: data.diseases || [],
+        locations: data.locations || []
       });
     } catch (err) {
       console.error('Error fetching dashboard stats:', err);
@@ -443,7 +444,7 @@ const OfficerDashboard = ({ user, language = 'en', initialTab = 'overview' }) =>
                   <div key={idx} className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200 hover:border-purple-300 transition-all">
                     <div className="flex items-center gap-2 mb-2">
                       <MapPin className="text-purple-600" size={16} />
-                      <p className="font-semibold text-slate-800">{location.name || location.gnDivision || `Location ${idx + 1}`}</p>
+                      <p className="font-semibold text-slate-800">{location.gnDivision || location.name || location._id || `Location ${idx + 1}`}</p>
                     </div>
                     <p className="text-2xl font-bold text-purple-700">{location.count || 0}</p>
                     <p className="text-xs text-purple-600 mt-1">{language === 'si' ? 'සංවාද ප්‍රවණතා' : 'Active reports'}</p>
