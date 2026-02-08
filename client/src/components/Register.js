@@ -506,7 +506,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 type={showConfirmPassword ? 'text' : 'password'}
                 name="confirmPassword"
                 required
-                placeholder="��������"
+                placeholder={lang === 'en' ? '••••••••' : '••••••••'}
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 className={`w-full p-4 pr-12 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 ${
