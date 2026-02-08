@@ -342,8 +342,18 @@ function MainApp() {
 
   // 4. MAIN APP DASHBOARD
   return (
-    <div className="min-h-screen font-sans flex flex-col md:flex-row bg-slate-50">
-      {/* Remove fixed background image overlay on mobile */}
+    <div 
+      className="min-h-screen font-sans flex flex-col md:flex-row"
+      style={{
+        backgroundImage: `url(${getBackgroundImage()})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      {/* Background overlay for better readability */}
+      <div className="fixed inset-0 bg-black/20 pointer-events-none z-0" />
+      
       {/* Mobile overlay */}
       {isSidebarOpen && (
         <button
@@ -494,10 +504,10 @@ function MainApp() {
           </div>
 
           {/* Content Wrapper - Direct Content Access */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto relative z-10">
             <div className="w-full mx-auto">
               {/* Desktop Welcome Header Only */}
-              <div className="hidden md:block bg-slate-50 border-b border-slate-200 md:m-4 md:rounded-xl md:border md:shadow-sm p-4">
+              <div className="hidden md:block bg-white/95 backdrop-blur-sm border-b border-slate-200 md:m-4 md:rounded-xl md:border md:shadow-lg p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-slate-500">
