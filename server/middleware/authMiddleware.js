@@ -31,7 +31,7 @@ const authMiddleware = async (req, res, next) => {
     // Find user in database
     let user = await User.findById(decoded.id);
     if (!user) {
-      console.error(`User not found for ID: ${decoded.id}, using token data as fallback`);
+      console.log(`User not found for ID: ${decoded.id}, using token data as fallback`);
       // Fallback: Use data from token if user not in DB (handles race conditions during signup)
       req.user = {
         _id: decoded.id,
@@ -39,7 +39,10 @@ const authMiddleware = async (req, res, next) => {
         role: decoded.role,
         district: decoded.district,
         dsDivision: decoded.dsDivision,
-        gnDivision: decoded.gnDivision
+        gnDivision: decoded.gnDivision,
+        phone: decoded.phone, // Include phone from token if available
+        email: decoded.email,
+        fullName: decoded.username
       };
       return next();
     }

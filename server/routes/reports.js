@@ -19,7 +19,16 @@ router.post('/submit', authMiddleware, async (req, res) => {
       return res.status(403).json({ success: false, msg: 'Only farmers can submit reports' });
     }
 
-    if (!currentUser.phone) {
+    // Get phone from user object or fetch from database if not available
+    let farmerPhone = currentUser.phone;
+    if (!farmerPhone && currentUser._id) {
+      const userFromDB = await User.findById(currentUser._id);
+      if (userFromDB) {
+        farmerPhone = userFromDB.phone;
+      }
+    }
+
+    if (!farmerPhone) {
       return res.status(400).json({
         success: false,
         msg: 'Phone number is required to submit a report. Please update your profile.'
@@ -38,7 +47,7 @@ router.post('/submit', authMiddleware, async (req, res) => {
       report_type: report_type || 'disease',
       farmerId: currentUser._id,
       farmerName: currentUser.fullName || currentUser.username || 'Farmer',
-      farmerPhone: currentUser.phone,
+      farmerPhone: farmerPhone,
       district: currentUser.district,
       dsDivision: currentUser.dsDivision,
       gnDivision: currentUser.gnDivision,

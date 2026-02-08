@@ -17,7 +17,10 @@ const generateTokens = (user) => {
       role: user.role,
       district: user.district,
       dsDivision: user.dsDivision,
-      gnDivision: user.gnDivision
+      gnDivision: user.gnDivision,
+      phone: user.phone,
+      email: user.email,
+      fullName: user.fullName
     },
     process.env.JWT_SECRET || 'govi_secret',
     { expiresIn: '15m' } // Short-lived access token
