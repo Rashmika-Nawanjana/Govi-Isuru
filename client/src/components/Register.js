@@ -536,7 +536,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
             <div className="space-y-4 p-5 bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-50 rounded-2xl border-2 border-blue-200 shadow-lg shadow-blue-100/50 animate-in fade-in slide-in-from-top duration-300">
               <div className="flex items-center gap-2 text-blue-700 font-bold mb-2">
                 <Building2 size={18} className="drop-shadow" />
-                <span className="text-sm"> {lang === 'si' ? '??? ???? ????' : 'Government Officer Information'}</span>
+                <span className="text-sm"> {lang === 'si' ? 'රජ නිලධාරී තොරතුරු' : 'Government Officer Information'}</span>
               </div>
 
               <div className="space-y-1.5">
@@ -590,7 +590,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
               <div className="p-2 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl shadow-sm">
                 <MapPin className="text-green-600" size={16} />
               </div>
-              <span className="text-sm font-bold text-gray-700">{lang === 'si' ? '?? ??? ??????' : '?? Your Location'}</span>
+              <span className="text-sm font-bold text-gray-700">{lang === 'si' ? '📍 ඔබගේ ස්ථානය' : '📍 Your Location'}</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
