@@ -147,20 +147,16 @@ const AIDoctor = ({ lang, user }) => {
     try {
       const token = localStorage.getItem('token');
       const reportData = {
-        crop: crop,
-        disease: predictionData.prediction,
-        confidence: predictionData.confidence || 0,
-        district: user.district || 'Unknown',
-        dsDivision: user.dsDivision || 'Unknown',
-        gnDivision: user.gnDivision || 'Unknown',
-        treatment: Array.isArray(predictionData.treatment) 
-          ? predictionData.treatment.join('; ') 
-          : predictionData.treatment || '',
-        farmerUsername: user.username
+        title: `${crop.charAt(0).toUpperCase() + crop.slice(1)} - ${predictionData.prediction}`,
+        description: predictionData.description || 'Disease detected by AI Crop Doctor',
+        image_url: preview || '',
+        ai_prediction: predictionData.prediction,
+        confidence_score: predictionData.confidence || 0,
+        report_type: 'disease'
       };
 
       const response = await axios.post(
-        `${API_BASE}/api/alerts/disease-report`,
+        `${API_BASE}/api/reports/submit`,
         reportData,
         {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
@@ -169,19 +165,17 @@ const AIDoctor = ({ lang, user }) => {
 
       if (response.data.success) {
         setReportSaved(true);
-        console.log('Disease report saved:', response.data);
+        console.log('Disease report submitted:', response.data);
         
-        // Show alert notification if outbreak was triggered
-        if (response.data.alertsTriggered > 0) {
-          alert(lang === 'en'
-            ? `⚠️ Alert: ${response.data.alertsTriggered} disease outbreak(s) detected in your area! Check Community Alerts for details.`
-            : `⚠️ අනතුරු ඇඟවීම: ඔබගේ ප්‍රදේශයේ රෝග පිපිරීම් ${response.data.alertsTriggered}ක් හඳුනාගෙන ඇත! විස්තර සඳහා ප්‍රජා අනතුරු ඇඟවීම් පරීක්ෂා කරන්න.`
-          );
-        }
+        alert(lang === 'en'
+          ? '✅ Report submitted to government officers for verification. You will be notified once verified.'
+          : '✅ වාර්තාව සත්‍යාපනය සඳහා ඩිජිටල් අධිකරණ ක්‍ෂේත්‍ර නිලධාරීන්ට ඉදිරිපත් කරන ලද බව සිතුවිලි ලබන ඉතිරි කිරීමයි।');
       }
     } catch (error) {
       console.error('Error saving disease report:', error);
-      // Don't show error to user - silent fail for better UX
+      alert(lang === 'en' 
+        ? 'Error submitting report. Please try again.' 
+        : 'වාර්තාව ඉදිරිපත් කිරීමේ දෝෂය. නැවත උත්සාහ කරන්න.');
     }
   };
 
@@ -526,6 +520,18 @@ const AIDoctor = ({ lang, user }) => {
               )}
             </div>
 
+            {/* Submit Report Button */}
+            {user && !reportSaved && result.disease && !result.disease.toLowerCase().includes('healthy') && (
+              <button
+                onClick={() => saveDiseaseReport(result, cropType)}
+                className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl"
+              >
+                <FileText size={20} />
+                {lang === 'en' 
+                  ? '📋 Submit Report to Government Officers' 
+                  : '📋 රජයේ නිලධාරීන්ට වාර්තාව ඉදිරිපත් කරන්න'}
+              </button>
+            )}
 
           </div>
         </div>
