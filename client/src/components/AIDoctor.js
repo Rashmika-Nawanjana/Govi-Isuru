@@ -173,9 +173,10 @@ const AIDoctor = ({ lang, user }) => {
       }
     } catch (error) {
       console.error('Error saving disease report:', error);
+      const errorMsg = error.response?.data?.msg || error.response?.data?.error;
       alert(lang === 'en' 
-        ? 'Error submitting report. Please try again.' 
-        : 'වාර්තාව ඉදිරිපත් කිරීමේ දෝෂය. නැවත උත්සාහ කරන්න.');
+        ? (errorMsg || 'Error submitting report. Please try again.')
+        : (errorMsg || 'වාර්තාව ඉදිරිපත් කිරීමේ දෝෂය. නැවත උත්සාහ කරන්න.'));
     }
   };
 
