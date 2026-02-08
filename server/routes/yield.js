@@ -129,4 +129,95 @@ router.get('/warning', (req, res) => {
   }
 });
 
+/**
+ * GET /api/yield/rankings
+ * Get district rankings by yield
+ */
+router.get('/rankings', (req, res) => {
+  try {
+    const { season = 'Maha', year = 2026 } = req.query;
+    
+    const rankings = [
+      {
+        rank: 1,
+        district: 'Polonnaruwa',
+        average_yield: 4.8,
+        area_cultured_ha: 45000,
+        production_tons: 216000,
+        growth_percent: 12.5
+      },
+      {
+        rank: 2,
+        district: 'Anuradhapura',
+        average_yield: 4.5,
+        area_cultured_ha: 38000,
+        production_tons: 171000,
+        growth_percent: 8.3
+      },
+      {
+        rank: 3,
+        district: 'Kurunegala',
+        average_yield: 4.2,
+        area_cultured_ha: 35000,
+        production_tons: 147000,
+        growth_percent: 5.2
+      },
+      {
+        rank: 4,
+        district: 'Ratnapura',
+        average_yield: 3.8,
+        area_cultured_ha: 28000,
+        production_tons: 106400,
+        growth_percent: 3.1
+      },
+      {
+        rank: 5,
+        district: 'Matara',
+        average_yield: 3.5,
+        area_cultured_ha: 22000,
+        production_tons: 77000,
+        growth_percent: 1.5
+      }
+    ];
+    
+    res.json({
+      success: true,
+      season,
+      year: parseInt(year),
+      rankings,
+      lastUpdated: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * GET /api/yield/trends
+ * Get yield trends over years
+ */
+router.get('/trends', (req, res) => {
+  try {
+    const { district = 'Anuradhapura', season = 'Maha' } = req.query;
+    
+    const trends = [
+      { year: 2022, yield_tons_per_ha: 3.8, area_ha: 35000, production_tons: 133000 },
+      { year: 2023, yield_tons_per_ha: 4.0, area_ha: 36000, production_tons: 144000 },
+      { year: 2024, yield_tons_per_ha: 4.3, area_ha: 37000, production_tons: 159100 },
+      { year: 2025, yield_tons_per_ha: 4.5, area_ha: 38000, production_tons: 171000 },
+      { year: 2026, yield_tons_per_ha: 4.6, area_ha: 39000, production_tons: 179400 }
+    ];
+    
+    res.json({
+      success: true,
+      district,
+      season,
+      trends,
+      lastUpdated: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;
