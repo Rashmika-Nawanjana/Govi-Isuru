@@ -331,12 +331,12 @@ function MainApp() {
   // Get background image based on user role
   const getBackgroundImage = () => {
     if (user?.role === 'officer') {
-      return '/backgrounds/rice-fields-sunrise.jpg';
+      return '/backgrounds/officer-dashboard-bg.jpg';
     } else if (user?.role === 'buyer') {
-      return '/backgrounds/village-community.jpg';
+      return '/backgrounds/buyer-dashboard-bg.jpg';
     } else {
       // Farmer or no specific role
-      return '/backgrounds/harvest-sunset.jpg';
+      return '/backgrounds/farmer-dashboard-bg.jpg';
     }
   };
 
