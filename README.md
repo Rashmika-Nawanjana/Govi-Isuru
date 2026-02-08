@@ -9,10 +9,12 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green.svg)](https://www.mongodb.com/atlas)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-blue.svg)](https://www.docker.com/)
 
+**This branch is the deployed branch in AWS. For local functionallity checking you can use the ""local"" branch**
+
 **Team Members:**
-- H.M. Kalana Lakshan (Full Stack Development & Project Lead)
-- G.H. Lasana Pahanga (Contributing Member)  
-- A.M.R. Nawanjana Aththanayake (Contributing Member)
+- H.M. Kalana Lakshan 
+- G.H. Lasana Pahanga 
+- A.M.R. Nawanjana Aththanayake 
 
 ---
 
