@@ -126,16 +126,8 @@ function MainApp() {
   const t = translations[lang];
 
   useEffect(() => {
-    // Use browser geolocation only when no user is logged in; otherwise use GN/district coords
-    if (user) return;
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCoords({ lat: position.coords.latitude, lon: position.coords.longitude });
-        },
-        (error) => console.error("Location error:", error.message)
-      );
-    }
+    // Location is obtained from user profile during registration, no need to ask on homepage
+    // Default to Anuradhapura for map/weather features
   }, [user]);
 
   // Map logged-in user's GN division or district to coordinates for weather (case-insensitive)
