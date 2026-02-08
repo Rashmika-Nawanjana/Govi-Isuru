@@ -20,6 +20,7 @@ const analyticsRoutes = require('./routes/analytics');
 const officerWorkflowRoutes = require('./routes/officerWorkflow');
 const authRoutes = require('./routes/auth');
 const weatherRoutes = require('./routes/weather');
+const yieldRoutes = require('./routes/yield');
 
 const app = express();
 
@@ -59,6 +60,9 @@ app.use('/api/auth', authRoutes);
 
 // Weather Proxy API Routes (OpenWeatherMap via backend)
 app.use('/api/weather', weatherRoutes);
+
+// Yield Prediction API Routes
+app.use('/api/yield', yieldRoutes);
 
 // 2. Connect to Database using environment variable
 // We remove the hardcoded string and the deprecated options (no longer needed in Mongoose 6+)
