@@ -8,6 +8,7 @@ import {
   Loader2,
   Sprout,
   Globe,
+  Phone,
   KeyRound,
   Leaf,
   ShoppingBag,
@@ -387,7 +388,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
               </div>
             </div>
 
-            {/* Email & Phone */}
+            {/* Email */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider flex items-center gap-1">
                 <Mail size={12} /> {t.email}
@@ -403,10 +404,10 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
               />
             </div>
 
-            {/* Phone */}
+            {/* Phone Number - REQUIRED FOR ALL USERS */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider flex items-center gap-1">
-                <Globe size={12} /> {t.phone}
+                <Phone size={12} /> {t.phone}
               </label>
               <input
                 type="tel"
@@ -418,9 +419,10 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-green-500 focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
               />
             </div>
+          </div>
 
-          {/* Password */}
-          <div className="space-y-1.5">
+          {/* Password Section */}
+          <div className="space-y-4">
             <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider flex items-center gap-1">
               <Lock size={12} /> {t.password}
             </label>
@@ -429,7 +431,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 type={showPassword ? 'text' : 'password'}
                 name="password"
                 required
-                placeholder="��������"
+                placeholder={lang === 'en' ? '••••••••' : '••••••••'}
                 value={formData.password}
                 onChange={handleChange}
                 className="w-full p-4 pr-12 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-green-500 focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
