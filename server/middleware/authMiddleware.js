@@ -29,12 +29,19 @@ const authMiddleware = async (req, res, next) => {
     }
 
     // Find user in database
-    const user = await User.findById(decoded.id);
+    let user = await User.findById(decoded.id);
     if (!user) {
-      return res.status(401).json({ 
-        success: false, 
-        error: 'User not found' 
-      });
+      console.error(`User not found for ID: ${decoded.id}, using token data as fallback`);
+      // Fallback: Use data from token if user not in DB (handles race conditions during signup)
+      req.user = {
+        _id: decoded.id,
+        username: decoded.username,
+        role: decoded.role,
+        district: decoded.district,
+        dsDivision: decoded.dsDivision,
+        gnDivision: decoded.gnDivision
+      };
+      return next();
     }
 
     // Attach user to request object
