@@ -80,25 +80,32 @@ router.get('/profit', (req, res) => {
     const baseYield = seasonData.baseYield;
     const variance = seasonData.variance;
     
-    const predictedYield = (baseYield + (Math.random() * variance - variance / 2)) * area_ha;
-    const totalCost = parseFloat(cost_per_ha) * parseFloat(area_ha);
-    const totalRevenue = predictedYield * 1000 * parseFloat(price_per_kg); // convert tons to kg
+    const areaNum = parseFloat(area_ha);
+    const costPerHa = parseFloat(cost_per_ha);
+    const pricePerKg = parseFloat(price_per_kg);
+    
+    const predictedYield = (baseYield + (Math.random() * variance - variance / 2)) * areaNum;
+    const totalCost = costPerHa * areaNum;
+    const totalRevenue = predictedYield * 1000 * pricePerKg; // convert tons to kg
     const profit = totalRevenue - totalCost;
-    const profitMargin = ((profit / totalRevenue) * 100) || 0;
+    const roi = (profit / totalCost * 100) || 0;
+    const profitPerHa = profit / areaNum;
+    const breakEvenYield = totalCost / (areaNum * pricePerKg); // in kg
     
     res.json({
       success: true,
       district,
       season,
       year: parseInt(year),
-      area_ha: parseFloat(area_ha),
-      predicted_yield_tons: parseFloat(predictedYield.toFixed(2)),
-      cost_per_ha: parseFloat(cost_per_ha),
+      area_ha: areaNum,
+      estimated_profit: parseFloat(profit.toFixed(2)),
+      revenue: parseFloat(totalRevenue.toFixed(2)),
       total_cost: parseFloat(totalCost.toFixed(2)),
-      price_per_kg: parseFloat(price_per_kg),
-      total_revenue: parseFloat(totalRevenue.toFixed(2)),
-      net_profit: parseFloat(profit.toFixed(2)),
-      profit_margin_percent: parseFloat(profitMargin.toFixed(2))
+      roi: parseFloat(roi.toFixed(2)),
+      profit_per_ha: parseFloat(profitPerHa.toFixed(2)),
+      break_even_yield: parseFloat((breakEvenYield).toFixed(2)),
+      price_per_kg: pricePerKg,
+      cost_per_ha: costPerHa
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -115,26 +122,51 @@ router.get('/warning', (req, res) => {
     
     const warnings = [
       {
-        type: 'Pest',
-        severity: 'Medium',
-        description: 'Rice Hispa detected in nearby areas',
-        recommendation: 'Monitor crops closely and consider preventive spraying'
+        message: 'Rice Hispa detected in nearby areas',
+        message_si: 'අახ අසල් ප්‍රදේශවල කුරුමිණ් සනසුන් අনාවරණය කර ඇත'
       },
       {
-        type: 'Weather',
-        severity: 'Low',
-        description: 'Monsoon onset may be delayed by 2-3 days',
-        recommendation: 'Plan irrigation accordingly'
+        message: 'Monsoon onset may be delayed by 2-3 days',
+        message_si: 'අපි ශ්‍රී කාලය දින 2-3 ක් ප්‍රමාද විය හැකිය'
       }
     ];
+    
+    const recommendations = [
+      {
+        en: 'Monitor crops closely and consider preventive spraying',
+        si: 'බෝවන් සමීපව බලා සපයා ගැනීම සඳහා පිඩුවචනීයතාකරණ ඉසිසිප සලකා බලන්න'
+      },
+      {
+        en: 'Plan irrigation accordingly based on weather forecast',
+        si: 'කෙසේ හෝ කාලගුණ පූර්වීකරණ පදනම්ව වාරිමාර්ගයේ සැලසුම් කරන්න'
+      }
+    ];
+    
+    // Calculate risk score based on season and district
+    const riskScores = {
+      'Anuradhapura': { 'Maha': 0.65, 'Yala': 0.55 },
+      'Kurunegala': { 'Maha': 0.60, 'Yala': 0.50 },
+      'Polonnaruwa': { 'Maha': 0.70, 'Yala': 0.60 }
+    };
+    
+    const districtRisks = riskScores[district] || riskScores['Anuradhapura'];
+    const riskScore = districtRisks[season] || districtRisks['Maha'];
+    
+    // Determine risk level based on score
+    let riskLevel = 'low';
+    if (riskScore >= 0.7) riskLevel = 'critical';
+    else if (riskScore >= 0.6) riskLevel = 'high';
+    else if (riskScore >= 0.45) riskLevel = 'medium';
     
     res.json({
       success: true,
       district,
       season,
       year: parseInt(year),
+      risk_score: parseFloat(riskScore.toFixed(2)),
+      risk_level: riskLevel,
       warnings: warnings,
-      overall_risk: 'Medium'
+      recommendations: recommendations
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
