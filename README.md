@@ -188,6 +188,10 @@ uvicorn main:app --reload --port 8000
 - **Instant Communication**: WhatsApp integration and direct call functionality
 - **Mark as Sold**: Track successful transactions and build reputation
 - **Feedback & Reviews**: Rate sellers after transactions
+- **✨ Saved Listings** (NEW): Bookmark marketplace listings for later viewing
+  - Save/unsave with visual feedback (bookmark button)
+  - Dedicated saved listings page with all product details
+  - Easy management and direct seller contact from saved view
 
 ### 🌤️ Weather Advisory
 - **Real-Time Weather Data**: Integration with OpenWeatherMap API
@@ -272,10 +276,25 @@ uvicorn main:app --reload --port 8000
 ### 🛍️ Buyer Dashboard
 - **Buyer-Specific Interface**: Dedicated dashboard for agricultural product buyers
 - **Quick Actions**: Browse marketplace, view agricultural news
-- **Saved Listings**: Bookmark interesting products for later (coming soon)
+- **Saved Listings**: ✅ Bookmark and manage interesting products - dedicated saved listings view
 - **Price Alerts**: Get notified about price drops (beta feature)
 - **Seller Discovery**: Find trusted sellers with high ratings
 - **Market Insights**: Access to market trends and price analytics
+
+**Saved Listings Features:**
+- 📌 **Bookmark Listings**: Click the bookmark button on any marketplace listing to save
+- 💾 **Save/Unsave**: Toggle save status with visual feedback (filled/outlined bookmark icon)
+- 📋 **Dedicated View**: Full-page saved listings view with all product details
+- 🧑‍🌾 **Farmer Details**: View seller reputation, sales history, and ratings
+- 📞 **Contact Options**: Direct WhatsApp & Call buttons to reach sellers
+- ⭐ **Rate Sellers**: Review and rate sellers from saved listings
+- 🔖 **Quick Management**: Easy unsave button to remove listings
+- 🌐 **Bilingual**: Full English and Sinhala translation support
+
+**API Endpoints (Saved Listings):**
+- `POST /api/saved-listings/toggle/:listingId` - Toggle save/unsave a listing
+- `GET /api/saved-listings` - Get all saved listings for current user
+- `GET /api/saved-listings/check/:listingId` - Check if listing is saved
 
 ---
 
@@ -475,6 +494,7 @@ govi-isuru/
 │   │   │   ├── AgriNews.js          # News feed with AI summaries & TTS
 │   │   │   ├── CommunityAlerts.js   # Disease alert system
 │   │   │   ├── Marketplace.js       # P2P marketplace
+│   │   │   ├── SavedListings.js     # 🔖 Saved listings browser (NEW)
 │   │   │   ├── MarketTrends.js      # Analytics dashboard
 │   │   │   ├── YieldPrediction.js   # 📊 Yield forecasting & analytics
 │   │   │   ├── PriceAnalytics.js    # Price trend charts
@@ -512,6 +532,7 @@ govi-isuru/
 │   │   ├── officer.js               # Officer user endpoints
 │   │   ├── officerWorkflow.js       # Officer workflow & verification
 │   │   ├── reputation.js            # Farmer ratings
+│   │   ├── savedListings.js         # Buyer saved listings (bookmark feature)
 │   │   └── suitability.js           # Crop suitability endpoints
 │   ├── services/
 │   │   ├── alertService.js          # Alert management
