@@ -345,7 +345,7 @@ function MainApp() {
     <div 
       className="min-h-screen font-sans flex flex-col md:flex-row relative"
       style={{
-        background: `linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url(${getBackgroundImage()})`,
+        background: `linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), url(${getBackgroundImage()})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
@@ -502,10 +502,10 @@ function MainApp() {
           </div>
 
           {/* Content Wrapper - Direct Content Access */}
-          <div className="flex-1 overflow-y-auto relative z-10">
+          <div className="flex-1 overflow-y-auto relative z-10 bg-white/25">
             <div className="w-full mx-auto">
               {/* Desktop Welcome Header Only */}
-              <div className="hidden md:block bg-white/95 backdrop-blur-sm border-b border-slate-200 md:m-4 md:rounded-xl md:border md:shadow-lg p-4">
+              <div className="hidden md:block bg-white/70 backdrop-blur-sm border-b border-slate-200 md:m-4 md:rounded-xl md:border md:shadow-lg p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-slate-500">
