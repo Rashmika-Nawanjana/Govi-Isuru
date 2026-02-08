@@ -4,12 +4,53 @@ const axios = require('axios');
  * Llama 3.3 70B Chatbot Service using Hugging Face Router API (OpenAI-compatible)
  * No local GPU required - uses cloud inference
  * Automatic fallback to Llama 3.1 8B on cold starts (503 errors)
+ * Falls back to mock responses when external service is unavailable
  */
 
 const HUGGINGFACE_API_URL = 'https://router.huggingface.co/v1/chat/completions';
 const PRIMARY_MODEL = 'meta-llama/Llama-3.3-70B-Instruct';
 const FALLBACK_MODEL = 'meta-llama/Llama-3.1-8B-Instruct';
 const HF_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN || '';
+
+/**
+ * Generate mock response when external services are unavailable
+ */
+function generateMockResponse(userMessage, language = 'en') {
+  const lowerMessage = userMessage.toLowerCase();
+  
+  const responses = {
+    en: {
+      default: "Thank you for your question! While I'm temporarily unavailable, here are some tips:\n\n• For disease identification: Use the AI Crop Doctor feature with a clear leaf photo\n• For market prices: Check Market Trends for the latest rates\n• For weather info: Visit Weather Advisory for your district\n• For yield predictions: Go to Yield Prediction section with your location details\n\nPlease try again in a moment!",
+      rice: "Rice is one of Sri Lanka's most important crops. For cultivation advice, check the AI Doctor feature or browse Agricultural News. Key tips:\n• Best season: Maha (main monsoon)\n• Common diseases: Bacterial Leaf Blight, Brown Spot, Leaf Blast\n• Treatment: Use recommended fungicides and maintain proper water management\n• Yield: Typical yield 4-5 metric tons per hectare in good conditions",
+      tea: "Tea cultivation requires elevation (above 600m) and good rainfall. For personalized advice:\n• Use AI Crop Doctor to identify leaf diseases\n• Check Weather Advisory for rainfall patterns\n• Monitor for Blister Blight, Brown Blight during monsoon\n• Consult Agricultural News for latest market trends",
+      chili: "Chili grows well in low elevations with warm temperatures:\n• Ideal temperature: 20-30°C\n• Common issues: Thrips, Leaf Spot, Yellow Virus\n• Prevention: Use proper spacing and pest management\n• Market demand: High in Sri Lanka, check Marketplace for prices",
+      weather: "Weather is crucial for farming! Use our Weather Advisory feature to:\n• Get real-time conditions and 5-day forecasts\n• Receive humidity warnings for fungal disease risk\n• Plan irrigation and fertilizer application timing\n• Track monsoon patterns for your district",
+      price: "Check Market Trends for live price updates on Rice, Tea, and Chili across Sri Lankan districts. Use AgroLink Marketplace for direct farmer-to-buyer trading.",
+      marketplace: "Use AgroLink Marketplace to:\n• Post your crop listings\n• Browse other farmers' offerings\n• Rate and review sellers\n• Contact buyers/sellers via WhatsApp or phone"
+    },
+    si: {
+      default: "ඔබගේ ප්‍රශ්නයට ස්තුතියි! AI සේවාව තාවකාලිකව නොමැති අතර, සමහර ඉඟි:\n\n• රෝග හඳුනා ගැනීම: AI ගස් වෛද්‍යවරයා එක්කෙනි\n• වෙළඳ මිල: වෙළඳ ප්‍රවණතා පරීක්ෂා කරන්න\n• කාලගුණ: කාලගුණ උපදෙස් බලන්න\n• අස්වැන්න: අස්වැන්න අනාවැකිය උපදෙස් දෙන්න",
+      rice: "සහල් ශ්‍රී ලංකාවේ වැදගත්ම බෝගයි. වගා උපදෙස් සඳහා:\n• හොඳම season: මහ (ප්‍රධාන සමෝ)\n• සामාන්‍ය රෝග: බෛක්ටීරිය잎 ගිඹුල්, බ්‍රවුන් ස්පෝට්, පත්‍ර ස්ફීතකතා\n• ගුණ: සාමාන්‍ය අස්වැන්න 4-5 metric ton/hectare",
+      tea: "තේ වගාව උසස් ස්ථානවලින් (600m ඉහලින්) සහ හොඳ වර්ෂාපතනයෙන් අවශ්‍යය:\n• AI වෛද්‍යවරයා කඩුවිතින්",
+      chili: "කුරුඹුරු උණුසුම් පෙදෙසින් හොඳින් වැඩි වෙයි:\n• ඉතා සුවපත් තාපමාන: 20-30°C\n• සාමාන්‍ය ගැටලුව: Thrips, Leaf Spot, Yellow Virus",
+      weather: "කාලගුණය ගොවිතැනට අත්‍යවශ්‍යය!",
+      price: "වෙළඳ ප්‍රවණතා පරීක්ෂා කරන්න සහල, තේ, කුරුඹුරු සඳහා",
+      marketplace: "AgroLink වෙළඳ සෙල්ලම භාවිතා කරන්න ඔබගේ බෝගවල ලැයිස්තුව දැමීමට"
+    }
+  };
+  
+  const langResponses = responses[language] || responses.en;
+  
+  // Check keywords and return relevant response
+  if (lowerMessage.includes('rice') || lowerMessage.includes('සහල')) return langResponses.rice;
+  if (lowerMessage.includes('tea') || lowerMessage.includes('තේ')) return langResponses.tea;
+  if (lowerMessage.includes('chili') || lowerMessage.includes('කුරුඹුරු')) return langResponses.chili;
+  if (lowerMessage.includes('weather') || lowerMessage.includes('කාලගුණ')) return langResponses.weather;
+  if (lowerMessage.includes('price') || lowerMessage.includes('මිල')) return langResponses.price;
+  if (lowerMessage.includes('marketplace') || lowerMessage.includes('වෙළඳ')) return langResponses.marketplace;
+  
+  return langResponses.default;
+}
 
 /**
  * Call AI model via Hugging Face Router API (OpenAI-compatible format)
@@ -199,8 +240,16 @@ async function generateResponse(userMessage, history = [], options = {}) {
           error.message.includes('503') || 
           error.message.includes('Model is loading')) {
         console.log('Primary model cold, falling back to Llama 3.1 8B...');
-        response = await callModelAPI(messages, options, FALLBACK_MODEL);
-        modelUsed = FALLBACK_MODEL;
+        try {
+          response = await callModelAPI(messages, options, FALLBACK_MODEL);
+          modelUsed = FALLBACK_MODEL;
+        } catch (fallbackError) {
+          // Both models failed, use mock response
+          console.log('Both AI models unavailable, using mock response...');
+          const language = options.language || 'en';
+          response = generateMockResponse(userMessage, language);
+          modelUsed = 'MOCK';
+        }
       } else {
         throw error; // Re-throw if not a cold start error
       }
@@ -209,15 +258,21 @@ async function generateResponse(userMessage, history = [], options = {}) {
     return {
       success: true,
       answer: response,
-      model: modelUsed.split('/')[1], // Extract model name
-      source: 'Hugging Face Router API',
+      model: modelUsed === 'MOCK' ? 'Assistant' : modelUsed.split('/')[1],
+      source: modelUsed === 'MOCK' ? 'Local Knowledge Base' : 'Hugging Face Router API',
     };
   } catch (error) {
     console.error('Chatbot error:', error.message);
+    
+    // Final fallback: return mock response
+    const language = options.language || 'en';
+    const mockResponse = generateMockResponse(userMessage, language);
+    
     return {
-      success: false,
-      error: error.message,
-      fallback: "I'm having trouble connecting to the AI service right now. Please try again in a moment.",
+      success: true,
+      answer: mockResponse,
+      model: 'Assistant',
+      source: 'Local Knowledge Base',
     };
   }
 }
