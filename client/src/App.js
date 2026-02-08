@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Leaf, ShoppingBag, Languages, LayoutDashboard, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X } from 'lucide-react';
+import { Leaf, ShoppingBag, Languages, LayoutDashboard, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X, FileText } from 'lucide-react';
 import { BrowserRouter, Routes, Route, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import CropSuitability from './components/CropSuitability';
 import AIDoctor from './components/AIDoctor';
@@ -22,6 +22,9 @@ import OfficerDashboard from './components/OfficerDashboard';
 import BuyerDashboard from './components/BuyerDashboard';
 import UserProfile from './components/UserProfile';
 import TraditionalRice from './components/TraditionalRice';
+import ReportVerification from './components/ReportVerification';
+import AreaAlerts from './components/AreaAlerts';
+import MyReports from './components/MyReports';
 import { districtCoordinates } from './data/sriLankaCoordinates';
 
 const translations = {
@@ -298,6 +301,7 @@ function MainApp() {
       // Farmer tabs
       return [
         { id: 'doctor', icon: LayoutDashboard, label: t.doctor, emoji: '🩺' },
+        { id: 'myReports', icon: FileText, label: lang === 'si' ? 'මගේ වාර්තා' : 'My Reports', emoji: '📋' },
         { id: 'yield', icon: BarChart3, label: t.yieldForecast, emoji: '🌾' },
         { id: 'trends', icon: TrendingUp, label: t.trends, emoji: '📈' },
         { id: 'market', icon: ShoppingBag, label: t.market, emoji: '🛒' },
@@ -321,7 +325,9 @@ function MainApp() {
       // Government Officer tabs
       return [
         { id: 'officerDashboard', icon: LayoutDashboard, label: 'Area Dashboard', emoji: '📊' },
-        { id: 'diseaseAlerts', icon: AlertTriangle, label: t.diseaseAlerts, emoji: '⚠️' },
+        { id: 'reportVerification', icon: AlertTriangle, label: 'Verify Reports', emoji: '✅' },
+        { id: 'areaAlerts', icon: AlertTriangle, label: t.diseaseAlerts, emoji: '⚠️' },
+        { id: 'diseaseAlerts', icon: AlertTriangle, label: 'Legacy Alerts', emoji: '⚠️' },
         { id: 'news', icon: Newspaper, label: t.news, emoji: '📰' },
         { id: 'riceVarieties', icon: BookOpen, label: t.riceVarieties, emoji: '🌾' },
         profileTab,
@@ -531,6 +537,7 @@ function MainApp() {
                 {(!user?.role || user?.role === 'farmer') && (
                   <>
                     {view === 'doctor' && <AIDoctor lang={lang} user={user} />}
+                    {view === 'myReports' && <MyReports user={user} lang={lang} />}
                     {view === 'market' && <Marketplace lang={lang} currentUser={user} />}
                     {view === 'weather' && <WeatherAdvisor lang={lang} lat={coords.lat} lon={coords.lon} user={user} />}
                     {view === 'trends' && <MarketTrends lang={lang} />}
@@ -558,6 +565,8 @@ function MainApp() {
                 {user?.role === 'officer' && (
                   <>
                     {view === 'officerDashboard' && <OfficerDashboard user={user} language={lang} />}
+                    {view === 'reportVerification' && <ReportVerification user={user} lang={lang} />}
+                    {view === 'areaAlerts' && <AreaAlerts user={user} lang={lang} />}
                     {view === 'diseaseAlerts' && <AlertsDashboard user={user} language={lang} isOfficer={true} />}
                     {view === 'areaAnalytics' && <OfficerDashboard user={user} language={lang} initialTab="analytics" />}
                     {view === 'news' && <AgriNews lang={lang} user={user} />}

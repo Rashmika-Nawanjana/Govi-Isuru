@@ -265,4 +265,36 @@ router.get('/alerts/my-area', authMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * GET /api/reports/my-reports
+ * Farmer gets their own submitted reports
+ */
+router.get('/my-reports', authMiddleware, async (req, res) => {
+  try {
+    const currentUser = req.user;
+
+    // Validate farmer role
+    if (currentUser.role !== 'farmer') {
+      return res.status(403).json({ success: false, msg: 'Only farmers can view their own reports' });
+    }
+
+    // Get all reports submitted by this farmer
+    const reports = await Report.find({
+      farmerId: currentUser._id
+    })
+      .select('title description image_url ai_prediction confidence_score status verifiedBy verificationDate verificationNotes gnDivision createdAt')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      reports,
+      count: reports.length
+    });
+
+  } catch (err) {
+    console.error('Error fetching farmer reports:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;
