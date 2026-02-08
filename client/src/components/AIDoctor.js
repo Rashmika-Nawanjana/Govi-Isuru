@@ -146,10 +146,22 @@ const AIDoctor = ({ lang, user }) => {
   const saveDiseaseReport = async (predictionData, crop) => {
     try {
       const token = localStorage.getItem('token');
+      
+      // Convert image to base64
+      let imageBase64 = '';
+      if (file) {
+        imageBase64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
       const reportData = {
         title: `${crop.charAt(0).toUpperCase() + crop.slice(1)} - ${predictionData.prediction}`,
         description: predictionData.description || 'Disease detected by AI Crop Doctor',
-        image_url: preview || '',
+        image_url: imageBase64 || '',
         ai_prediction: predictionData.prediction,
         confidence_score: predictionData.confidence || 0,
         report_type: 'disease'
