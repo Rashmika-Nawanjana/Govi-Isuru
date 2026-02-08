@@ -343,17 +343,15 @@ function MainApp() {
   // 4. MAIN APP DASHBOARD
   return (
     <div 
-      className="min-h-screen font-sans flex flex-col md:flex-row"
+      className="min-h-screen font-sans flex flex-col md:flex-row relative"
       style={{
-        backgroundImage: `url(${getBackgroundImage()})`,
+        background: `linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url(${getBackgroundImage()})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
+        backgroundAttachment: 'fixed',
+        backgroundRepeat: 'no-repeat'
       }}
     >
-      {/* Background overlay for better readability */}
-      <div className="fixed inset-0 bg-black/20 pointer-events-none z-0" />
-      
       {/* Mobile overlay */}
       {isSidebarOpen && (
         <button
