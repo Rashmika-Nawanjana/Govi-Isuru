@@ -2,12 +2,12 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Listing = require('../models/Listing');
-const { verifyToken } = require('../middleware/authMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
 
 // @route   POST /api/saved-listings/toggle/:listingId
 // @desc    Toggle save/unsave a listing
 // @access  Private (Buyers only)
-router.post('/toggle/:listingId', verifyToken, async (req, res) => {
+router.post('/toggle/:listingId', authMiddleware, async (req, res) => {
   try {
     const { listingId } = req.params;
     const userId = req.user.id;
@@ -53,7 +53,7 @@ router.post('/toggle/:listingId', verifyToken, async (req, res) => {
 // @route   GET /api/saved-listings
 // @desc    Get all saved listings for current user
 // @access  Private (Buyers only)
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -87,7 +87,7 @@ router.get('/', verifyToken, async (req, res) => {
 // @route   GET /api/saved-listings/check/:listingId
 // @desc    Check if a specific listing is saved by current user
 // @access  Private
-router.get('/check/:listingId', verifyToken, async (req, res) => {
+router.get('/check/:listingId', authMiddleware, async (req, res) => {
   try {
     const { listingId } = req.params;
     const userId = req.user.id;
