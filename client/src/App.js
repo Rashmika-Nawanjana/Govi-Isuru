@@ -345,7 +345,7 @@ function MainApp() {
     <div 
       className="min-h-screen font-sans flex flex-col md:flex-row relative"
       style={{
-        background: `linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), url(${getBackgroundImage()})`,
+        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), url(${getBackgroundImage()})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
