@@ -31,18 +31,30 @@ router.get('/predict', (req, res) => {
     const baseYield = seasonData.baseYield;
     const variance = seasonData.variance;
     
-    // Simple yield calculation
-    const predictedYield = (baseYield + (Math.random() * variance - variance / 2)) * area_ha;
+    // Calculate yield per hectare
+    const yieldPerHa = baseYield + (Math.random() * variance - variance / 2);
+    
+    // Calculate total production in kg
+    const areaNum = parseFloat(area_ha);
+    const totalProductionKg = yieldPerHa * areaNum * 1000; // Convert tons to kg
+    const totalProductionTons = yieldPerHa * areaNum;
     
     res.json({
       success: true,
       district,
       season,
       year: parseInt(year),
-      area_ha: parseFloat(area_ha),
-      predicted_yield: parseFloat(predictedYield.toFixed(2)),
+      area_ha: areaNum,
+      predicted_yield: parseFloat(totalProductionTons.toFixed(2)),
+      yield_kg_ha: parseFloat((yieldPerHa * 1000).toFixed(2)),
+      total_production_kg: parseFloat(totalProductionKg.toFixed(2)),
       unit: 'metric tons',
       confidence: 0.85,
+      stability_index: 0.78,
+      yield_range: {
+        min: parseFloat(((yieldPerHa - variance) * 1000).toFixed(2)),
+        max: parseFloat(((yieldPerHa + variance) * 1000).toFixed(2))
+      },
       factors: {
         rainfall: 'Good',
         soil: 'Fertile',
@@ -141,42 +153,52 @@ router.get('/rankings', (req, res) => {
       {
         rank: 1,
         district: 'Polonnaruwa',
-        average_yield: 4.8,
+        avg_yield: 4800,
         area_cultured_ha: 45000,
         production_tons: 216000,
-        growth_percent: 12.5
+        stability: 0.92,
+        trend: 0.125,
+        overall_score: 95
       },
       {
         rank: 2,
         district: 'Anuradhapura',
-        average_yield: 4.5,
+        avg_yield: 4500,
         area_cultured_ha: 38000,
         production_tons: 171000,
-        growth_percent: 8.3
+        stability: 0.88,
+        trend: 0.083,
+        overall_score: 92
       },
       {
         rank: 3,
         district: 'Kurunegala',
-        average_yield: 4.2,
+        avg_yield: 4200,
         area_cultured_ha: 35000,
         production_tons: 147000,
-        growth_percent: 5.2
+        stability: 0.85,
+        trend: 0.052,
+        overall_score: 88
       },
       {
         rank: 4,
         district: 'Ratnapura',
-        average_yield: 3.8,
+        avg_yield: 3800,
         area_cultured_ha: 28000,
         production_tons: 106400,
-        growth_percent: 3.1
+        stability: 0.78,
+        trend: 0.031,
+        overall_score: 78
       },
       {
         rank: 5,
         district: 'Matara',
-        average_yield: 3.5,
+        avg_yield: 3500,
         area_cultured_ha: 22000,
         production_tons: 77000,
-        growth_percent: 1.5
+        stability: 0.72,
+        trend: 0.015,
+        overall_score: 70
       }
     ];
     
@@ -201,11 +223,11 @@ router.get('/trends', (req, res) => {
     const { district = 'Anuradhapura', season = 'Maha' } = req.query;
     
     const trends = [
-      { year: 2022, yield_tons_per_ha: 3.8, area_ha: 35000, production_tons: 133000 },
-      { year: 2023, yield_tons_per_ha: 4.0, area_ha: 36000, production_tons: 144000 },
-      { year: 2024, yield_tons_per_ha: 4.3, area_ha: 37000, production_tons: 159100 },
-      { year: 2025, yield_tons_per_ha: 4.5, area_ha: 38000, production_tons: 171000 },
-      { year: 2026, yield_tons_per_ha: 4.6, area_ha: 39000, production_tons: 179400 }
+      { year: 2022, avg_yield_kg_ha: 3800, area_ha: 35000, total_production_mt: 133 },
+      { year: 2023, avg_yield_kg_ha: 4000, area_ha: 36000, total_production_mt: 144 },
+      { year: 2024, avg_yield_kg_ha: 4300, area_ha: 37000, total_production_mt: 159 },
+      { year: 2025, avg_yield_kg_ha: 4500, area_ha: 38000, total_production_mt: 171 },
+      { year: 2026, avg_yield_kg_ha: 4600, area_ha: 39000, total_production_mt: 179 }
     ];
     
     res.json({

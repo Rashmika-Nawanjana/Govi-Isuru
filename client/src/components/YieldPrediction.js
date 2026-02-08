@@ -238,7 +238,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
         ...(pricePerKg && { price_per_kg: pricePerKg })
       });
       
-      const response = await fetch(`${API_BASE}/api/yield/predict?${params}`);
+      const response = await fetch(`${API_BASE}/api/yield/profit?${params}`);
       const data = await response.json();
       
       if (data.success) {
