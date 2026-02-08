@@ -110,7 +110,7 @@ const AIDoctor = ({ lang, user }) => {
       setTimeout(() => setAnalysisStep(3), 1600);
 
       // Use crop-specific endpoint
-      const response = await axios.post(`${AI_API}/predict/${cropType}`, formData);
+      const response = await axios.post(`${API_BASE}/ai/predict/${cropType}`, formData);
       const data = response.data;
       
       const mappedResult = {

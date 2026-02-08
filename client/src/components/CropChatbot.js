@@ -565,7 +565,7 @@ export default function CropChatbot({ lang = 'en' }) {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await axios.post(`${AI_API}/predict/${selectedCropType}`, formData, {
+      const response = await axios.post(`${API_BASE}/ai/predict/${selectedCropType}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
