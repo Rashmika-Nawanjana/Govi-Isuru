@@ -53,6 +53,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
     fullName: '',
     username: '',
     email: '',
+    phone: '',
     password: '',
     confirmPassword: '',
     district: '',
@@ -132,6 +133,8 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
       usernamePlaceholder: 'Ex: namal_perera',
       email: 'Email Address',
       emailPlaceholder: 'your@email.com',
+      phone: 'Contact Number',
+      phonePlaceholder: 'Ex: +94771234567',
       password: 'Password',
       confirmPassword: 'Confirm Password',
       passwordRequirements: {
@@ -179,6 +182,8 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
       usernamePlaceholder: '???: namal_perera',
       email: '????????? ?????? ??????',
       emailPlaceholder: 'your@email.com',
+      phone: '????????? ?????? ????? ??????',
+      phonePlaceholder: '???: +94771234567',
       password: '??????',
       confirmPassword: '?????? ?????? ?????',
       passwordRequirements: {
@@ -396,6 +401,22 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-green-500 focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
               />
             </div>
+
+            {/* Phone */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider flex items-center gap-1">
+                <Globe size={12} /> {t.phone}
+              </label>
+              <input
+                type="tel"
+                name="phone"
+                required
+                placeholder={t.phonePlaceholder}
+                value={formData.phone}
+                onChange={handleChange}
+                className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-green-500 focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
+              />
+            </div>
           </div>
 
           {/* Password */}
@@ -408,7 +429,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 type={showPassword ? 'text' : 'password'}
                 name="password"
                 required
-                placeholder="••••••••"
+                placeholder="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
                 value={formData.password}
                 onChange={handleChange}
                 className="w-full p-4 pr-12 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-green-500 focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
@@ -483,7 +504,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 type={showConfirmPassword ? 'text' : 'password'}
                 name="confirmPassword"
                 required
-                placeholder="••••••••"
+                placeholder="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 className={`w-full p-4 pr-12 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 ${
