@@ -37,6 +37,9 @@ const UserSchema = new mongoose.Schema({
   account_flagged: { type: Boolean, default: false },
   last_report_at: { type: Date },
   
+  // Saved Listings (for buyers)
+  savedListings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Listing' }],
+  
   createdAt: { type: Date, default: Date.now }
 });
 

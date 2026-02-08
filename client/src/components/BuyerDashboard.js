@@ -106,7 +106,7 @@ const BuyerDashboard = ({ user, language = 'en', onNavigate }) => {
             <h3 className="text-sm md:text-lg font-bold text-slate-800">{text.saved}</h3>
           </div>
           <button
-            onClick={() => onNavigate && onNavigate('marketplace')}
+            onClick={() => onNavigate && onNavigate('savedListings')}
             className="text-[10px] md:text-sm font-semibold text-emerald-600 hover:text-emerald-700"
           >
             {text.viewSaved}

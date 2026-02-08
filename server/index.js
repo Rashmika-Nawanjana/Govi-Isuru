@@ -22,6 +22,7 @@ const authRoutes = require('./routes/auth');
 const weatherRoutes = require('./routes/weather');
 const yieldRoutes = require('./routes/yield');
 const reportRoutes = require('./routes/reports');
+const savedListingsRoutes = require('./routes/savedListings');
 
 const app = express();
 
@@ -67,6 +68,9 @@ app.use('/api/yield', yieldRoutes);
 
 // Disease/Pest Report Verification API Routes (Farmer reporting, Officer verification, Farmer alerts)
 app.use('/api/reports', reportRoutes);
+
+// Saved Listings API Routes (Buyers can save/view marketplace listings)
+app.use('/api/saved-listings', savedListingsRoutes);
 
 // 2. Connect to Database using environment variable
 // We remove the hardcoded string and the deprecated options (no longer needed in Mongoose 6+)

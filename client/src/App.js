@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Leaf, ShoppingBag, Languages, LayoutDashboard, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X, FileText } from 'lucide-react';
+import { Leaf, ShoppingBag, Languages, LayoutDashboard, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X, FileText, Bookmark } from 'lucide-react';
 import { BrowserRouter, Routes, Route, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import CropSuitability from './components/CropSuitability';
 import AIDoctor from './components/AIDoctor';
@@ -25,6 +25,7 @@ import TraditionalRice from './components/TraditionalRice';
 import ReportVerification from './components/ReportVerification';
 import AreaAlerts from './components/AreaAlerts';
 import MyReports from './components/MyReports';
+import SavedListings from './components/SavedListings';
 import { districtCoordinates } from './data/sriLankaCoordinates';
 
 const translations = {
@@ -48,6 +49,7 @@ const translations = {
     areaAnalytics: "Area Reports & Analytics",
     buyerDashboard: "Buyer Dashboard",
     marketplace: "Marketplace",
+    savedListings: "Saved Listings",
     agriNews: "Agri News"
   },
   si: { 
@@ -70,6 +72,7 @@ const translations = {
     areaAnalytics: "ප්‍රදේශ වාර්තා හා විශ්ලේෂණ",
     buyerDashboard: "ගැණුම්කරු උපකරණ පුවරුව",
     marketplace: "වෙළඳසැල",
+    savedListings: "සුරක්ෂිත ලැයිස්තු",
     agriNews: "ගොවි ප්‍රවෘත්ති"
   }
 };
@@ -309,6 +312,7 @@ function MainApp() {
       return [
         { id: 'buyerDashboard', icon: LayoutDashboard, label: t.buyerDashboard, emoji: '🛍️' },
         { id: 'marketplace', icon: ShoppingBag, label: t.marketplace, emoji: '🛒' },
+        { id: 'savedListings', icon: Bookmark, label: t.savedListings, emoji: '🔖' },
         { id: 'news', icon: Newspaper, label: t.agriNews, emoji: '📰' },
         { id: 'riceVarieties', icon: BookOpen, label: t.riceVarieties, emoji: '🌾' },
         profileTab,
@@ -554,6 +558,7 @@ function MainApp() {
                   <>
                     {view === 'buyerDashboard' && <BuyerDashboard user={user} language={lang} onNavigate={setView} />}
                     {view === 'marketplace' && <Marketplace lang={lang} currentUser={user} />}
+                    {view === 'savedListings' && <SavedListings lang={lang} currentUser={user} onNavigate={setView} />}
                     {view === 'news' && <AgriNews lang={lang} user={user} />}
                     {view === 'riceVarieties' && <TraditionalRice lang={lang} />}
                     {view === 'profile' && <UserProfile />}

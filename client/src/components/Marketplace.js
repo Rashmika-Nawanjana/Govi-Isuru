@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   ShoppingBag, MapPin, Phone, User, PlusCircle, Sprout, MessageCircle,
-  Star, CheckCircle, Award, ThumbsUp, X, MessageSquare, Trash2
+  Star, CheckCircle, Award, ThumbsUp, X, MessageSquare, Trash2, Bookmark
 } from 'lucide-react';
 import ReputationBadge, { MiniReputationBadge } from './ReputationBadge';
 import FeedbackForm from './FeedbackForm';
@@ -18,6 +18,7 @@ const Marketplace = ({ lang, currentUser }) => {
   const [feedbackListing, setFeedbackListing] = useState(null);
   const [viewFeedbackListing, setViewFeedbackListing] = useState(null);
   const [topFarmers, setTopFarmers] = useState([]);
+  const [savedListingIds, setSavedListingIds] = useState([]);
 
   const t = {
     en: { 
@@ -65,7 +66,10 @@ const Marketplace = ({ lang, currentUser }) => {
   useEffect(() => {
     fetchListings();
     fetchTopFarmers();
-  }, []);
+    if (currentUser) {
+      fetchSavedListings();
+    }
+  }, [currentUser]);
 
   const fetchListings = async () => {
     try {
@@ -82,6 +86,51 @@ const Marketplace = ({ lang, currentUser }) => {
       setTopFarmers(res.data.farmers || []);
     } catch (err) {
       console.error("Failed to fetch top farmers", err);
+    }
+  };
+
+  const fetchSavedListings = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const res = await axios.get(`${API_BASE}/api/saved-listings`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Extract just the IDs for quick lookup
+      const savedIds = res.data.listings.map(listing => listing._id);
+      setSavedListingIds(savedIds);
+    } catch (err) {
+      console.error("Failed to fetch saved listings", err);
+    }
+  };
+
+  const toggleSaveListing = async (listingId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert(lang === 'en' ? 'Please log in to save listings' : 'දැන්වීම් සුරැකීමට කරුණාකර පුරනය වන්න');
+        return;
+      }
+
+      const res = await axios.post(
+        `${API_BASE}/api/saved-listings/toggle/${listingId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.data.success) {
+        // Update saved listings state
+        if (res.data.isSaved) {
+          setSavedListingIds([...savedListingIds, listingId]);
+        } else {
+          setSavedListingIds(savedListingIds.filter(id => id !== listingId));
+        }
+      }
+    } catch (err) {
+      console.error("Failed to toggle saved listing", err);
+      alert(lang === 'en' ? 'Failed to save listing' : 'දැන්වීම සුරැකීමට අසමත් විය');
     }
   };
 
@@ -300,7 +349,7 @@ const Marketplace = ({ lang, currentUser }) => {
             {/* Action Buttons */}
             <div className="space-y-2">
               {/* Contact Actions */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className={`grid gap-2 ${!isOwnListing && currentUser ? 'grid-cols-3' : 'grid-cols-2'}`}>
                   {/* WhatsApp Button */}
                   <a 
                   href={`https://wa.me/${
@@ -326,6 +375,24 @@ const Marketplace = ({ lang, currentUser }) => {
                   >
                   <Phone size={16} /> {t[lang].contactCall}
                   </a>
+
+                  {/* Save Button (for non-owner users) */}
+                  {!isOwnListing && currentUser && (
+                    <button
+                      onClick={() => toggleSaveListing(item._id)}
+                      className={`flex items-center justify-center gap-1 py-2 rounded-xl font-bold text-xs transition shadow-sm ${
+                        savedListingIds.includes(item._id)
+                          ? 'bg-yellow-500 text-white hover:bg-yellow-600'
+                          : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                      }`}
+                    >
+                      <Bookmark size={14} fill={savedListingIds.includes(item._id) ? 'currentColor' : 'none'} />
+                      {savedListingIds.includes(item._id) 
+                        ? (lang === 'si' ? 'සුරකින ලදී' : 'Saved') 
+                        : (lang === 'si' ? 'සුරකින්න' : 'Save')
+                      }
+                    </button>
+                  )}
               </div>
 
               {/* Rate Seller & Mark Sold Buttons */}
