@@ -326,8 +326,7 @@ function MainApp() {
       return [
         { id: 'officerDashboard', icon: LayoutDashboard, label: 'Area Dashboard', emoji: '📊' },
         { id: 'reportVerification', icon: AlertTriangle, label: 'Verify Reports', emoji: '✅' },
-        { id: 'areaAlerts', icon: AlertTriangle, label: t.diseaseAlerts, emoji: '⚠️' },
-        { id: 'diseaseAlerts', icon: AlertTriangle, label: 'Legacy Alerts', emoji: '⚠️' },
+        { id: 'alerts', icon: AlertTriangle, label: t.diseaseAlerts, emoji: '⚠️' },
         { id: 'news', icon: Newspaper, label: t.news, emoji: '📰' },
         { id: 'riceVarieties', icon: BookOpen, label: t.riceVarieties, emoji: '🌾' },
         profileTab,
@@ -566,9 +565,7 @@ function MainApp() {
                   <>
                     {view === 'officerDashboard' && <OfficerDashboard user={user} language={lang} />}
                     {view === 'reportVerification' && <ReportVerification user={user} lang={lang} />}
-                    {view === 'areaAlerts' && <AreaAlerts user={user} lang={lang} />}
-                    {view === 'diseaseAlerts' && <AlertsDashboard user={user} language={lang} isOfficer={true} />}
-                    {view === 'areaAnalytics' && <OfficerDashboard user={user} language={lang} initialTab="analytics" />}
+                    {view === 'alerts' && <AlertsDashboard user={user} language={lang} />}
                     {view === 'news' && <AgriNews lang={lang} user={user} />}
                     {view === 'riceVarieties' && <TraditionalRice lang={lang} />}
                     {view === 'profile' && <UserProfile />}

@@ -179,11 +179,23 @@ const ReportVerification = ({ lang, user }) => {
                 {pendingReports.map((report) => (
                   <div
                     key={report._id}
-                    className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all p-6 border-l-4 border-amber-500 cursor-pointer"
+                    className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all border-l-4 border-amber-500 cursor-pointer overflow-hidden"
                     onClick={() => setSelectedReport(report)}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
+                      {/* Image Section */}
+                      {report.image_url && (
+                        <div className="md:col-span-1">
+                          <img 
+                            src={report.image_url} 
+                            alt="Leaf disease" 
+                            className="w-full h-48 object-cover rounded-xl shadow-md"
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Content Section */}
+                      <div className={report.image_url ? 'md:col-span-2' : 'md:col-span-3'}>
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="text-xl font-bold text-gray-900">{report.title}</h3>
                           <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-semibold">
@@ -192,7 +204,7 @@ const ReportVerification = ({ lang, user }) => {
                         </div>
                         <p className="text-gray-600 mb-4">{report.description}</p>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div className="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm">
                           <div className="flex items-center gap-2 text-gray-600">
                             <User size={16} />
                             <span>{report.farmerName}</span>
@@ -224,7 +236,7 @@ const ReportVerification = ({ lang, user }) => {
                         </div>
                       </div>
 
-                      <button className="ml-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                      <button className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors md:hidden">
                         <Eye className="h-5 w-5 text-gray-600" />
                       </button>
                     </div>
