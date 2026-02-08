@@ -287,10 +287,10 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
               <Sprout className="h-10 w-10 text-white drop-shadow-lg" />
             </div>
             <h2 className="text-3xl font-black text-white mb-2 tracking-tight drop-shadow-lg">
-              {lang === 'si' ? ' ???? ????' : ' Create Your Profile'}
+              {lang === 'si' ? 'ඔබගේ පැතිකඩ සාදන්න' : ' Create Your Profile'}
             </h2>
             <p className="text-green-100 text-sm font-medium">
-              {lang === 'si' ? '?? ??? ?????? ????? ??? ???' : "Join Sri Lanka's Digital Farming Revolution"}
+              {lang === 'si' ? 'ශ්‍රී ලංකාවේ ඩිජිටල් ගොවිතැනේ විপ්ලවයට සම්බන්ධ වන්න' : "Join Sri Lanka's Digital Farming Revolution"}
             </p>
           </div>
         </div>
@@ -307,7 +307,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
           {/* Role Selection */}
           <div className="mb-4">
             <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider mb-3 block flex items-center gap-2">
-              <span className="text-lg">??</span>
+              <span className="text-lg">👤</span>
               {t.selectRole}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
