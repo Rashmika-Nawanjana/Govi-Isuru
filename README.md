@@ -22,6 +22,8 @@
 
 **Govi Isuru** (Sinhala: ගොවි ඉසුරු) is a comprehensive digital farming platform designed to empower Sri Lankan farmers with AI-driven crop disease detection, real-time market intelligence, weather advisory, community disease alerts, and a peer-to-peer marketplace. The name "Govi Isuru" translates to "Farmer's Fortune" in Sinhala, reflecting our mission to bring prosperity to the agricultural community.
 
+**Live Link** - (https://govi-isuru.kalanalakshan.me/)
+
 ### Prerequisites
 - **Node.js** v22.x or higher - [Download](https://nodejs.org/)
 - **Python** 3.8+ - [Download](https://www.python.org/)
