@@ -1048,20 +1048,6 @@ docker-compose up -d --scale backend=3
 6. Configure Elastic IP for static address
 7. Set up CloudWatch for monitoring
 
-#### DigitalOcean
-1. Create Droplet (4GB RAM recommended)
-2. Install Docker
-3. Configure firewall rules
-4. Deploy using Docker Compose
-5. Set up managed MongoDB if not using Atlas
-6. Configure domain and SSL
-
-#### Heroku
-- Use Heroku Container Registry for Docker deployment
-- Set up MongoDB Atlas (Heroku doesn't provide MongoDB)
-- Configure environment variables in Heroku dashboard
-- Use Heroku CLI for deployment
-
 ### Environment-Specific Configurations
 
 #### Development
@@ -1331,7 +1317,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Contact
 
 For questions, suggestions, or collaboration:
-- **Email**: contact@goviisuru.lk
 - **GitHub**: [github.com/yourusername/govi-isuru](https://github.com/yourusername/govi-isuru)
 - **Website**: [www.goviisuru.lk](https://www.goviisuru.lk)
 
