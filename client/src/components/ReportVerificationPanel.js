@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   Shield,
-  AlertTriangle,
   CheckCircle,
   XCircle,
   Flag,
@@ -16,11 +15,7 @@ import {
   Search,
   Filter,
   Clock,
-  FileText,
-  AlertOctagon,
-  Clipboard,
-  History,
-  Send
+  History
 } from 'lucide-react';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -235,6 +230,7 @@ const ReportVerificationPanel = ({ user, language = 'en', onActionTaken }) => {
   useEffect(() => {
     fetchReports();
     fetchStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, priorityFilter]);
 
   // Update report status

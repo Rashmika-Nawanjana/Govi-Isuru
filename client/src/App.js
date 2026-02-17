@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Leaf, ShoppingBag, Languages, LayoutDashboard, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X, FileText, Bookmark } from 'lucide-react';
-import { BrowserRouter, Routes, Route, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import CropSuitability from './components/CropSuitability';
 import AIDoctor from './components/AIDoctor';
 import Marketplace from './components/Marketplace';
@@ -12,10 +12,10 @@ import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import VerifyEmail from './components/VerifyEmail';
 import LlamaChatbot from './components/LlamaChatbot';
-import CommunityAlerts from './components/CommunityAlerts';
+
 import AlertsDashboard from './components/AlertsDashboard';
 import AgriNews from './components/AgriNews';
-import NewsWidget from './components/NewsWidget';
+
 import YieldPrediction from './components/YieldPrediction';
 import HomePage from './components/HomePage';
 import OfficerDashboard from './components/OfficerDashboard';
@@ -23,7 +23,7 @@ import BuyerDashboard from './components/BuyerDashboard';
 import UserProfile from './components/UserProfile';
 import TraditionalRice from './components/TraditionalRice';
 import ReportVerification from './components/ReportVerification';
-import AreaAlerts from './components/AreaAlerts';
+
 import MyReports from './components/MyReports';
 import SavedListings from './components/SavedListings';
 import { districtCoordinates } from './data/sriLankaCoordinates';
@@ -117,13 +117,11 @@ const ResetPasswordPage = () => {
 
 // Main App Component
 function MainApp() {
-  const navigate = useNavigate();
   // 1. ALL HOOKS AT THE VERY TOP (Crucial for React Rules)
   const [view, setView] = useState('home'); 
   const [lang, setLang] = useState('en');
   const [coords, setCoords] = useState({ lat: 8.3114, lon: 80.4037 }); // Default to Anuradhapura
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
-  const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const t = translations[lang];
@@ -178,6 +176,7 @@ function MainApp() {
       else if (user?.role === 'buyer') initialView = 'buyerDashboard';
       setView(initialView);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // 2. HELPER FUNCTIONS

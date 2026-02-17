@@ -4,10 +4,8 @@ import {
   Star, 
   X, 
   MessageSquare, 
-  User, 
-  Calendar,
-  ThumbsUp,
-  Award
+  User,
+  ThumbsUp
 } from 'lucide-react';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -45,6 +43,7 @@ const FeedbackList = ({ listing, onClose, lang = 'en' }) => {
 
   useEffect(() => {
     fetchFeedbacks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listing]);
 
   const fetchFeedbacks = async () => {

@@ -169,6 +169,7 @@ const OfficerActionLogs = ({ user, language = 'en', refreshTrigger = 0 }) => {
 
   useEffect(() => {
     fetchLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, days, refreshTrigger]);
 
   // Format date

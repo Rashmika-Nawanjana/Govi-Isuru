@@ -306,6 +306,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
   // Initial load
   useEffect(() => {
     fetchRankings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Predict when form changes

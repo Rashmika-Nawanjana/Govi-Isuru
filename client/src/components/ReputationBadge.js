@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, Shield, CheckCircle } from 'lucide-react';
+import { Star, CheckCircle } from 'lucide-react';
 
 /**
  * ReputationBadge - Displays farmer reputation score with stars

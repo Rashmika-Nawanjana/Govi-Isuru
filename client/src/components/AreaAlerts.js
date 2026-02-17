@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-  AlertTriangle, Bell, MapPin, Calendar, User, Loader2, FileText, Eye,
-  Shield, Activity, Leaf, Thermometer, Wind, Droplets
+  AlertTriangle, Bell, MapPin, Calendar, User, Loader2, Eye,
+  Shield, Activity, Leaf, Wind
 } from 'lucide-react';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';

@@ -270,6 +270,7 @@ const DiseaseHeatmap = ({ user, language = 'en' }) => {
 
   useEffect(() => {
     fetchHeatmapData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   // Calculate point size based on count

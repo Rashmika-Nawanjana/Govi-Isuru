@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { User, Lock, ArrowRight, Loader2, KeyRound, Leaf, Sparkles, Sun, Cloud, Droplets, AlertCircle, Mail } from 'lucide-react';
+import { User, Lock, ArrowRight, Loader2, Leaf, Sparkles, Sun, Cloud, Droplets, AlertCircle, Mail } from 'lucide-react';
 
 const Login = ({ onLoginSuccess, switchToRegister, switchToForgotPassword, lang }) => {
   const [loading, setLoading] = useState(false);

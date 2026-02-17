@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { CloudRain, Wind, AlertCircle, Thermometer, MapPin, Calendar, CloudSun, Droplets, Sun } from 'lucide-react';
+import { Wind, AlertCircle, MapPin, Calendar, CloudSun, Droplets } from 'lucide-react';
 
 const WeatherAdvisor = ({ lat, lon, lang, user }) => {
   const [weather, setWeather] = useState(null);
@@ -32,6 +32,7 @@ const WeatherAdvisor = ({ lat, lon, lang, user }) => {
       }
     };
     fetchAllWeather();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lat, lon]);
 
   if (!weather) return (
