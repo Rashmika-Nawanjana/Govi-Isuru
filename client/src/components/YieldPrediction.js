@@ -7,9 +7,6 @@ import {
   DollarSign,
   BarChart3,
   Leaf,
-  CloudRain,
-  Sun,
-  Activity,
   Award,
   Target,
   Info,
@@ -28,13 +25,6 @@ const DISTRICTS = [
   'Matale', 'Matara', 'Monaragala', 'Mullaitivu', 'NuwaraEliya',
   'Polonnaruwa', 'Puttalam', 'Ratnapura', 'Trincomalee', 'Vavuniya'
 ];
-
-// Climate zones info
-const CLIMATE_INFO = {
-  wet_zone: { name: 'Wet Zone', icon: CloudRain, color: 'blue', desc: 'High rainfall, suitable for rice' },
-  dry_zone: { name: 'Dry Zone', icon: Sun, color: 'orange', desc: 'Irrigation dependent' },
-  intermediate: { name: 'Intermediate', icon: Activity, color: 'green', desc: 'Moderate conditions' }
-};
 
 // Translations
 const translations = {

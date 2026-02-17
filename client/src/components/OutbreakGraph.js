@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   LineChart,
@@ -19,7 +19,6 @@ import {
   Filter,
   RefreshCw,
   ArrowUp,
-  ArrowDown,
   Activity
 } from 'lucide-react';
 
@@ -40,7 +39,6 @@ const diseaseColors = [
 const OutbreakGraph = ({ user, language = 'en' }) => {
   const [timeSeriesData, setTimeSeriesData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     disease: 'all',
     days: 30
@@ -95,7 +93,7 @@ const OutbreakGraph = ({ user, language = 'en' }) => {
   const text = t[language] || t.en;
 
   // Fetch time series data
-  const fetchTimeSeriesData = async () => {
+  const fetchTimeSeriesData = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -106,18 +104,16 @@ const OutbreakGraph = ({ user, language = 'en' }) => {
 
       const response = await axios.get(`${API_BASE}/api/alerts/timeseries?${params}`);
       setTimeSeriesData(response.data);
-      setError(null);
     } catch (err) {
       console.error('Error fetching time series data:', err);
-      setError('Failed to load trend data');
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, user?.district]);
 
   useEffect(() => {
     fetchTimeSeriesData();
-  }, [filters, user?.district]);
+  }, [fetchTimeSeriesData]);
 
   // Transform data for Recharts
   const getChartData = () => {

@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   Shield,
-  AlertTriangle,
   CheckCircle,
   XCircle,
   Flag,
@@ -42,7 +41,6 @@ const statusConfig = {
 const AdminModerationPanel = ({ user, language = 'en' }) => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [expandedReport, setExpandedReport] = useState(null);
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -111,7 +109,7 @@ const AdminModerationPanel = ({ user, language = 'en' }) => {
   const getToken = () => localStorage.getItem('token');
 
   // Fetch flagged reports
-  const fetchReports = async () => {
+  const fetchReports = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_BASE}/api/alerts/flagged`, {
@@ -119,18 +117,16 @@ const AdminModerationPanel = ({ user, language = 'en' }) => {
         params: { district: user?.district }
       });
       setReports(response.data.reports || []);
-      setError(null);
     } catch (err) {
       console.error('Error fetching reports:', err);
-      setError('Failed to load reports');
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.district]);
 
   useEffect(() => {
     fetchReports();
-  }, [user?.district]);
+  }, [fetchReports]);
 
   // Review a report
   const reviewReport = async (reportId, status, flaggedReason = null) => {

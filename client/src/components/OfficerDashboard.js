@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   AlertTriangle,
@@ -100,12 +100,7 @@ const OfficerDashboard = ({ user, language = 'en', initialTab = 'overview' }) =>
 
   const getToken = () => localStorage.getItem('token');
 
-  useEffect(() => {
-    fetchDashboardStats();
-    fetchVerificationStats();
-  }, [user?.district]);
-
-  const fetchVerificationStats = async () => {
+  const fetchVerificationStats = useCallback(async () => {
     try {
       const response = await axios.get(`${API_BASE}/api/officer/stats`, {
         headers: { Authorization: `Bearer ${getToken()}` }
@@ -114,9 +109,9 @@ const OfficerDashboard = ({ user, language = 'en', initialTab = 'overview' }) =>
     } catch (err) {
       console.error('Error fetching verification stats:', err);
     }
-  };
+  }, []);
 
-  const fetchDashboardStats = async () => {
+  const fetchDashboardStats = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_BASE}/api/alerts/outbreak-summary`, {
@@ -141,7 +136,12 @@ const OfficerDashboard = ({ user, language = 'en', initialTab = 'overview' }) =>
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.district, user?.gnDivision]);
+
+  useEffect(() => {
+    fetchDashboardStats();
+    fetchVerificationStats();
+  }, [fetchDashboardStats, fetchVerificationStats]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
