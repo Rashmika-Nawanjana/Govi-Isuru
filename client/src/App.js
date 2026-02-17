@@ -177,7 +177,7 @@ function MainApp() {
       setView(initialView);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, view]);
 
   // 2. HELPER FUNCTIONS
   const handleRegisterSuccess = (userData) => {

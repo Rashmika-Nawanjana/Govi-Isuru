@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   History,
@@ -146,7 +146,7 @@ const OfficerActionLogs = ({ user, language = 'en', refreshTrigger = 0 }) => {
   const getToken = () => localStorage.getItem('token');
 
   // Fetch logs
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     try {
       setLoading(true);
       const params = { days };
@@ -165,12 +165,11 @@ const OfficerActionLogs = ({ user, language = 'en', refreshTrigger = 0 }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [days, filter]);
 
   useEffect(() => {
     fetchLogs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, days, refreshTrigger]);
+  }, [fetchLogs, filter, days, refreshTrigger]);
 
   // Format date
   const formatDate = (dateStr) => {

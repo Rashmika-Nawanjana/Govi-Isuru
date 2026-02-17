@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   Newspaper,
@@ -73,7 +73,7 @@ const NewsWidget = ({ lang = 'en', onViewAll, maxItems = 4 }) => {
   const t = translations[lang];
 
   // Fetch latest news
-  const fetchNews = async (isRefresh = false) => {
+  const fetchNews = useCallback(async (isRefresh = false) => {
     try {
       if (isRefresh) setRefreshing(true);
       setError(null);
@@ -100,15 +100,14 @@ const NewsWidget = ({ lang = 'en', onViewAll, maxItems = 4 }) => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [maxItems]);
 
   useEffect(() => {
     fetchNews();
     // Refresh every 10 minutes
     const interval = setInterval(() => fetchNews(true), 10 * 60 * 1000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchNews]);
 
   // Format relative time
   const formatTime = (dateStr) => {

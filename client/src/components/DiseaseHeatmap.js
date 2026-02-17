@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { 
   MapPin, 
@@ -136,18 +136,6 @@ const DiseaseHeatmap = ({ user, language = 'en' }) => {
 
   const text = t[language] || t.en;
 
-  const getClampBounds = () => {
-    if (geoData) return getGeoBounds;
-    return [SRI_LANKA_BOUNDS.west, SRI_LANKA_BOUNDS.south, SRI_LANKA_BOUNDS.east, SRI_LANKA_BOUNDS.north];
-  };
-
-  const clampLatLng = (lat, lng) => {
-    const [minLng, minLat, maxLng, maxLat] = getClampBounds();
-    const safeLat = Math.min(maxLat - 0.02, Math.max(minLat + 0.02, lat));
-    const safeLng = Math.min(maxLng - 0.02, Math.max(minLng + 0.02, lng));
-    return { lat: safeLat, lng: safeLng };
-  };
-
   // Load GeoJSON data for map
   useEffect(() => {
     fetch('/lk.json')
@@ -223,8 +211,20 @@ const DiseaseHeatmap = ({ user, language = 'en' }) => {
     return [minLng, minLat, maxLng, maxLat];
   }, [geoData]);
 
+  const getClampBounds = useCallback(() => {
+    if (geoData) return getGeoBounds;
+    return [SRI_LANKA_BOUNDS.west, SRI_LANKA_BOUNDS.south, SRI_LANKA_BOUNDS.east, SRI_LANKA_BOUNDS.north];
+  }, [geoData, getGeoBounds]);
+
+  const clampLatLng = useCallback((lat, lng) => {
+    const [minLng, minLat, maxLng, maxLat] = getClampBounds();
+    const safeLat = Math.min(maxLat - 0.02, Math.max(minLat + 0.02, lat));
+    const safeLng = Math.min(maxLng - 0.02, Math.max(minLng + 0.02, lng));
+    return { lat: safeLat, lng: safeLng };
+  }, [getClampBounds]);
+
   // Fetch heatmap data - try without district filter first to get all data
-  const fetchHeatmapData = async () => {
+  const fetchHeatmapData = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -266,12 +266,11 @@ const DiseaseHeatmap = ({ user, language = 'en' }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, clampLatLng]);
 
   useEffect(() => {
     fetchHeatmapData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [fetchHeatmapData, filters]);
 
   // Calculate point size based on count
   const getPointSize = (count) => {

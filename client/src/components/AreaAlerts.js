@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   AlertTriangle, Bell, MapPin, Calendar, User, Loader2, Eye,
-  Shield, Activity, Leaf, Wind
+  Shield, Activity, Wind
 } from 'lucide-react';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -304,7 +304,7 @@ const AreaAlerts = ({ lang, user }) => {
                 {selectedAlert.preventiveMeasures && selectedAlert.preventiveMeasures.length > 0 && (
                   <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
                     <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-3 flex items-center gap-2">
-                      <Leaf size={16} />
+                      <Shield size={16} />
                       {text.preventive}
                     </p>
                     <ul className="space-y-2">

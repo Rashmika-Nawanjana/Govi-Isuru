@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   AlertTriangle,
@@ -70,7 +70,7 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
   const text = t[language] || t.en;
 
   // Fetch outbreak summary
-  const fetchSummary = async () => {
+  const fetchSummary = useCallback(async () => {
     try {
       setLoading(true);
       // First try with user's district, then fallback to all data
@@ -95,12 +95,11 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.district]);
 
   useEffect(() => {
     fetchSummary();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.district]);
+  }, [fetchSummary, user?.district]);
 
   // Role-based tabs
   const tabs = isOfficer ? [

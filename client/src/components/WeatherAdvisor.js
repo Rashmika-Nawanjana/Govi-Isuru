@@ -32,8 +32,7 @@ const WeatherAdvisor = ({ lat, lon, lang, user }) => {
       }
     };
     fetchAllWeather();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lat, lon]);
+  }, [API_BASE, lat, lon]);
 
   if (!weather) return (
     <div className="p-10 text-center">
