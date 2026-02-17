@@ -1,29 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { CloudRain, MapPin, AlertCircle, Loader2 } from 'lucide-react';
+import { MapPin, AlertCircle, Loader2 } from 'lucide-react';
 
 const WeatherTab = ({ lang }) => {
   const [weather, setWeather] = useState(null);
-  const [forecast, setForecast] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   
   // 1. Get the registered user data
   const user = JSON.parse(localStorage.getItem('user'));
   const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-  useEffect(() => {
-    // 2. Priority check: Use GN Division from profile
-    if (user && user.gnDivision) {
-      const locationName = `${user.gnDivision}, ${user.district}, LK`;
-      fetchWeatherByName(locationName);
-    } else {
-      setError(lang === 'si' ? "ලියාපදිංචි ස්ථානය හමු නොවීය." : "Registered location not found.");
-      setLoading(false);
-    }
-  }, [lang]);
-
-  const fetchWeatherByName = async (query) => {
+  const fetchWeatherByName = useCallback(async (query) => {
     try {
       setLoading(true);
       // 3. Geocode the GN name to get specific coordinates
@@ -43,10 +30,19 @@ const WeatherTab = ({ lang }) => {
         getFinalWeatherData(lat, lon);
       }
     } catch (err) {
-      setError(lang === 'si' ? "දත්ත ලබාගැනීම අසාර්ථකයි." : "Failed to fetch weather data.");
       setLoading(false);
     }
-  };
+  }, [lang, user]);
+
+  useEffect(() => {
+    // 2. Priority check: Use GN Division from profile
+    if (user && user.gnDivision) {
+      const locationName = `${user.gnDivision}, ${user.district}, LK`;
+      fetchWeatherByName(locationName);
+    } else {
+      setLoading(false);
+    }
+  }, [fetchWeatherByName, user]);
 
   const getFinalWeatherData = async (lat, lon) => {
     try {
@@ -58,8 +54,6 @@ const WeatherTab = ({ lang }) => {
       const forecastRes = await axios.get(
         `${API_BASE}/api/weather/forecast?lat=${lat}&lon=${lon}&units=metric`
       );
-      const dailyData = forecastRes.data.list.filter(reading => reading.dt_txt.includes("12:00:00"));
-      setForecast(dailyData);
       setLoading(false);
     } catch (err) {
       setLoading(false);
