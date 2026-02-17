@@ -10,8 +10,7 @@ import {
   ChevronRight,
   RefreshCw,
   BarChart3,
-  MapPin,
-  Calendar
+  MapPin
 } from 'lucide-react';
 import DiseaseHeatmap from './DiseaseHeatmap';
 import OutbreakGraph from './OutbreakGraph';
@@ -100,6 +99,7 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
 
   useEffect(() => {
     fetchSummary();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.district]);
 
   // Role-based tabs

@@ -1,7 +1,7 @@
 import React from 'react';
 import PriceAnalytics from './PriceAnalytics';
 import PriceComparison from './PriceComparison';
-import { BarChart3, TrendingUp, Lightbulb } from 'lucide-react';
+import { TrendingUp, Lightbulb } from 'lucide-react';
 
 const MarketTrends = ({ lang }) => {
   return (

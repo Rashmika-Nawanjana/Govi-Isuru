@@ -5,7 +5,6 @@ import {
   AlertOctagon,
   Bell,
   Info,
-  Clock,
   MapPin,
   RefreshCw,
   ChevronRight,
@@ -216,6 +215,7 @@ const PriorityAlerts = ({ user, language = 'en', onViewReport }) => {
     // Auto-refresh every 5 minutes
     const interval = setInterval(fetchAlerts, 5 * 60 * 1000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Priority Card Component

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   CheckCircle, XCircle, AlertTriangle, Loader2, MapPin, Phone,
-  User, Calendar, FileText, Eye, Check, X, MessageCircle
+  User, Calendar, FileText, Eye
 } from 'lucide-react';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';

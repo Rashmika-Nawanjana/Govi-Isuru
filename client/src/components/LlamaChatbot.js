@@ -62,7 +62,6 @@ export default function LlamaChatbot({ lang = 'en' }) {
         
         // Handle specific errors with user-friendly messages
         let errorMessage = '';
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         
         switch(event.error) {
           case 'no-speech':
@@ -128,6 +127,7 @@ export default function LlamaChatbot({ lang = 'en' }) {
         }
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
   // Update speech recognition language when chatLang changes

@@ -126,28 +126,9 @@ const AlertCard = ({ alert, language, expanded, onToggle }) => {
   );
 };
 
-// Notification Bell Component
-const NotificationBell = ({ count, onClick }) => {
-  return (
-    <button
-      onClick={onClick}
-      className="relative p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-full transition-colors"
-      title="Disease Alerts"
-    >
-      <Bell className="w-6 h-6" />
-      {count > 0 && (
-        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-          {count > 9 ? '9+' : count}
-        </span>
-      )}
-    </button>
-  );
-};
-
 // Main Community Alerts Component
 const CommunityAlerts = ({ user, language = 'en' }) => {
   const [alerts, setAlerts] = useState([]);
-  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showPanel, setShowPanel] = useState(false);
@@ -163,7 +144,7 @@ const CommunityAlerts = ({ user, language = 'en' }) => {
 
     try {
       setLoading(true);
-      const [alertsRes, notifRes, statsRes] = await Promise.all([
+      const [alertsRes, , statsRes] = await Promise.all([
         axios.get(`${API_BASE}/api/alerts/active`, {
           params: {
             gnDivision: user.gnDivision,
@@ -180,7 +161,6 @@ const CommunityAlerts = ({ user, language = 'en' }) => {
       ]);
 
       setAlerts(alertsRes.data.alerts || []);
-      setNotifications(notifRes.data.notifications || []);
       setStats(statsRes.data.stats || null);
       setError(null);
     } catch (err) {

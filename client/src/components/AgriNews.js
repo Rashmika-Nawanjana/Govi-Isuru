@@ -15,23 +15,16 @@ import {
   AlertCircle,
   Loader2,
   Tag,
-  Eye,
-  Calendar,
   Globe,
-  Filter,
   X,
-  Bookmark,
-  Share2,
   Volume2,
-  VolumeX,
   FileText,
   Bell,
   BellOff,
   Sparkles,
   Play,
   Pause,
-  StopCircle,
-  Languages
+  StopCircle
 } from 'lucide-react';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -941,6 +934,7 @@ const AgriNews = ({ lang = 'en', user }) => {
       setLoading(false);
     };
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Category change
@@ -948,6 +942,7 @@ const AgriNews = ({ lang = 'en', user }) => {
     if (!loading) {
       fetchNews(activeCategory);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCategory]);
 
   // Refresh handler

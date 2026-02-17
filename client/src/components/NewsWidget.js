@@ -107,6 +107,7 @@ const NewsWidget = ({ lang = 'en', onViewAll, maxItems = 4 }) => {
     // Refresh every 10 minutes
     const interval = setInterval(() => fetchNews(true), 10 * 60 * 1000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Format relative time

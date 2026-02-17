@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   ShoppingBag, MapPin, Phone, User, PlusCircle, Sprout, MessageCircle,
-  Star, CheckCircle, Award, ThumbsUp, X, MessageSquare, Trash2, Bookmark
+  Star, CheckCircle, Award, ThumbsUp, MessageSquare, Trash2, Bookmark
 } from 'lucide-react';
 import ReputationBadge, { MiniReputationBadge } from './ReputationBadge';
 import FeedbackForm from './FeedbackForm';
