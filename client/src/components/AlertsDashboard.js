@@ -99,7 +99,7 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
 
   useEffect(() => {
     fetchSummary();
-  }, [fetchSummary, user?.district]);
+  }, [fetchSummary]);
 
   // Role-based tabs
   const tabs = isOfficer ? [

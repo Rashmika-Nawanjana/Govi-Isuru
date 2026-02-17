@@ -230,7 +230,7 @@ const ReportVerificationPanel = ({ user, language = 'en', onActionTaken }) => {
   useEffect(() => {
     fetchReports();
     fetchStats();
-  }, [fetchReports, fetchStats, filter, priorityFilter]);
+  }, [fetchReports, fetchStats]);
 
   // Update report status
   const updateStatus = async (reportId, newStatus, reason = null) => {

@@ -169,7 +169,7 @@ const OfficerActionLogs = ({ user, language = 'en', refreshTrigger = 0 }) => {
 
   useEffect(() => {
     fetchLogs();
-  }, [fetchLogs, filter, days, refreshTrigger]);
+  }, [fetchLogs, refreshTrigger]);
 
   // Format date
   const formatDate = (dateStr) => {

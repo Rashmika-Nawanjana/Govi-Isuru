@@ -938,10 +938,8 @@ const AgriNews = ({ lang = 'en', user }) => {
 
   // Category change
   useEffect(() => {
-    if (!loading) {
-      fetchNews(activeCategory);
-    }
-  }, [activeCategory, loading, fetchNews]);
+    fetchNews(activeCategory);
+  }, [activeCategory, fetchNews]);
 
   // Refresh handler
   const handleRefresh = async () => {

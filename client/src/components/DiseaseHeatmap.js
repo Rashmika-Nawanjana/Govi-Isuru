@@ -270,7 +270,7 @@ const DiseaseHeatmap = ({ user, language = 'en' }) => {
 
   useEffect(() => {
     fetchHeatmapData();
-  }, [fetchHeatmapData, filters]);
+  }, [fetchHeatmapData]);
 
   // Calculate point size based on count
   const getPointSize = (count) => {

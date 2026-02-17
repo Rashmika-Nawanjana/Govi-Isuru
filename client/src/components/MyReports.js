@@ -69,6 +69,7 @@ const MyReports = ({ user, lang }) => {
     } finally {
       setLoading(false);
     }
+    // No external dependencies needed - token is fetched directly from localStorage
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
