@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { 
   Star, 
@@ -41,12 +41,7 @@ const FeedbackList = ({ listing, onClose, lang = 'en' }) => {
 
   const t = texts[lang] || texts.en;
 
-  useEffect(() => {
-    fetchFeedbacks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listing]);
-
-  const fetchFeedbacks = async () => {
+  const fetchFeedbacks = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -77,7 +72,11 @@ const FeedbackList = ({ listing, onClose, lang = 'en' }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [listing]);
+
+  useEffect(() => {
+    fetchFeedbacks();
+  }, [fetchFeedbacks]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   AlertTriangle,
@@ -176,7 +176,7 @@ const PriorityAlerts = ({ user, language = 'en', onViewReport }) => {
   const getToken = () => localStorage.getItem('token');
 
   // Fetch priority alerts
-  const fetchAlerts = async () => {
+  const fetchAlerts = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -208,15 +208,14 @@ const PriorityAlerts = ({ user, language = 'en', onViewReport }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchAlerts();
     // Auto-refresh every 5 minutes
     const interval = setInterval(fetchAlerts, 5 * 60 * 1000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchAlerts]);
 
   // Priority Card Component
   const PriorityCard = ({ priority, reports }) => {

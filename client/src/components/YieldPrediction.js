@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   TrendingUp, 
   AlertTriangle, 
@@ -257,7 +257,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
   };
 
   // Fetch district rankings
-  const fetchRankings = async () => {
+  const fetchRankings = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -276,7 +276,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [lang]);
 
   // Fetch trends
   const fetchTrends = async () => {
@@ -306,8 +306,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
   // Initial load
   useEffect(() => {
     fetchRankings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchRankings]);
 
   // Predict when form changes
   const handlePredict = () => {

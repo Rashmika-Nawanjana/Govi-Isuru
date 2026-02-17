@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   Shield,
@@ -197,7 +197,7 @@ const ReportVerificationPanel = ({ user, language = 'en', onActionTaken }) => {
   const getToken = () => localStorage.getItem('token');
 
   // Fetch reports
-  const fetchReports = async () => {
+  const fetchReports = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_BASE}/api/officer/reports`, {
@@ -213,10 +213,10 @@ const ReportVerificationPanel = ({ user, language = 'en', onActionTaken }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, priorityFilter]);
 
   // Fetch stats
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const response = await axios.get(`${API_BASE}/api/officer/stats`, {
         headers: { Authorization: `Bearer ${getToken()}` }
@@ -225,13 +225,12 @@ const ReportVerificationPanel = ({ user, language = 'en', onActionTaken }) => {
     } catch (err) {
       console.error('Error fetching stats:', err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchReports();
     fetchStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, priorityFilter]);
+  }, [fetchReports, fetchStats]);
 
   // Update report status
   const updateStatus = async (reportId, newStatus, reason = null) => {

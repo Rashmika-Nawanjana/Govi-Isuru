@@ -934,16 +934,12 @@ const AgriNews = ({ lang = 'en', user }) => {
       setLoading(false);
     };
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchNews, fetchHeadlines, activeCategory]);
 
   // Category change
   useEffect(() => {
-    if (!loading) {
-      fetchNews(activeCategory);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeCategory]);
+    fetchNews(activeCategory);
+  }, [activeCategory, fetchNews]);
 
   // Refresh handler
   const handleRefresh = async () => {

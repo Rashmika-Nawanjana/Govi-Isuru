@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { FileText, AlertCircle, CheckCircle, Clock, Eye, X } from 'lucide-react';
 
@@ -49,12 +49,7 @@ const MyReports = ({ user, lang }) => {
 
   const text = t[lang] || t.en;
 
-  useEffect(() => {
-    fetchMyReports();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const fetchMyReports = async () => {
+  const fetchMyReports = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
@@ -74,7 +69,11 @@ const MyReports = ({ user, lang }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_BASE]);
+
+  useEffect(() => {
+    fetchMyReports();
+  }, [fetchMyReports]);
 
   const getStatusColor = (status) => {
     switch (status) {
