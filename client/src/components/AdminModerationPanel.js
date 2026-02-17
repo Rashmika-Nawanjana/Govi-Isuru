@@ -126,7 +126,6 @@ const AdminModerationPanel = ({ user, language = 'en' }) => {
 
   useEffect(() => {
     fetchReports();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchReports]);
 
   // Review a report

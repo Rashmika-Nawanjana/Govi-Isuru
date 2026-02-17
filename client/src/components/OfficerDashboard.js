@@ -141,7 +141,6 @@ const OfficerDashboard = ({ user, language = 'en', initialTab = 'overview' }) =>
   useEffect(() => {
     fetchDashboardStats();
     fetchVerificationStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchDashboardStats, fetchVerificationStats]);
 
   const handleRefresh = async () => {

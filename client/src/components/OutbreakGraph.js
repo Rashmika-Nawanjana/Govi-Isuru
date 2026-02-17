@@ -113,7 +113,6 @@ const OutbreakGraph = ({ user, language = 'en' }) => {
 
   useEffect(() => {
     fetchTimeSeriesData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchTimeSeriesData]);
 
   // Transform data for Recharts
