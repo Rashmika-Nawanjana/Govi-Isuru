@@ -144,6 +144,7 @@ const CommunityAlerts = ({ user, language = 'en' }) => {
 
     try {
       setLoading(true);
+      // notifRes (middle element) is intentionally unused - notifications feature not currently implemented
       const [alertsRes, , statsRes] = await Promise.all([
         axios.get(`${API_BASE}/api/alerts/active`, {
           params: {
