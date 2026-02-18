@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Leaf, ShoppingBag, Languages, LayoutDashboard, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X, FileText, Bookmark } from 'lucide-react';
+import { Leaf, ShoppingBag, Languages, LayoutDashboard, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X, FileText, Bookmark, Shield, Users } from 'lucide-react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import CropSuitability from './components/CropSuitability';
 import AIDoctor from './components/AIDoctor';
@@ -23,16 +23,17 @@ import BuyerDashboard from './components/BuyerDashboard';
 import UserProfile from './components/UserProfile';
 import TraditionalRice from './components/TraditionalRice';
 import ReportVerification from './components/ReportVerification';
+import AdminDashboard from './components/AdminDashboard';
 
 import MyReports from './components/MyReports';
 import SavedListings from './components/SavedListings';
 import { districtCoordinates } from './data/sriLankaCoordinates';
 
 const translations = {
-  en: { 
-    title: "Govi Isuru", 
-    doctor: "AI Doctor", 
-    market: "Marketplace", 
+  en: {
+    title: "Govi Isuru",
+    doctor: "AI Doctor",
+    market: "Marketplace",
     trends: "Market Trends",
     weather: "Weather Advisory",
     alerts: "Disease Alerts",
@@ -50,13 +51,17 @@ const translations = {
     buyerDashboard: "Buyer Dashboard",
     marketplace: "Marketplace",
     savedListings: "Saved Listings",
-    agriNews: "Agri News"
+    agriNews: "Agri News",
+    // Admin-specific translations
+    adminDashboard: "Admin Dashboard",
+    userManagement: "User Management",
+    officerApprovals: "Officer Approvals"
   },
-  si: { 
-    title: "ගොවි ඉසුරු", 
-    doctor: "AI වෛද්‍යවරයා", 
-    market: "අලෙවිසැල", 
-    trends: "මිල ප්‍රවණතා", 
+  si: {
+    title: "ගොවි ඉසුරු",
+    doctor: "AI වෛද්‍යවරයා",
+    market: "අලෙවිසැල",
+    trends: "මිල ප්‍රවණතා",
     weather: "කාලගුණ උපදෙස්",
     alerts: "රෝග අනතුරු ඇඟවීම්",
     news: "ගොවි ප්‍රවෘත්ති",
@@ -73,7 +78,11 @@ const translations = {
     buyerDashboard: "ගැණුම්කරු උපකරණ පුවරුව",
     marketplace: "වෙළඳසැල",
     savedListings: "සුරක්ෂිත ලැයිස්තු",
-    agriNews: "ගොවි ප්‍රවෘත්ති"
+    agriNews: "ගොවි ප්‍රවෘත්ති",
+    // Admin-specific translations
+    adminDashboard: "පරිපාලක උපකරණ පුවරුව",
+    userManagement: "පරිශීලක කළමනාකරණය",
+    officerApprovals: "නිලධාරී අනුමැතිය"
   }
 };
 
@@ -81,16 +90,16 @@ const translations = {
 const VerifyEmailPage = () => {
   const [lang] = useState('en');
   const navigate = useNavigate();
-  
+
   return (
     <div className="min-h-screen bg-green-900 flex flex-col items-center justify-center p-4">
       <div className="mb-8 text-center text-white animate-in fade-in zoom-in duration-1000">
         <Leaf className="h-16 w-16 text-green-300 mx-auto mb-2" />
         <h1 className="text-4xl font-black tracking-tighter">GOVI ISURU</h1>
       </div>
-      <VerifyEmail 
+      <VerifyEmail
         switchToLogin={() => navigate('/')}
-        lang={lang} 
+        lang={lang}
       />
     </div>
   );
@@ -100,16 +109,16 @@ const VerifyEmailPage = () => {
 const ResetPasswordPage = () => {
   const [lang] = useState('en');
   const navigate = useNavigate();
-  
+
   return (
     <div className="min-h-screen bg-green-900 flex flex-col items-center justify-center p-4">
       <div className="mb-8 text-center text-white animate-in fade-in zoom-in duration-1000">
         <Leaf className="h-16 w-16 text-green-300 mx-auto mb-2" />
         <h1 className="text-4xl font-black tracking-tighter">GOVI ISURU</h1>
       </div>
-      <ResetPassword 
+      <ResetPassword
         switchToLogin={() => navigate('/')}
-        lang={lang} 
+        lang={lang}
       />
     </div>
   );
@@ -118,7 +127,7 @@ const ResetPasswordPage = () => {
 // Main App Component
 function MainApp() {
   // 1. ALL HOOKS AT THE VERY TOP (Crucial for React Rules)
-  const [view, setView] = useState('home'); 
+  const [view, setView] = useState('home');
   const [lang, setLang] = useState('en');
   const [coords, setCoords] = useState({ lat: 8.3114, lon: 80.4037 }); // Default to Anuradhapura
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
@@ -172,7 +181,8 @@ function MainApp() {
     // If user exists and view hasn't been set to a dashboard yet, set it based on role
     if (user && (view === 'home' || view === 'login' || view === 'register')) {
       let initialView = 'doctor';
-      if (user?.role === 'officer') initialView = 'officerDashboard';
+      if (user?.role === 'admin') initialView = 'adminDashboard';
+      else if (user?.role === 'officer') initialView = 'officerDashboard';
       else if (user?.role === 'buyer') initialView = 'buyerDashboard';
       setView(initialView);
     }
@@ -184,7 +194,8 @@ function MainApp() {
     setUser(userData);
     // Set initial view based on role
     let initialView = 'doctor';
-    if (userData?.role === 'officer') initialView = 'officerDashboard';
+    if (userData?.role === 'admin') initialView = 'adminDashboard';
+    else if (userData?.role === 'officer') initialView = 'officerDashboard';
     else if (userData?.role === 'buyer') initialView = 'buyerDashboard';
     setView(initialView);
   };
@@ -200,13 +211,13 @@ function MainApp() {
     // Show HomePage if no user is logged in and view is 'home'
     if (view === 'home') {
       return (
-        <HomePage 
-          onLogin={() => setView('login')} 
+        <HomePage
+          onLogin={() => setView('login')}
           onRegister={() => setView('register')}
         />
       );
     }
-    
+
     // Show Login, Register, Forgot Password, etc.
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4" style={{
@@ -229,47 +240,47 @@ function MainApp() {
           <Leaf className="h-16 w-16 text-green-300 mx-auto mb-2" />
           <h1 className="text-4xl font-black tracking-tighter">GOVI ISURU</h1>
         </div>
-        
+
         <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '480px' }}>
-        {view === 'login' && (
-          <Login 
-            onLoginSuccess={handleRegisterSuccess} 
-            switchToRegister={() => setView('register')}
-            switchToForgotPassword={() => setView('forgotPassword')}
-            lang={lang} 
-          />
-        )}
-        
-        {view === 'register' && (
-          <Register 
-            onRegisterSuccess={handleRegisterSuccess} 
-            switchToLogin={() => setView('login')}
-            lang={lang} 
-          />
-        )}
-        
-        {view === 'forgotPassword' && (
-          <ForgotPassword 
-            switchToLogin={() => setView('login')}
-            lang={lang} 
-          />
-        )}
-        
-        {view === 'resetPassword' && (
-          <ResetPassword 
-            switchToLogin={() => setView('login')}
-            lang={lang} 
-          />
-        )}
-        
-        {view === 'verifyEmail' && (
-          <VerifyEmail 
-            switchToLogin={() => setView('login')}
-            lang={lang} 
-          />
-        )}
+          {view === 'login' && (
+            <Login
+              onLoginSuccess={handleRegisterSuccess}
+              switchToRegister={() => setView('register')}
+              switchToForgotPassword={() => setView('forgotPassword')}
+              lang={lang}
+            />
+          )}
+
+          {view === 'register' && (
+            <Register
+              onRegisterSuccess={handleRegisterSuccess}
+              switchToLogin={() => setView('login')}
+              lang={lang}
+            />
+          )}
+
+          {view === 'forgotPassword' && (
+            <ForgotPassword
+              switchToLogin={() => setView('login')}
+              lang={lang}
+            />
+          )}
+
+          {view === 'resetPassword' && (
+            <ResetPassword
+              switchToLogin={() => setView('login')}
+              lang={lang}
+            />
+          )}
+
+          {view === 'verifyEmail' && (
+            <VerifyEmail
+              switchToLogin={() => setView('login')}
+              lang={lang}
+            />
+          )}
         </div>
-        
+
         {/* Back to Home button */}
         <button
           onClick={() => {
@@ -289,9 +300,17 @@ function MainApp() {
   const getNavItems = () => {
     const isFarmer = !user?.role || user?.role === 'farmer';
     const isBuyer = user?.role === 'buyer';
+    const isAdmin = user?.role === 'admin';
     // Add profile tab for all users
     const profileTab = { id: 'profile', icon: Leaf, label: lang === 'si' ? 'පැතිකඩ' : 'Profile', emoji: '👤' };
-    if (isFarmer) {
+    if (isAdmin) {
+      // Admin tabs
+      return [
+        { id: 'adminDashboard', icon: Shield, label: t.adminDashboard, emoji: '🛡️' },
+        { id: 'news', icon: Newspaper, label: t.news, emoji: '📰' },
+        profileTab,
+      ];
+    } else if (isFarmer) {
       // Farmer tabs
       return [
         { id: 'doctor', icon: LayoutDashboard, label: t.doctor, emoji: '🩺' },
@@ -333,7 +352,9 @@ function MainApp() {
 
   // Get background image based on user role
   const getBackgroundImage = () => {
-    if (user?.role === 'officer') {
+    if (user?.role === 'admin') {
+      return '/backgrounds/farmer-dashboard-bg.jpg';
+    } else if (user?.role === 'officer') {
       return '/backgrounds/officer-dashboard-bg.jpg';
     } else if (user?.role === 'buyer') {
       return '/backgrounds/buyer-dashboard-bg.jpg';
@@ -345,7 +366,7 @@ function MainApp() {
 
   // 4. MAIN APP DASHBOARD
   return (
-    <div 
+    <div
       className="min-h-screen font-sans flex flex-col md:flex-row relative"
       style={{
         backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), url(${getBackgroundImage()})`,
@@ -366,9 +387,8 @@ function MainApp() {
 
       {/* Sidebar Navigation - Modern Mobile Drawer */}
       <nav
-        className={`fixed md:static inset-y-0 left-0 z-40 w-72 md:w-80 max-w-[85%] md:max-w-none bg-gradient-to-b from-green-800 to-green-900 text-white shadow-2xl flex-shrink-0 flex flex-col transform transition-transform duration-300 ease-out ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        }`}
+        className={`fixed md:static inset-y-0 left-0 z-40 w-72 md:w-80 max-w-[85%] md:max-w-none bg-gradient-to-b from-green-800 to-green-900 text-white shadow-2xl flex-shrink-0 flex flex-col transform transition-transform duration-300 ease-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          }`}
       >
         {/* Logo Header */}
         <div className="sticky top-0 z-10 p-3 md:p-6 flex items-center gap-2 md:gap-3 border-b border-green-700/50 bg-green-800/95 backdrop-blur-sm">
@@ -394,17 +414,16 @@ function MainApp() {
             const Icon = item.icon;
             const isActive = view === item.id;
             return (
-              <button 
+              <button
                 key={item.id}
                 onClick={() => {
                   setView(item.id);
                   setIsSidebarOpen(false);
                 }}
-                className={`group flex items-center gap-2 md:gap-3 w-full px-3 md:px-4 py-2.5 md:py-3 rounded-lg md:rounded-xl font-semibold text-sm md:text-base transition-all duration-200 active:scale-95 ${
-                  isActive 
-                    ? 'bg-white text-green-800 shadow-lg' 
+                className={`group flex items-center gap-2 md:gap-3 w-full px-3 md:px-4 py-2.5 md:py-3 rounded-lg md:rounded-xl font-semibold text-sm md:text-base transition-all duration-200 active:scale-95 ${isActive
+                    ? 'bg-white text-green-800 shadow-lg'
                     : 'text-green-100 hover:bg-white/10'
-                }`}
+                  }`}
               >
                 <div className={`p-1 md:p-1.5 rounded-lg transition-colors flex-shrink-0 ${isActive ? 'bg-green-100' : 'bg-green-700/50'}`}>
                   <Icon size={18} className={isActive ? 'text-green-700' : 'text-green-200'} />
@@ -426,8 +445,8 @@ function MainApp() {
             </p>
             <p className="text-xs md:text-sm font-bold text-white truncate mt-0.5">{user.username}</p>
             <p className="text-[10px] md:text-xs text-green-400 mt-1 truncate">
-              {user?.role === 'officer' 
-                ? `📋 ${user.officerId || user.district}` 
+              {user?.role === 'officer'
+                ? `📋 ${user.officerId || user.district}`
                 : `📍 ${user.gnDivision}`}
             </p>
           </div>
@@ -435,7 +454,7 @@ function MainApp() {
 
         {/* Bottom Actions */}
         <div className="p-2 md:p-4 border-t border-green-700/50 space-y-1.5 md:space-y-2">
-          <button 
+          <button
             onClick={() => setLang(lang === 'en' ? 'si' : 'en')}
             className="flex items-center gap-2 md:gap-3 w-full px-3 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl font-semibold border border-green-600/50 hover:bg-green-700/50 hover:border-green-500 text-xs md:text-sm text-green-100 transition-all active:scale-95"
           >
@@ -444,7 +463,7 @@ function MainApp() {
             <span className="ml-auto text-[9px] md:text-xs bg-green-700 px-1.5 md:px-2 py-0.5 rounded-full font-bold">{lang === 'en' ? 'EN' : 'SI'}</span>
           </button>
 
-          <button 
+          <button
             onClick={handleLogout}
             className="flex items-center gap-2 md:gap-3 w-full px-3 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl font-semibold text-red-300 hover:bg-red-500/20 hover:text-red-200 text-xs md:text-sm transition-all active:scale-95"
           >
@@ -478,7 +497,7 @@ function MainApp() {
                 <LayoutDashboard size={20} className="text-white" />
               </button>
             </div>
-            
+
             {/* Mobile Horizontal Tabs - Compact */}
             <div className="overflow-x-auto px-3 py-1.5 bg-white/10 backdrop-blur-sm">
               <div className="flex gap-1.5 min-w-min">
@@ -489,11 +508,10 @@ function MainApp() {
                     <button
                       key={item.id}
                       onClick={() => setView(item.id)}
-                      className={`flex items-center gap-1 px-2.5 py-1 rounded-full whitespace-nowrap text-[10px] font-medium transition-all active:scale-95 flex-shrink-0 ${
-                        isActive
+                      className={`flex items-center gap-1 px-2.5 py-1 rounded-full whitespace-nowrap text-[10px] font-medium transition-all active:scale-95 flex-shrink-0 ${isActive
                           ? 'bg-white text-green-700 shadow-sm'
                           : 'bg-white/20 text-white hover:bg-white/30'
-                      }`}
+                        }`}
                     >
                       <Icon size={12} />
                       <span className="hidden xs:inline">{item.emoji}</span>
@@ -572,6 +590,15 @@ function MainApp() {
                     {view === 'alerts' && <AlertsDashboard user={user} language={lang} />}
                     {view === 'news' && <AgriNews lang={lang} user={user} />}
                     {view === 'riceVarieties' && <TraditionalRice lang={lang} />}
+                    {view === 'profile' && <UserProfile />}
+                  </>
+                )}
+
+                {/* Admin Views */}
+                {user?.role === 'admin' && (
+                  <>
+                    {view === 'adminDashboard' && <AdminDashboard user={user} language={lang} />}
+                    {view === 'news' && <AgriNews lang={lang} user={user} />}
                     {view === 'profile' && <UserProfile />}
                   </>
                 )}
