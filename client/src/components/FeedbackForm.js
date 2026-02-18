@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Star, Send, X, MessageSquare, CheckCircle } from 'lucide-react';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
 /**
  * FeedbackForm - Submit buyer feedback for a listing

@@ -13,7 +13,7 @@ import {
   XCircle
 } from 'lucide-react';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
 // Coverage status configuration
 const COVERAGE_CONFIG = {

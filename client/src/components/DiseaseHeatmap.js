@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { SRI_LANKA_BOUNDS } from '../data/sriLankaCoordinates';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
 // Disease colors for the map
 const diseaseColors = {

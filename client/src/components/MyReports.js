@@ -3,7 +3,7 @@ import axios from 'axios';
 import { FileText, AlertCircle, CheckCircle, Clock, Eye, X } from 'lucide-react';
 
 const MyReports = ({ user, lang }) => {
-  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState(null);

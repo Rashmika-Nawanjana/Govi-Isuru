@@ -5,7 +5,7 @@ import { Wind, AlertCircle, MapPin, Calendar, CloudSun, Droplets } from 'lucide-
 const WeatherAdvisor = ({ lat, lon, lang, user }) => {
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
-  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
   
   // Use user's GN Division or weather.name as fallback
   const locationName = user?.gnDivision || weather?.name || 'Your Location';

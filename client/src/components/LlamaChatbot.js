@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, X, Send, Loader2, Sparkles, Languages, Mic, MicOff, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
 export default function LlamaChatbot({ lang = 'en' }) {
   const [isOpen, setIsOpen] = useState(false);

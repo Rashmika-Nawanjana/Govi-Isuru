@@ -8,7 +8,7 @@ const WeatherTab = ({ lang }) => {
   
   // 1. Get the registered user data
   const user = JSON.parse(localStorage.getItem('user'));
-  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
   const fetchWeatherByName = useCallback(async (query) => {
     try {

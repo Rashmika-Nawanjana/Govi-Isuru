@@ -10,7 +10,7 @@ const Login = ({ onLoginSuccess, switchToRegister, switchToForgotPassword, lang 
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
   const [resendLoading, setResendLoading] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
-  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
   const handleSubmit = async (e) => {
     e.preventDefault();

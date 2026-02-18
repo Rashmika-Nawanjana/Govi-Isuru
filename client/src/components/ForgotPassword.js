@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Mail, ArrowRight, Loader2, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
 
 const ForgotPassword = ({ switchToLogin, lang }) => {
-  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);

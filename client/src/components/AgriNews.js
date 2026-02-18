@@ -27,7 +27,7 @@ import {
   StopCircle
 } from 'lucide-react';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
 // Category configuration with icons and colors
 const categoryConfig = {

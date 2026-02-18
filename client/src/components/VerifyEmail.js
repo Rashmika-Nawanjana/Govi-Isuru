@@ -4,7 +4,7 @@ import { CheckCircle, AlertCircle, Loader2, Mail, ArrowRight } from 'lucide-reac
 import { useSearchParams } from 'react-router-dom';
 
 const VerifyEmail = ({ switchToLogin, lang }) => {
-  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   

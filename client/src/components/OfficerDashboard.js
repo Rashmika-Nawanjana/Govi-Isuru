@@ -19,7 +19,7 @@ import ReportVerificationPanel from './ReportVerificationPanel';
 import OfficerActionLogs from './OfficerActionLogs';
 import PriorityAlerts from './PriorityAlerts';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
 const OfficerDashboard = ({ user, language = 'en', initialTab = 'overview' }) => {
   const [stats, setStats] = useState(null);
