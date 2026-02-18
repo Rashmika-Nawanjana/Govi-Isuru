@@ -1,0 +1,73 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    # Only deploy if CI passes
+    needs: []
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_key
+          chmod 600 ~/.ssh/ec2_key
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Copy project files to EC2
+        run: |
+          rsync -avz --delete \
+            --exclude '.git' \
+            --exclude 'node_modules' \
+            --exclude '__pycache__' \
+            --exclude '.env' \
+            -e "ssh -i ~/.ssh/ec2_key -o StrictHostKeyChecking=no" \
+            ./ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/govi-isuru/
+
+      - name: Deploy with Docker Compose
+        run: |
+          ssh -i ~/.ssh/ec2_key -o StrictHostKeyChecking=no \
+            ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
+            cd /home/${{ secrets.EC2_USERNAME }}/govi-isuru
+
+            # Build and restart containers
+            sudo docker compose -f docker-compose.prod.yml build --no-cache
+            sudo docker compose -f docker-compose.prod.yml up -d
+
+            # Cleanup old images
+            sudo docker image prune -f
+
+            # Show status
+            echo "=== Container Status ==="
+            sudo docker compose -f docker-compose.prod.yml ps
+
+            echo ""
+            echo "✅ Deployment complete!"
+          ENDSSH
+
+      - name: Health check
+        run: |
+          echo "Waiting 30s for services to start..."
+          sleep 30
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.EC2_HOST }} || echo "000")
+          if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "301" ] || [ "$HTTP_STATUS" = "302" ]; then
+            echo "✅ Health check passed (HTTP $HTTP_STATUS)"
+          else
+            echo "⚠️ Health check returned HTTP $HTTP_STATUS - services may still be starting"
+            echo "Check logs: ssh ubuntu@${{ secrets.EC2_HOST }} 'sudo docker compose -f /home/ubuntu/govi-isuru/docker-compose.prod.yml logs'"
+          fi
+
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -f ~/.ssh/ec2_key
