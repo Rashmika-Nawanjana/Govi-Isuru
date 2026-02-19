@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { 
+import {
   Upload, Loader2, CheckCircle, AlertTriangle, MapPin, Info,
   Microscope, Stethoscope, Shield, Calendar, Leaf, Activity, Brain,
   FileText, ChevronRight, Coffee, Flame
@@ -24,7 +24,7 @@ const AIDoctor = ({ lang, user }) => {
       subtitle: "The smart AI solution for farming",
       uploadTitle: "Upload Leaf Photo",
       uploadDesc: "Take a clear photo of the affected crop leaf for instant AI diagnosis.",
-      analyzeBtn: "Analyze Crop",
+      analyzeBtn: "Analyze Disease (25 Credits)",
       analyzing: "Analyzing...",
       results: "Diagnosis Report",
       treatment: "Recommended Treatment",
@@ -55,7 +55,7 @@ const AIDoctor = ({ lang, user }) => {
       subtitle: "ගොවිතැනට සුහුරු AI විසඳුම",
       uploadTitle: "පත්‍ර ඡායාරූපය උඩුගත කරන්න",
       uploadDesc: "ක්ෂණික AI විශ්ලේෂණය සඳහා බලපෑමට ලක් වූ බෝග පත්‍රයේ පැහැදිලි ඡායාරූපයක් ගන්න.",
-      analyzeBtn: "පරීක්ෂා කරන්න",
+      analyzeBtn: "පරීක්ෂා කරන්න (ණය 25)",
       analyzing: "විශ්ලේෂණය කරමින්...",
       results: "රෝග විනිශ්චය වාර්තාව",
       treatment: "නිර්දේශිත ප්‍රතිකාර",
@@ -98,7 +98,7 @@ const AIDoctor = ({ lang, user }) => {
     setLoading(true);
     setShowGradCam(false);
     setAnalysisStep(1);
-    
+
     const formData = new FormData();
     formData.append('file', file);
 
@@ -110,7 +110,7 @@ const AIDoctor = ({ lang, user }) => {
       // Use crop-specific endpoint
       const response = await axios.post(`${API_BASE}/ai/predict/${cropType}`, formData);
       const data = response.data;
-      
+
       const mappedResult = {
         disease: data.prediction,
         si_name: data.si_name,
@@ -123,17 +123,26 @@ const AIDoctor = ({ lang, user }) => {
         gradcam: data.gradcam,
         crop_type: data.crop_type
       };
-      
+
       setResult(mappedResult);
-      
+
       // Automatically save disease report if user is logged in and disease detected
       if (user && data.prediction && !data.prediction.toLowerCase().includes('healthy')) {
         await saveDiseaseReport(data, cropType);
       }
     } catch (error) {
       console.error("Error connecting to AI service", error);
-      alert(lang === 'en' 
-        ? "Unable to connect to AI service. Please try again." 
+
+      if (error.response && error.response.status === 403) {
+        alert(lang === 'en'
+          ? "⚠️ Insufficient Credits! Please top up to continue."
+          : "⚠️ ප්‍රමාණවත් මුදල් නොමැත! කරුණාකර නැවත ආරෝපණය කරන්න.");
+        window.dispatchEvent(new CustomEvent('open-credit-purchase'));
+        return;
+      }
+
+      alert(lang === 'en'
+        ? "Unable to connect to AI service. Please try again."
         : "AI සේවාවට සම්බන්ධ විය නොහැක. නැවත උත්සාහ කරන්න.");
     } finally {
       setLoading(false);
@@ -144,7 +153,7 @@ const AIDoctor = ({ lang, user }) => {
   const saveDiseaseReport = async (predictionData, crop) => {
     try {
       const token = localStorage.getItem('token');
-      
+
       // Convert image to base64
       let imageBase64 = '';
       if (file) {
@@ -176,7 +185,7 @@ const AIDoctor = ({ lang, user }) => {
       if (response.data.success) {
         setReportSaved(true);
         console.log('Disease report submitted:', response.data);
-        
+
         alert(lang === 'en'
           ? '✅ Report submitted to government officers for verification. You will be notified once verified.'
           : '✅ වාර්තාව සත්‍යාපනය සඳහා ඩිජිටල් අධිකරණ ක්‍ෂේත්‍ර නිලධාරීන්ට ඉදිරිපත් කරන ලද බව සිතුවිලි ලබන ඉතිරි කිරීමයි।');
@@ -184,14 +193,14 @@ const AIDoctor = ({ lang, user }) => {
     } catch (error) {
       console.error('Error saving disease report:', error);
       const errorMsg = error.response?.data?.msg || error.response?.data?.error;
-      alert(lang === 'en' 
+      alert(lang === 'en'
         ? (errorMsg || 'Error submitting report. Please try again.')
         : (errorMsg || 'වාර්තාව ඉදිරිපත් කිරීමේ දෝෂය. නැවත උත්සාහ කරන්න.'));
     }
   };
 
   const getSeverityStyle = (severity) => {
-    switch(severity) {
+    switch (severity) {
       case 'high': return { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', badge: 'bg-red-500' };
       case 'medium': return { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-700', badge: 'bg-yellow-500' };
       case 'none': return { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', badge: 'bg-green-500' };
@@ -224,11 +233,10 @@ const AIDoctor = ({ lang, user }) => {
         <div className="grid grid-cols-3 gap-1.5 md:gap-3">{/* Rice Button */}
           <button
             onClick={() => { setCropType('rice'); setResult(null); }}
-            className={`flex flex-col items-center gap-1 p-1.5 md:p-3 rounded-lg md:rounded-xl border-2 transition-all active:scale-95 shadow-sm ${
-              cropType === 'rice' 
-                ? 'border-green-500 bg-green-50 shadow-md' 
+            className={`flex flex-col items-center gap-1 p-1.5 md:p-3 rounded-lg md:rounded-xl border-2 transition-all active:scale-95 shadow-sm ${cropType === 'rice'
+                ? 'border-green-500 bg-green-50 shadow-md'
                 : 'border-slate-200 bg-white hover:border-green-300 hover:bg-green-50/30'
-            }`}
+              }`}
           >
             <div className={`p-1 md:p-2 rounded-lg flex-shrink-0 ${cropType === 'rice' ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
               <Leaf className="h-3.5 w-3.5 md:h-5 md:w-5" />
@@ -239,15 +247,14 @@ const AIDoctor = ({ lang, user }) => {
               </div>
             </div>
           </button>
-          
+
           {/* Tea Button */}
           <button
             onClick={() => { setCropType('tea'); setResult(null); }}
-            className={`flex flex-col items-center gap-1 p-1.5 md:p-3 rounded-lg md:rounded-xl border-2 transition-all active:scale-95 shadow-sm ${
-              cropType === 'tea' 
-                ? 'border-green-500 bg-green-50 shadow-md' 
+            className={`flex flex-col items-center gap-1 p-1.5 md:p-3 rounded-lg md:rounded-xl border-2 transition-all active:scale-95 shadow-sm ${cropType === 'tea'
+                ? 'border-green-500 bg-green-50 shadow-md'
                 : 'border-slate-200 bg-white hover:border-green-300 hover:bg-green-50/30'
-            }`}
+              }`}
           >
             <div className={`p-1 md:p-2 rounded-lg flex-shrink-0 ${cropType === 'tea' ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
               <Coffee className="h-3.5 w-3.5 md:h-5 md:w-5" />
@@ -262,11 +269,10 @@ const AIDoctor = ({ lang, user }) => {
           {/* Chili Button */}
           <button
             onClick={() => { setCropType('chili'); setResult(null); }}
-            className={`flex flex-col items-center gap-1 p-1.5 md:p-3 rounded-lg md:rounded-xl border-2 transition-all active:scale-95 shadow-sm ${
-              cropType === 'chili' 
-                ? 'border-red-500 bg-red-50 shadow-md' 
+            className={`flex flex-col items-center gap-1 p-1.5 md:p-3 rounded-lg md:rounded-xl border-2 transition-all active:scale-95 shadow-sm ${cropType === 'chili'
+                ? 'border-red-500 bg-red-50 shadow-md'
                 : 'border-slate-200 bg-white hover:border-red-300 hover:bg-red-50/30'
-            }`}
+              }`}
           >
             <div className={`p-1 md:p-2 rounded-lg flex-shrink-0 ${cropType === 'chili' ? 'bg-red-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
               <Flame className="h-3.5 w-3.5 md:h-5 md:w-5" />
@@ -283,16 +289,15 @@ const AIDoctor = ({ lang, user }) => {
       {/* Upload Card - Minimal Padding */}
       <div className="bg-white rounded-lg md:rounded-xl shadow-sm border border-slate-100">
         <div className="p-2 md:p-4">{/* Upload Area */}
-          <div className={`relative border-2 border-dashed rounded-lg p-2 md:p-4 transition-all duration-300 ${
-            preview ? 'border-green-400 bg-green-50/50' : 'border-slate-300 hover:border-green-400 hover:bg-green-50/30'
-          }`}>
+          <div className={`relative border-2 border-dashed rounded-lg p-2 md:p-4 transition-all duration-300 ${preview ? 'border-green-400 bg-green-50/50' : 'border-slate-300 hover:border-green-400 hover:bg-green-50/30'
+            }`}>
             <div className="flex flex-col items-center gap-2">
               {preview ? (
                 <div className="relative w-full">
-                  <img 
-                    src={preview} 
-                    alt="Crop preview" 
-                    className="w-full max-h-40 md:max-h-64 object-cover rounded-lg shadow-sm" 
+                  <img
+                    src={preview}
+                    alt="Crop preview"
+                    className="w-full max-h-40 md:max-h-64 object-cover rounded-lg shadow-sm"
                   />
                   <div className="absolute top-1 right-1 bg-green-500 text-white px-1.5 py-0.5 rounded-full text-[9px] md:text-xs font-bold flex items-center gap-1 shadow-md">
                     <CheckCircle className="h-2.5 w-2.5" /> Ready
@@ -307,11 +312,11 @@ const AIDoctor = ({ lang, user }) => {
                   <p className="text-[9px] md:text-xs text-slate-400 mt-0.5 text-center px-2">{text.uploadDesc}</p>
                 </div>
               )}
-              
-              <input 
-                type="file" 
+
+              <input
+                type="file"
                 accept="image/*"
-                onChange={handleFileChange} 
+                onChange={handleFileChange}
                 className="block w-full text-[9px] md:text-sm text-slate-500 
                   file:mr-1 md:file:mr-3 file:py-1 md:file:py-2.5 file:px-2 md:file:px-5 
                   file:rounded-full file:border-0 
@@ -327,9 +332,8 @@ const AIDoctor = ({ lang, user }) => {
           <button
             onClick={handleAnalyze}
             disabled={!file || loading}
-            className={`w-full mt-2 py-2.5 md:py-3.5 rounded-lg md:rounded-xl font-bold text-white text-xs md:text-base flex flex-col items-center justify-center gap-1 shadow-md transition-all duration-300 active:scale-95 ${
-              !file ? 'bg-slate-300 cursor-not-allowed' : loading ? 'bg-green-600' : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 hover:shadow-lg'
-            }`}
+            className={`w-full mt-2 py-2.5 md:py-3.5 rounded-lg md:rounded-xl font-bold text-white text-xs md:text-base flex flex-col items-center justify-center gap-1 shadow-md transition-all duration-300 active:scale-95 ${!file ? 'bg-slate-300 cursor-not-allowed' : loading ? 'bg-green-600' : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 hover:shadow-lg'
+              }`}
           >
             {loading ? (
               <>
@@ -369,8 +373,8 @@ const AIDoctor = ({ lang, user }) => {
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5" />
                 <span className="font-medium">
-                  {lang === 'en' 
-                    ? '✓ Report automatically saved and sent to government officers in your area' 
+                  {lang === 'en'
+                    ? '✓ Report automatically saved and sent to government officers in your area'
                     : '✓ වාර්තාව ස්වයංක්‍රීයව සුරකින ලද අතර ඔබගේ ප්‍රදේශයේ රජයේ නිලධාරීන් වෙත යවන ලදී'}
                 </span>
               </div>
@@ -445,12 +449,11 @@ const AIDoctor = ({ lang, user }) => {
                 <span className="ml-auto text-lg font-bold text-gray-900">{(result.confidence * 100).toFixed(0)}%</span>
               </div>
               <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full rounded-full transition-all duration-500 ${
-                    result.confidence > 0.75 ? 'bg-gradient-to-r from-green-400 to-green-600' : 
-                    result.confidence > 0.5 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 
-                    'bg-gradient-to-r from-red-400 to-red-600'
-                  }`}
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${result.confidence > 0.75 ? 'bg-gradient-to-r from-green-400 to-green-600' :
+                      result.confidence > 0.5 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
+                        'bg-gradient-to-r from-red-400 to-red-600'
+                    }`}
                   style={{ width: `${result.confidence * 100}%` }}
                 />
               </div>
@@ -494,9 +497,9 @@ const AIDoctor = ({ lang, user }) => {
                       </div>
                       <div className="text-center">
                         <p className="text-xs font-bold text-gray-500 mb-2">AI Focus</p>
-                        <img 
-                          src={`data:image/png;base64,${result.gradcam.overlay}`} 
-                          alt="Grad-CAM" 
+                        <img
+                          src={`data:image/png;base64,${result.gradcam.overlay}`}
+                          alt="Grad-CAM"
                           className="w-full h-36 object-cover rounded-xl shadow-md"
                         />
                       </div>
@@ -538,8 +541,8 @@ const AIDoctor = ({ lang, user }) => {
                 className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl"
               >
                 <FileText size={20} />
-                {lang === 'en' 
-                  ? '📋 Submit Report to Government Officers' 
+                {lang === 'en'
+                  ? '📋 Submit Report to Government Officers'
                   : '📋 රජයේ නිලධාරීන්ට වාර්තාව ඉදිරිපත් කරන්න'}
               </button>
             )}

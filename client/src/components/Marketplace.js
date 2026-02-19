@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { 
+import {
   ShoppingBag, MapPin, Phone, User, PlusCircle, Sprout, MessageCircle,
   Star, CheckCircle, Award, ThumbsUp, MessageSquare, Trash2, Bookmark
 } from 'lucide-react';
@@ -21,47 +21,47 @@ const Marketplace = ({ lang, currentUser }) => {
   const [savedListingIds, setSavedListingIds] = useState([]);
 
   const t = {
-    en: { 
-        header: "AgroLink Marketplace", 
-        sub: "Connect directly with buyers", 
-        formTitle: "Sell New Harvest", 
-        btn: "Post Listing",
-        contactWa: "WhatsApp",
-        contactCall: "Call Now",
-        rateSeller: "Rate Seller",
-        viewReviews: "View Reviews",
-        verified: "Verified",
-        topFarmers: "Top Rated Farmers",
-        soldOut: "Mark as Sold",
-        active: "Active",
-        delete: "Delete",
-        deleteConfirm: "Are you sure you want to delete this listing?",
-        postingAs: "Posting as",
-        buyerViewOnly: "Buyers can browse listings. Posting is for farmers only.",
-        loginToPost: "Please log in as a farmer to post listings."
+    en: {
+      header: "AgroLink Marketplace",
+      sub: "Connect directly with buyers",
+      formTitle: "Sell New Harvest",
+      btn: "Post Listing (50 Credits)",
+      contactWa: "WhatsApp",
+      contactCall: "Call Now",
+      rateSeller: "Rate Seller",
+      viewReviews: "View Reviews",
+      verified: "Verified",
+      topFarmers: "Top Rated Farmers",
+      soldOut: "Mark as Sold",
+      active: "Active",
+      delete: "Delete",
+      deleteConfirm: "Are you sure you want to delete this listing?",
+      postingAs: "Posting as",
+      buyerViewOnly: "Buyers can browse listings. Posting is for farmers only.",
+      loginToPost: "Please log in as a farmer to post listings."
     },
-    si: { 
-        header: "අලෙවිසැල", 
-        sub: "ගැනුම්කරුවන් සමඟ සෘජුව සම්බන්ධ වන්න", 
-        formTitle: "අලුත් අස්වැන්න විකුණන්න", 
-        btn: "දැන්වීම පළ කරන්න",
-        contactWa: "WhatsApp",
-        contactCall: "ඇමතුමක් ගන්න",
-        rateSeller: "ශ්‍රේණිගත කරන්න",
-        viewReviews: "සමාලෝචන බලන්න",
-        verified: "සත්‍යාපිත",
-        topFarmers: "ඉහළ ශ්‍රේණිගත ගොවීන්",
-        soldOut: "විකුණන ලද ලෙස සලකුණු කරන්න",
-        active: "ක්‍රියාකාරී",
-        delete: "මකන්න",
-          deleteConfirm: "මෙම දැන්වීම මැකීමට ඔබට විශ්වාසද?",
-          postingAs: "ලෙස පළ කිරීම",
-          buyerViewOnly: "ගැණුම්කරුවන්ට දැන්වීම් බැලීමට පමණක් හැකිය. දැන්වීම් පළ කරන්නේ ගොවියන් විසින් පමණි.",
-          loginToPost: "දැන්වීම් පළ කිරීමට ගොවියෙකු ලෙස පුරනය වන්න."
+    si: {
+      header: "අලෙවිසැල",
+      sub: "ගැනුම්කරුවන් සමඟ සෘජුව සම්බන්ධ වන්න",
+      formTitle: "අලුත් අස්වැන්න විකුණන්න",
+      btn: "දැන්වීම පළ කරන්න (ණය 50)",
+      contactWa: "WhatsApp",
+      contactCall: "ඇමතුමක් ගන්න",
+      rateSeller: "ශ්‍රේණිගත කරන්න",
+      viewReviews: "සමාලෝචන බලන්න",
+      verified: "සත්‍යාපිත",
+      topFarmers: "ඉහළ ශ්‍රේණිගත ගොවීන්",
+      soldOut: "විකුණන ලද ලෙස සලකුණු කරන්න",
+      active: "ක්‍රියාකාරී",
+      delete: "මකන්න",
+      deleteConfirm: "මෙම දැන්වීම මැකීමට ඔබට විශ්වාසද?",
+      postingAs: "ලෙස පළ කිරීම",
+      buyerViewOnly: "ගැණුම්කරුවන්ට දැන්වීම් බැලීමට පමණක් හැකිය. දැන්වීම් පළ කරන්නේ ගොවියන් විසින් පමණි.",
+      loginToPost: "දැන්වීම් පළ කිරීමට ගොවියෙකු ලෙස පුරනය වන්න."
     }
   };
 
-        const isBuyer = currentUser?.role === 'buyer';
+  const isBuyer = currentUser?.role === 'buyer';
 
   useEffect(() => {
     fetchListings();
@@ -97,7 +97,7 @@ const Marketplace = ({ lang, currentUser }) => {
       const res = await axios.get(`${API_BASE}/api/saved-listings`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       // Extract just the IDs for quick lookup
       const savedIds = res.data.listings.map(listing => listing._id);
       setSavedListingIds(savedIds);
@@ -161,7 +161,7 @@ const Marketplace = ({ lang, currentUser }) => {
 
   const handleDelete = async (listingId) => {
     if (!window.confirm(t[lang].deleteConfirm)) return;
-    
+
     try {
       const token = localStorage.getItem('token');
       await axios.delete(
@@ -202,6 +202,11 @@ const Marketplace = ({ lang, currentUser }) => {
       setForm({ cropType: '', quantity: '', price: '', location: '', phone: '' });
       alert(lang === 'en' ? "Success! Your crop is listed." : "සාර්ථකයි! දැන්වීම ඇතුළත් කරන ලදී.");
     } catch (err) {
+      if (err.response && err.response.status === 403) {
+        alert(lang === 'si' ? "ප්‍රමාණවත් මුදල් නොමැත!" : "Insufficient Credits!");
+        window.dispatchEvent(new CustomEvent('open-credit-purchase'));
+        return;
+      }
       alert("Error listing crop.");
     }
   };
@@ -230,7 +235,7 @@ const Marketplace = ({ lang, currentUser }) => {
           </h3>
           <div className="flex gap-3 overflow-x-auto pb-2">
             {topFarmers.map((farmer) => (
-              <div 
+              <div
                 key={farmer._id}
                 className="flex-shrink-0 bg-white px-4 py-3 rounded-xl shadow-sm border border-amber-100 flex items-center gap-3 hover:shadow-md transition-shadow"
               >
@@ -296,144 +301,142 @@ const Marketplace = ({ lang, currentUser }) => {
             (item.farmerName === currentUser.username || item.farmer_id?.username === currentUser.username);
 
           return (
-          <div key={item._id} className="bg-white p-5 rounded-2xl shadow-md hover:shadow-xl transition-all border-l-4 border-green-500 flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-start mb-2">
-                <h4 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                  <Sprout className="h-5 w-5 text-green-500" /> {item.cropType}
-                </h4>
-                <div className="flex items-center gap-2">
-                  {item.verified && (
-                    <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                      <CheckCircle size={12} /> {t[lang].verified}
-                    </span>
-                  )}
-                  <span className="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded-full">{item.quantity}</span>
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-green-700 mb-3">Rs. {item.price}</p>
-              
-              <div className="space-y-1 text-sm text-gray-600 mb-4">
-                <div className="flex items-center justify-between">
-                  <p className="flex items-center gap-2"><User size={14} /> {item.farmerName}</p>
-                  {/* Reputation Badge */}
-                  {item.farmer_id && (
-                    <ReputationBadge 
-                      score={item.farmer_id.reputation_score || 3.0}
-                      isVerified={item.farmer_id.is_verified_farmer}
-                      size="sm"
-                      lang={lang}
-                    />
-                  )}
-                </div>
-                <p className="flex items-center gap-2"><MapPin size={14} /> {item.location}</p>
-                <p className="flex items-center gap-2 font-bold text-gray-800"><Phone size={14} /> {item.phone}</p>
-              </div>
-
-              {/* Farmer Stats */}
-              {item.farmer_id && item.farmer_id.total_sales > 0 && (
-                <div className="bg-gray-50 rounded-lg p-2 mb-4 flex items-center justify-around text-xs">
-                  <div className="text-center">
-                    <p className="font-bold text-gray-800">{item.farmer_id.total_sales}</p>
-                    <p className="text-gray-500">{lang === 'si' ? 'විකුණුම්' : 'Sales'}</p>
-                  </div>
-                  <div className="w-px h-8 bg-gray-200"></div>
-                  <div className="text-center">
-                    <p className="font-bold text-gray-800">{item.farmer_id.reputation_score?.toFixed(1) || '3.0'}</p>
-                    <p className="text-gray-500">{lang === 'si' ? 'ශ්‍රේණිගත' : 'Rating'}</p>
+            <div key={item._id} className="bg-white p-5 rounded-2xl shadow-md hover:shadow-xl transition-all border-l-4 border-green-500 flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <Sprout className="h-5 w-5 text-green-500" /> {item.cropType}
+                  </h4>
+                  <div className="flex items-center gap-2">
+                    {item.verified && (
+                      <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                        <CheckCircle size={12} /> {t[lang].verified}
+                      </span>
+                    )}
+                    <span className="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded-full">{item.quantity}</span>
                   </div>
                 </div>
-              )}
-            </div>
+                <p className="text-2xl font-bold text-green-700 mb-3">Rs. {item.price}</p>
 
-            {/* Action Buttons */}
-            <div className="space-y-2">
-              {/* Contact Actions */}
-              <div className={`grid gap-2 ${!isOwnListing && currentUser ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                <div className="space-y-1 text-sm text-gray-600 mb-4">
+                  <div className="flex items-center justify-between">
+                    <p className="flex items-center gap-2"><User size={14} /> {item.farmerName}</p>
+                    {/* Reputation Badge */}
+                    {item.farmer_id && (
+                      <ReputationBadge
+                        score={item.farmer_id.reputation_score || 3.0}
+                        isVerified={item.farmer_id.is_verified_farmer}
+                        size="sm"
+                        lang={lang}
+                      />
+                    )}
+                  </div>
+                  <p className="flex items-center gap-2"><MapPin size={14} /> {item.location}</p>
+                  <p className="flex items-center gap-2 font-bold text-gray-800"><Phone size={14} /> {item.phone}</p>
+                </div>
+
+                {/* Farmer Stats */}
+                {item.farmer_id && item.farmer_id.total_sales > 0 && (
+                  <div className="bg-gray-50 rounded-lg p-2 mb-4 flex items-center justify-around text-xs">
+                    <div className="text-center">
+                      <p className="font-bold text-gray-800">{item.farmer_id.total_sales}</p>
+                      <p className="text-gray-500">{lang === 'si' ? 'විකුණුම්' : 'Sales'}</p>
+                    </div>
+                    <div className="w-px h-8 bg-gray-200"></div>
+                    <div className="text-center">
+                      <p className="font-bold text-gray-800">{item.farmer_id.reputation_score?.toFixed(1) || '3.0'}</p>
+                      <p className="text-gray-500">{lang === 'si' ? 'ශ්‍රේණිගත' : 'Rating'}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-2">
+                {/* Contact Actions */}
+                <div className={`grid gap-2 ${!isOwnListing && currentUser ? 'grid-cols-3' : 'grid-cols-2'}`}>
                   {/* WhatsApp Button */}
-                  <a 
-                  href={`https://wa.me/${
-                  item.phone.replace(/\s/g, '').startsWith('0') 
-                      ? '94' + item.phone.replace(/\s/g, '').substring(1) 
-                      : item.phone.replace(/\s/g, '')
-                  }?text=${encodeURIComponent(
-                  lang === 'si' 
-                  ? `ආයුබෝවන් ${item.farmerName}, මම ඔබේ ${item.cropType} අස්වැන්න ගැන විමසීමට කැමතියි (Govi Isuru හරහා).` 
-                  : `Hello ${item.farmerName}, I am interested in your ${item.cropType} harvest posted on Govi Isuru.`
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-[#25D366] text-white py-2 rounded-xl font-bold text-xs hover:bg-[#128C7E] transition shadow-sm"
+                  <a
+                    href={`https://wa.me/${item.phone.replace(/\s/g, '').startsWith('0')
+                        ? '94' + item.phone.replace(/\s/g, '').substring(1)
+                        : item.phone.replace(/\s/g, '')
+                      }?text=${encodeURIComponent(
+                        lang === 'si'
+                          ? `ආයුබෝවන් ${item.farmerName}, මම ඔබේ ${item.cropType} අස්වැන්න ගැන විමසීමට කැමතියි (Govi Isuru හරහා).`
+                          : `Hello ${item.farmerName}, I am interested in your ${item.cropType} harvest posted on Govi Isuru.`
+                      )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 bg-[#25D366] text-white py-2 rounded-xl font-bold text-xs hover:bg-[#128C7E] transition shadow-sm"
                   >
-                  <MessageCircle size={16} /> {t[lang].contactWa}
+                    <MessageCircle size={16} /> {t[lang].contactWa}
                   </a>
 
                   {/* Direct Call Button */}
-                  <a 
-                  href={`tel:${item.phone}`}
-                  className="flex items-center justify-center gap-2 bg-blue-600 text-white py-2 rounded-xl font-bold text-xs hover:bg-blue-700 transition shadow-sm"
+                  <a
+                    href={`tel:${item.phone}`}
+                    className="flex items-center justify-center gap-2 bg-blue-600 text-white py-2 rounded-xl font-bold text-xs hover:bg-blue-700 transition shadow-sm"
                   >
-                  <Phone size={16} /> {t[lang].contactCall}
+                    <Phone size={16} /> {t[lang].contactCall}
                   </a>
 
                   {/* Save Button (for non-owner users) */}
                   {!isOwnListing && currentUser && (
                     <button
                       onClick={() => toggleSaveListing(item._id)}
-                      className={`flex items-center justify-center gap-1 py-2 rounded-xl font-bold text-xs transition shadow-sm ${
-                        savedListingIds.includes(item._id)
+                      className={`flex items-center justify-center gap-1 py-2 rounded-xl font-bold text-xs transition shadow-sm ${savedListingIds.includes(item._id)
                           ? 'bg-yellow-500 text-white hover:bg-yellow-600'
                           : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
-                      }`}
+                        }`}
                     >
                       <Bookmark size={14} fill={savedListingIds.includes(item._id) ? 'currentColor' : 'none'} />
-                      {savedListingIds.includes(item._id) 
-                        ? (lang === 'si' ? 'සුරකින ලදී' : 'Saved') 
+                      {savedListingIds.includes(item._id)
+                        ? (lang === 'si' ? 'සුරකින ලදී' : 'Saved')
                         : (lang === 'si' ? 'සුරකින්න' : 'Save')
                       }
                     </button>
                   )}
-              </div>
+                </div>
 
-              {/* Rate Seller & Mark Sold Buttons */}
-              <div className="grid grid-cols-2 gap-2">
-                {!isOwnListing && currentUser && currentUser._id !== item.farmer_id?._id && (
-                  <button
-                    onClick={() => setFeedbackListing(item)}
-                    className="flex items-center justify-center gap-1 bg-amber-100 text-amber-700 py-2 rounded-xl font-bold text-xs hover:bg-amber-200 transition"
-                  >
-                    <Star size={14} /> {t[lang].rateSeller}
-                  </button>
-                )}
-                
-                <button
-                  onClick={() => setViewFeedbackListing(item)}
-                  className={`flex items-center justify-center gap-1 py-2 rounded-xl font-bold text-xs transition ${isOwnListing ? 'col-span-2 bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}
-                >
-                  <MessageSquare size={14} /> {t[lang].viewReviews}
-                </button>
-              </div>
-
-              {/* Mark as Sold (only for own listings) */}
-              {currentUser && item.farmerName === currentUser.username && item.status !== 'sold' && (
+                {/* Rate Seller & Mark Sold Buttons */}
                 <div className="grid grid-cols-2 gap-2">
+                  {!isOwnListing && currentUser && currentUser._id !== item.farmer_id?._id && (
+                    <button
+                      onClick={() => setFeedbackListing(item)}
+                      className="flex items-center justify-center gap-1 bg-amber-100 text-amber-700 py-2 rounded-xl font-bold text-xs hover:bg-amber-200 transition"
+                    >
+                      <Star size={14} /> {t[lang].rateSeller}
+                    </button>
+                  )}
+
                   <button
-                    onClick={() => handleMarkSold(item._id)}
-                    className="flex items-center justify-center gap-1 bg-green-100 text-green-700 py-2 rounded-xl font-bold text-xs hover:bg-green-200 transition"
+                    onClick={() => setViewFeedbackListing(item)}
+                    className={`flex items-center justify-center gap-1 py-2 rounded-xl font-bold text-xs transition ${isOwnListing ? 'col-span-2 bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}
                   >
-                    <ThumbsUp size={14} /> {t[lang].soldOut}
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item._id)}
-                    className="flex items-center justify-center gap-1 bg-red-100 text-red-700 py-2 rounded-xl font-bold text-xs hover:bg-red-200 transition"
-                  >
-                    <Trash2 size={14} /> {t[lang].delete}
+                    <MessageSquare size={14} /> {t[lang].viewReviews}
                   </button>
                 </div>
-              )}
+
+                {/* Mark as Sold (only for own listings) */}
+                {currentUser && item.farmerName === currentUser.username && item.status !== 'sold' && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => handleMarkSold(item._id)}
+                      className="flex items-center justify-center gap-1 bg-green-100 text-green-700 py-2 rounded-xl font-bold text-xs hover:bg-green-200 transition"
+                    >
+                      <ThumbsUp size={14} /> {t[lang].soldOut}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item._id)}
+                      className="flex items-center justify-center gap-1 bg-red-100 text-red-700 py-2 rounded-xl font-bold text-xs hover:bg-red-200 transition"
+                    >
+                      <Trash2 size={14} /> {t[lang].delete}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        );
+          );
         })}
       </div>
 

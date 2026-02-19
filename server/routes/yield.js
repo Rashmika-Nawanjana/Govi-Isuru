@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const authMiddleware = require('../middleware/authMiddleware');
+const checkCredits = require('../middleware/creditMiddleware');
 
 // Mock data for yield predictions
 const yieldData = {
@@ -20,25 +22,26 @@ const yieldData = {
 /**
  * GET /api/yield/predict
  * Predict yield based on district, season, area, etc.
+ * Cost: 20 credits
  */
-router.get('/predict', (req, res) => {
+router.get('/predict', authMiddleware, checkCredits(20), (req, res) => {
   try {
     const { district = 'Anuradhapura', season = 'Maha', year = 2026, area_ha = 1 } = req.query;
-    
+
     const districtData = yieldData[district] || yieldData['Anuradhapura'];
     const seasonData = districtData[season] || districtData['Maha'];
-    
+
     const baseYield = seasonData.baseYield;
     const variance = seasonData.variance;
-    
+
     // Calculate yield per hectare
     const yieldPerHa = baseYield + (Math.random() * variance - variance / 2);
-    
+
     // Calculate total production in kg
     const areaNum = parseFloat(area_ha);
     const totalProductionKg = yieldPerHa * areaNum * 1000; // Convert tons to kg
     const totalProductionTons = yieldPerHa * areaNum;
-    
+
     res.json({
       success: true,
       district,
@@ -69,21 +72,22 @@ router.get('/predict', (req, res) => {
 /**
  * GET /api/yield/profit
  * Calculate profit based on yield and market prices
+ * Cost: 10 credits
  */
-router.get('/profit', (req, res) => {
+router.get('/profit', authMiddleware, checkCredits(10), (req, res) => {
   try {
     const { district = 'Anuradhapura', season = 'Maha', year = 2026, area_ha = 1, cost_per_ha = 50000, price_per_kg = 35 } = req.query;
-    
+
     const districtData = yieldData[district] || yieldData['Anuradhapura'];
     const seasonData = districtData[season] || districtData['Maha'];
-    
+
     const baseYield = seasonData.baseYield;
     const variance = seasonData.variance;
-    
+
     const areaNum = parseFloat(area_ha);
     const costPerHa = parseFloat(cost_per_ha);
     const pricePerKg = parseFloat(price_per_kg);
-    
+
     const predictedYield = (baseYield + (Math.random() * variance - variance / 2)) * areaNum;
     const totalCost = costPerHa * areaNum;
     const totalRevenue = predictedYield * 1000 * pricePerKg; // convert tons to kg
@@ -91,7 +95,7 @@ router.get('/profit', (req, res) => {
     const roi = (profit / totalCost * 100) || 0;
     const profitPerHa = profit / areaNum;
     const breakEvenYield = totalCost / (areaNum * pricePerKg); // in kg
-    
+
     res.json({
       success: true,
       district,
@@ -119,7 +123,7 @@ router.get('/profit', (req, res) => {
 router.get('/warning', (req, res) => {
   try {
     const { district = 'Anuradhapura', season = 'Maha', year = 2026 } = req.query;
-    
+
     const warnings = [
       {
         message: 'Rice Hispa detected in nearby areas',
@@ -130,7 +134,7 @@ router.get('/warning', (req, res) => {
         message_si: 'අපි ශ්‍රී කාලය දින 2-3 ක් ප්‍රමාද විය හැකිය'
       }
     ];
-    
+
     const recommendations = [
       {
         en: 'Monitor crops closely and consider preventive spraying',
@@ -141,23 +145,23 @@ router.get('/warning', (req, res) => {
         si: 'කෙසේ හෝ කාලගුණ පූර්වීකරණ පදනම්ව වාරිමාර්ගයේ සැලසුම් කරන්න'
       }
     ];
-    
+
     // Calculate risk score based on season and district
     const riskScores = {
       'Anuradhapura': { 'Maha': 0.65, 'Yala': 0.55 },
       'Kurunegala': { 'Maha': 0.60, 'Yala': 0.50 },
       'Polonnaruwa': { 'Maha': 0.70, 'Yala': 0.60 }
     };
-    
+
     const districtRisks = riskScores[district] || riskScores['Anuradhapura'];
     const riskScore = districtRisks[season] || districtRisks['Maha'];
-    
+
     // Determine risk level based on score
     let riskLevel = 'low';
     if (riskScore >= 0.7) riskLevel = 'critical';
     else if (riskScore >= 0.6) riskLevel = 'high';
     else if (riskScore >= 0.45) riskLevel = 'medium';
-    
+
     res.json({
       success: true,
       district,
@@ -180,7 +184,7 @@ router.get('/warning', (req, res) => {
 router.get('/rankings', (req, res) => {
   try {
     const { season = 'Maha', year = 2026 } = req.query;
-    
+
     const rankings = [
       {
         rank: 1,
@@ -233,7 +237,7 @@ router.get('/rankings', (req, res) => {
         overall_score: 70
       }
     ];
-    
+
     res.json({
       success: true,
       season,
@@ -253,7 +257,7 @@ router.get('/rankings', (req, res) => {
 router.get('/trends', (req, res) => {
   try {
     const { district = 'Anuradhapura', season = 'Maha' } = req.query;
-    
+
     const trends = [
       { year: 2022, avg_yield_kg_ha: 3800, area_ha: 35000, total_production_mt: 133 },
       { year: 2023, avg_yield_kg_ha: 4000, area_ha: 36000, total_production_mt: 144 },
@@ -261,7 +265,7 @@ router.get('/trends', (req, res) => {
       { year: 2025, avg_yield_kg_ha: 4500, area_ha: 38000, total_production_mt: 171 },
       { year: 2026, avg_yield_kg_ha: 4600, area_ha: 39000, total_production_mt: 179 }
     ];
-    
+
     res.json({
       success: true,
       district,

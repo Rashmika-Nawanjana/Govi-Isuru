@@ -24,6 +24,11 @@ const yieldRoutes = require('./routes/yield');
 const reportRoutes = require('./routes/reports');
 const savedListingsRoutes = require('./routes/savedListings');
 const adminRoutes = require('./routes/admin');
+const aiRoutes = require('./routes/ai');
+const creditRoutes = require('./routes/credits');
+
+const authMiddleware = require('./middleware/authMiddleware');
+const checkCredits = require('./middleware/creditMiddleware');
 
 const app = express();
 
@@ -47,7 +52,8 @@ app.use('/api/reputation', reputationRoutes);
 app.use('/api/news', newsRoutes);
 
 // Crop Suitability API Routes
-app.use('/api/suitability', suitabilityRoutes);
+// Cost: 20 credits per recommendation
+app.use('/api/suitability', authMiddleware, checkCredits(20), suitabilityRoutes);
 
 // Government Officer API Routes
 app.use('/api/officer', officerRoutes);
@@ -76,6 +82,12 @@ app.use('/api/saved-listings', savedListingsRoutes);
 // Admin API Routes (User Management & Officer Approval)
 app.use('/api/admin', adminRoutes);
 
+// Credit System Routes
+app.use('/api/credits', creditRoutes);
+
+// AI Doctor Route (Proxy + Credit Check)
+app.use('/api/ai', aiRoutes);
+
 // 2. Connect to Database using environment variable
 // We remove the hardcoded string and the deprecated options (no longer needed in Mongoose 6+)
 const MONGO_URI = process.env.MONGO_URI;
@@ -101,21 +113,12 @@ app.get('/api/listings', async (req, res) => {
 });
 
 // POST: Add new item with farmer association
-app.post('/api/listings', async (req, res) => {
+// POST: Add new item with farmer association
+// Cost: 50 credits
+app.post('/api/listings', authMiddleware, checkCredits(50), async (req, res) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) {
-      return res.status(401).json({ error: "Authentication required" });
-    }
-
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'govi_secret');
-    } catch (err) {
-      return res.status(401).json({ error: "Invalid token" });
-    }
-
-    const user = await User.findById(decoded.id);
+    // Auth handled by middleware
+    const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(401).json({ error: "User not found" });
     }

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  TrendingUp, 
-  AlertTriangle, 
-  MapPin, 
+import {
+  TrendingUp,
+  AlertTriangle,
+  MapPin,
   Calendar,
   DollarSign,
   BarChart3,
@@ -46,7 +46,7 @@ const translations = {
       costPerHa: 'Cost per Hectare (LKR) - Optional',
       pricePerKg: 'Expected Price per kg (LKR) - Optional',
       analyzing: 'Analyzing...',
-      predictBtn: 'Predict Yield'
+      predictBtn: 'Predict Yield (20 Credits)'
     },
     seasons: {
       maha: 'Maha',
@@ -112,7 +112,7 @@ const translations = {
       costPerHa: 'හෙක්ටයාරයකට පිරිවැය (රු.) - විකල්ප',
       pricePerKg: 'කිලෝවකට අපේක්ෂිත මිල (රු.) - විකල්ප',
       analyzing: 'විශ්ලේෂණය කරමින්...',
-      predictBtn: 'අස්වැන්න අනාවැකිය'
+      predictBtn: 'අස්වැන්න අනාවැකිය (ණය 20)'
     },
     seasons: {
       maha: 'මහ',
@@ -172,14 +172,14 @@ const YieldPrediction = ({ lang = 'en' }) => {
   const [area, setArea] = useState(1);
   const [costPerHa, setCostPerHa] = useState('');
   const [pricePerKg, setPricePerKg] = useState('');
-  
+
   // Results
   const [yieldPrediction, setYieldPrediction] = useState(null);
   const [profitPrediction, setProfitPrediction] = useState(null);
   const [warning, setWarning] = useState(null);
   const [rankings, setRankings] = useState([]);
   const [trends, setTrends] = useState([]);
-  
+
   // UI State
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -197,16 +197,35 @@ const YieldPrediction = ({ lang = 'en' }) => {
         year: year.toString(),
         ...(area && { area_ha: area.toString() })
       });
-      
+
       const response = await fetch(`${API_BASE}/api/yield/predict?${params}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setYieldPrediction(data);
       } else {
-        throw new Error(data.detail || 'Prediction failed');
+        // Check for credit error
+        if (response.status === 403) {
+          throw new Error('Insufficient credits');
+        }
+        throw new Error(data.detail || data.error || 'Prediction failed');
       }
     } catch (err) {
+      if (err.message && err.message.includes('Insufficient credits')) {
+        // If message is from our throw above (which might not happen if fetch throws 403)
+      }
+
+      // Check if it was a fetch error with response status (not easily available in standard fetch catch unless we handled it)
+      // Actually standard fetch doesn't throw on 403. We need to check response.ok in logic.
+      // But my code above does: const response = await fetch(...); const data = await response.json();
+      // If 403, data will contain error.
+
+      if (err.message === 'Insufficient credits' || err.message === 'You have used your daily credit limit. Please upgrade or wait for midnight reset.') {
+        alert(lang === 'si' ? "ප්‍රමාණවත් මුදල් නොමැත!" : "Insufficient Credits!");
+        window.dispatchEvent(new CustomEvent('open-credit-purchase'));
+        return;
+      }
+
       setError(err.message);
     } finally {
       setLoading(false);
@@ -216,7 +235,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
   // Fetch profit prediction
   const fetchProfitPrediction = async () => {
     if (!area) return;
-    
+
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -227,12 +246,18 @@ const YieldPrediction = ({ lang = 'en' }) => {
         ...(costPerHa && { cost_per_ha: costPerHa }),
         ...(pricePerKg && { price_per_kg: pricePerKg })
       });
-      
+
       const response = await fetch(`${API_BASE}/api/yield/profit?${params}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setProfitPrediction(data);
+      } else {
+        if (response.status === 403) {
+          console.log("Insufficient credits for profit");
+          // Optional: trigger modal here too, or just let the main one do it
+          window.dispatchEvent(new CustomEvent('open-credit-purchase'));
+        }
       }
     } catch (err) {
       console.error('Profit prediction error:', err);
@@ -247,7 +272,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
       const params = new URLSearchParams({ district, season, year: year.toString() });
       const response = await fetch(`${API_BASE}/api/yield/warning?${params}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setWarning(data);
       }
@@ -263,7 +288,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
     try {
       const response = await fetch(`${API_BASE}/api/yield/rankings`);
       const data = await response.json();
-      
+
       if (data.success && Array.isArray(data.rankings)) {
         setRankings(data.rankings);
       } else {
@@ -289,7 +314,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
       });
       const response = await fetch(`${API_BASE}/api/yield/trends?${params}`);
       const data = await response.json();
-      
+
       if (data.success && Array.isArray(data.trends)) {
         setTrends(data.trends);
       } else {
@@ -331,9 +356,9 @@ const YieldPrediction = ({ lang = 'en' }) => {
   // Format number with commas
   const formatNumber = (num, decimals = 0) => {
     if (num === undefined || num === null) return '-';
-    return Number(num).toLocaleString('en-US', { 
+    return Number(num).toLocaleString('en-US', {
       minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals 
+      maximumFractionDigits: decimals
     });
   };
 
@@ -365,11 +390,10 @@ const YieldPrediction = ({ lang = 'en' }) => {
                 if (tab.id === 'rankings') fetchRankings();
                 if (tab.id === 'trends') fetchTrends();
               }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                activeTab === tab.id
-                  ? 'bg-green-600 text-white shadow-lg'
-                  : 'bg-white text-green-700 hover:bg-green-50'
-              }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${activeTab === tab.id
+                ? 'bg-green-600 text-white shadow-lg'
+                : 'bg-white text-green-700 hover:bg-green-50'
+                }`}
             >
               <tab.icon className="w-5 h-5" />
               {tab.label}
@@ -416,11 +440,10 @@ const YieldPrediction = ({ lang = 'en' }) => {
                       <button
                         key={s}
                         onClick={() => setSeason(s)}
-                        className={`p-3 rounded-lg font-medium transition-all ${
-                          season === s
-                            ? 'bg-green-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
+                        className={`p-3 rounded-lg font-medium transition-all ${season === s
+                          ? 'bg-green-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
                       >
                         {s === 'Maha' ? `🌧️ ${t.seasons.maha}` : `☀️ ${t.seasons.yala}`}
                       </button>
@@ -563,7 +586,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
                           {formatNumber(yieldPrediction.yield_range.min)} kg/ha
                         </span>
                         <div className="flex-1 h-2 bg-gray-200 rounded-full relative">
-                          <div 
+                          <div
                             className="absolute h-full bg-gradient-to-r from-orange-400 via-green-500 to-blue-400 rounded-full"
                             style={{ width: '100%' }}
                           />
@@ -586,17 +609,15 @@ const YieldPrediction = ({ lang = 'en' }) => {
                   </h2>
 
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <div className={`rounded-xl p-4 ${
-                      profitPrediction.estimated_profit > 0 
-                        ? 'bg-green-100' 
-                        : 'bg-red-100'
-                    }`}>
-                      <p className="text-xs text-gray-600">{t.results.estimatedProfit}</p>
-                      <p className={`text-2xl font-bold ${
-                        profitPrediction.estimated_profit > 0 
-                          ? 'text-green-700' 
-                          : 'text-red-700'
+                    <div className={`rounded-xl p-4 ${profitPrediction.estimated_profit > 0
+                      ? 'bg-green-100'
+                      : 'bg-red-100'
                       }`}>
+                      <p className="text-xs text-gray-600">{t.results.estimatedProfit}</p>
+                      <p className={`text-2xl font-bold ${profitPrediction.estimated_profit > 0
+                        ? 'text-green-700'
+                        : 'text-red-700'
+                        }`}>
                         Rs. {formatNumber(profitPrediction.estimated_profit)}
                       </p>
                     </div>
@@ -620,9 +641,8 @@ const YieldPrediction = ({ lang = 'en' }) => {
                   <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                     <div className="flex justify-between text-sm mb-2">
                       <span>{t.results.roi}</span>
-                      <span className={`font-semibold ${
-                        profitPrediction.roi > 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
+                      <span className={`font-semibold ${profitPrediction.roi > 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
                         {formatNumber(profitPrediction.roi)}%
                       </span>
                     </div>
@@ -644,18 +664,16 @@ const YieldPrediction = ({ lang = 'en' }) => {
 
               {/* Early Warning */}
               {warning && (
-                <div className={`rounded-2xl shadow-xl p-6 border-l-4 ${
-                  getRiskStyle(warning.risk_level).border
-                } ${getRiskStyle(warning.risk_level).bg}`}>
+                <div className={`rounded-2xl shadow-xl p-6 border-l-4 ${getRiskStyle(warning.risk_level).border
+                  } ${getRiskStyle(warning.risk_level).bg}`}>
                   <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                     <AlertTriangle className={`w-6 h-6 ${getRiskStyle(warning.risk_level).text}`} />
                     {t.warning.title}
                   </h2>
 
                   <div className="flex items-center gap-4 mb-4">
-                    <span className={`px-4 py-2 rounded-full font-bold ${
-                      getRiskStyle(warning.risk_level).bg
-                    } ${getRiskStyle(warning.risk_level).text}`}>
+                    <span className={`px-4 py-2 rounded-full font-bold ${getRiskStyle(warning.risk_level).bg
+                      } ${getRiskStyle(warning.risk_level).text}`}>
                       {t.warning.riskLevel}: {warning.risk_level?.toUpperCase()}
                     </span>
                     <span className="text-gray-600">
@@ -686,8 +704,8 @@ const YieldPrediction = ({ lang = 'en' }) => {
                           <li key={i} className="flex items-start gap-2 text-gray-700">
                             <Info className="w-4 h-4 mt-1 flex-shrink-0" />
                             <span>
-                              {typeof rec === 'object' 
-                                ? (lang === 'si' && rec.si ? rec.si : rec.en) 
+                              {typeof rec === 'object'
+                                ? (lang === 'si' && rec.si ? rec.si : rec.en)
                                 : rec}
                             </span>
                           </li>
@@ -719,60 +737,58 @@ const YieldPrediction = ({ lang = 'en' }) => {
                 <p>{lang === 'si' ? 'ශ්‍රේණිගත කිරීම් දත්ත නොමැත' : 'No rankings data available'}</p>
               </div>
             ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-green-50">
-                    <th className="p-3 text-left">{t.rankings.rank}</th>
-                    <th className="p-3 text-left">{t.rankings.district}</th>
-                    <th className="p-3 text-right">{t.rankings.avgYield}</th>
-                    <th className="p-3 text-right">{t.rankings.stability}</th>
-                    <th className="p-3 text-right">{t.rankings.trend}</th>
-                    <th className="p-3 text-right">{t.rankings.score}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rankings.map((r, i) => (
-                    <tr 
-                      key={r.district}
-                      className={`border-b hover:bg-gray-50 ${i < 3 ? 'bg-yellow-50' : ''}`}
-                    >
-                      <td className="p-3">
-                        {i < 3 ? (
-                          <span className="text-2xl">
-                            {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
-                          </span>
-                        ) : (
-                          <span className="text-gray-500">{i + 1}</span>
-                        )}
-                      </td>
-                      <td className="p-3 font-medium">{r.district}</td>
-                      <td className="p-3 text-right">{formatNumber(r.avg_yield)}</td>
-                      <td className="p-3 text-right">
-                        <span className={`px-2 py-1 rounded text-sm ${
-                          r.stability > 0.8 ? 'bg-green-100 text-green-700' :
-                          r.stability > 0.6 ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-red-100 text-red-700'
-                        }`}>
-                          {formatNumber(r.stability * 100)}%
-                        </span>
-                      </td>
-                      <td className="p-3 text-right">
-                        <span className={`flex items-center justify-end gap-1 ${
-                          r.trend > 0 ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {r.trend > 0 ? '📈' : '📉'}
-                          {r.trend > 0 ? '+' : ''}{formatNumber(r.trend * 100, 1)}%
-                        </span>
-                      </td>
-                      <td className="p-3 text-right font-bold text-green-700">
-                        {formatNumber(r.overall_score)}
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-green-50">
+                      <th className="p-3 text-left">{t.rankings.rank}</th>
+                      <th className="p-3 text-left">{t.rankings.district}</th>
+                      <th className="p-3 text-right">{t.rankings.avgYield}</th>
+                      <th className="p-3 text-right">{t.rankings.stability}</th>
+                      <th className="p-3 text-right">{t.rankings.trend}</th>
+                      <th className="p-3 text-right">{t.rankings.score}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {rankings.map((r, i) => (
+                      <tr
+                        key={r.district}
+                        className={`border-b hover:bg-gray-50 ${i < 3 ? 'bg-yellow-50' : ''}`}
+                      >
+                        <td className="p-3">
+                          {i < 3 ? (
+                            <span className="text-2xl">
+                              {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
+                            </span>
+                          ) : (
+                            <span className="text-gray-500">{i + 1}</span>
+                          )}
+                        </td>
+                        <td className="p-3 font-medium">{r.district}</td>
+                        <td className="p-3 text-right">{formatNumber(r.avg_yield)}</td>
+                        <td className="p-3 text-right">
+                          <span className={`px-2 py-1 rounded text-sm ${r.stability > 0.8 ? 'bg-green-100 text-green-700' :
+                            r.stability > 0.6 ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                            {formatNumber(r.stability * 100)}%
+                          </span>
+                        </td>
+                        <td className="p-3 text-right">
+                          <span className={`flex items-center justify-end gap-1 ${r.trend > 0 ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                            {r.trend > 0 ? '📈' : '📉'}
+                            {r.trend > 0 ? '+' : ''}{formatNumber(r.trend * 100, 1)}%
+                          </span>
+                        </td>
+                        <td className="p-3 text-right font-bold text-green-700">
+                          {formatNumber(r.overall_score)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         )}
@@ -795,61 +811,60 @@ const YieldPrediction = ({ lang = 'en' }) => {
                 <p>{lang === 'si' ? 'ප්‍රවණතා දත්ත නොමැත' : 'No trends data available'}</p>
               </div>
             ) : (
-            <>
-            {/* Simple bar chart visualization */}
-            <div className="space-y-4">
-              {trends.map((trend, i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <div className="w-24 text-sm font-medium">
-                    {trend.year} {trend.season === 'Maha' ? '🌧️' : '☀️'}
-                  </div>
-                  <div className="flex-1 bg-gray-100 rounded-full h-8 relative overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full ${
-                        trend.season === 'Maha' ? 'bg-blue-500' : 'bg-orange-500'
-                      }`}
-                      style={{ 
-                        width: `${Math.min(100, (trend.avg_yield_kg_ha / 5000) * 100)}%` 
-                      }}
-                    />
-                    <span className="absolute inset-0 flex items-center justify-center text-sm font-medium">
-                      {formatNumber(trend.avg_yield_kg_ha)} kg/ha
-                    </span>
-                  </div>
-                  <div className="w-32 text-right text-sm text-gray-600">
-                    {formatNumber(trend.total_production_mt)} MT
-                  </div>
+              <>
+                {/* Simple bar chart visualization */}
+                <div className="space-y-4">
+                  {trends.map((trend, i) => (
+                    <div key={i} className="flex items-center gap-4">
+                      <div className="w-24 text-sm font-medium">
+                        {trend.year} {trend.season === 'Maha' ? '🌧️' : '☀️'}
+                      </div>
+                      <div className="flex-1 bg-gray-100 rounded-full h-8 relative overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${trend.season === 'Maha' ? 'bg-blue-500' : 'bg-orange-500'
+                            }`}
+                          style={{
+                            width: `${Math.min(100, (trend.avg_yield_kg_ha / 5000) * 100)}%`
+                          }}
+                        />
+                        <span className="absolute inset-0 flex items-center justify-center text-sm font-medium">
+                          {formatNumber(trend.avg_yield_kg_ha)} kg/ha
+                        </span>
+                      </div>
+                      <div className="w-32 text-right text-sm text-gray-600">
+                        {formatNumber(trend.total_production_mt)} MT
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            {/* Summary Stats */}
-            {trends.length > 0 && (
-              <div className="mt-8 grid grid-cols-3 gap-4">
-                <div className="bg-green-50 rounded-xl p-4 text-center">
-                  <p className="text-sm text-gray-600">{t.trends.avgYield}</p>
-                  <p className="text-2xl font-bold text-green-700">
-                    {formatNumber(trends.reduce((a, b) => a + b.avg_yield_kg_ha, 0) / trends.length)}
-                  </p>
-                  <p className="text-sm text-gray-500">kg/ha</p>
-                </div>
-                <div className="bg-blue-50 rounded-xl p-4 text-center">
-                  <p className="text-sm text-gray-600">{t.trends.totalProduction}</p>
-                  <p className="text-2xl font-bold text-blue-700">
-                    {formatNumber(trends.reduce((a, b) => a + b.total_production_mt, 0))}
-                  </p>
-                  <p className="text-sm text-gray-500">{t.trends.allYears}</p>
-                </div>
-                <div className="bg-purple-50 rounded-xl p-4 text-center">
-                  <p className="text-sm text-gray-600">{t.trends.dataPoints}</p>
-                  <p className="text-2xl font-bold text-purple-700">
-                    {trends.length}
-                  </p>
-                  <p className="text-sm text-gray-500">{t.trends.seasons}</p>
-                </div>
-              </div>
-            )}
-            </>
+                {/* Summary Stats */}
+                {trends.length > 0 && (
+                  <div className="mt-8 grid grid-cols-3 gap-4">
+                    <div className="bg-green-50 rounded-xl p-4 text-center">
+                      <p className="text-sm text-gray-600">{t.trends.avgYield}</p>
+                      <p className="text-2xl font-bold text-green-700">
+                        {formatNumber(trends.reduce((a, b) => a + b.avg_yield_kg_ha, 0) / trends.length)}
+                      </p>
+                      <p className="text-sm text-gray-500">kg/ha</p>
+                    </div>
+                    <div className="bg-blue-50 rounded-xl p-4 text-center">
+                      <p className="text-sm text-gray-600">{t.trends.totalProduction}</p>
+                      <p className="text-2xl font-bold text-blue-700">
+                        {formatNumber(trends.reduce((a, b) => a + b.total_production_mt, 0))}
+                      </p>
+                      <p className="text-sm text-gray-500">{t.trends.allYears}</p>
+                    </div>
+                    <div className="bg-purple-50 rounded-xl p-4 text-center">
+                      <p className="text-sm text-gray-600">{t.trends.dataPoints}</p>
+                      <p className="text-2xl font-bold text-purple-700">
+                        {trends.length}
+                      </p>
+                      <p className="text-sm text-gray-500">{t.trends.seasons}</p>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}

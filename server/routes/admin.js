@@ -411,4 +411,45 @@ router.get('/districts', adminAuthMiddleware, async (req, res) => {
     }
 });
 
+// ==========================================
+// PUT /api/admin/users/:id/credits
+// Update user specific credits and limits
+// ==========================================
+router.put('/users/:id/credits', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { credits, dailyLimit, isPremium } = req.body;
+
+        // Build update object
+        const update = {};
+        if (credits !== undefined) update.credits = credits;
+        if (dailyLimit !== undefined) update.dailyLimit = dailyLimit;
+        if (isPremium !== undefined) update.isPremium = isPremium;
+
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            update,
+            { new: true }
+        ).select('-password');
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({
+            success: true,
+            message: 'User credits updated',
+            user: {
+                _id: user._id,
+                username: user.username,
+                credits: user.credits,
+                dailyLimit: user.dailyLimit,
+                isPremium: user.isPremium
+            }
+        });
+    } catch (error) {
+        console.error('Error updating credits:', error);
+        res.status(500).json({ error: 'Failed to update credits' });
+    }
+});
+
 module.exports = router;

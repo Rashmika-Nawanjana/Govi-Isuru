@@ -60,6 +60,9 @@ const translations = {
         showing: 'Showing',
         topDistricts: 'Top Districts',
         changeRole: 'Change Role',
+        credits: 'Credits',
+        dailyLimit: 'Daily Limit',
+        updateCredits: 'Update Credits',
     },
     si: {
         title: 'පරිපාලක උපකරණ පුවරුව',
@@ -111,6 +114,9 @@ const translations = {
         showing: 'පෙන්වමින්',
         topDistricts: 'ප්‍රමුඛ දිස්ත්‍රික්ක',
         changeRole: 'භූමිකාව වෙනස් කරන්න',
+        credits: 'ණය',
+        dailyLimit: 'දෛනික සීමාව',
+        updateCredits: 'ණය යාවත්කාලීන කරන්න',
     }
 };
 
@@ -299,6 +305,34 @@ const AdminDashboard = ({ user, language = 'en' }) => {
         }
     };
 
+    const updateCredits = async (id, credits, dailyLimit, isPremium) => {
+        try {
+            setActionLoading(id);
+            await axios.put(`${API}/api/admin/users/${id}/credits`, {
+                credits: Number(credits),
+                dailyLimit: Number(dailyLimit),
+                isPremium: Boolean(isPremium)
+            }, { headers });
+
+            if (activeTab === 'users') fetchUsers(pagination.page);
+            fetchStats();
+
+            if (selectedUser && selectedUser._id === id) {
+                setSelectedUser(prev => ({
+                    ...prev,
+                    credits: Number(credits),
+                    dailyLimit: Number(dailyLimit),
+                    isPremium: Boolean(isPremium)
+                }));
+            }
+            alert('Credits updated');
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to update credits');
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
     // Tabs config
     const tabs = [
         { id: 'overview', label: t.overview, icon: BarChart3 },
@@ -451,6 +485,7 @@ const AdminDashboard = ({ user, language = 'en' }) => {
                                         <th className="text-left px-4 py-3 font-semibold text-slate-600">{t.users}</th>
                                         <th className="text-left px-4 py-3 font-semibold text-slate-600 hidden md:table-cell">{t.email}</th>
                                         <th className="text-left px-4 py-3 font-semibold text-slate-600">{t.role}</th>
+                                        <th className="text-left px-4 py-3 font-semibold text-slate-600">{t.credits}</th>
                                         <th className="text-left px-4 py-3 font-semibold text-slate-600 hidden lg:table-cell">{t.district}</th>
                                         <th className="text-left px-4 py-3 font-semibold text-slate-600 hidden md:table-cell">{t.joined}</th>
                                         <th className="text-left px-4 py-3 font-semibold text-slate-600">{t.actions}</th>
@@ -476,6 +511,12 @@ const AdminDashboard = ({ user, language = 'en' }) => {
                                             </td>
                                             <td className="px-4 py-3">
                                                 <RoleBadge role={u.role} />
+                                            </td>
+                                            <td className="px-4 py-3 text-slate-600">
+                                                <div className="text-xs">
+                                                    <span className="font-bold text-slate-700">{u.credits}</span>
+                                                    <span className="text-slate-400"> / {u.dailyLimit}</span>
+                                                </div>
                                             </td>
                                             <td className="px-4 py-3 text-slate-600 hidden lg:table-cell">{u.district}</td>
                                             <td className="px-4 py-3 text-slate-500 text-xs hidden md:table-cell">{formatDate(u.createdAt)}</td>
@@ -551,74 +592,139 @@ const AdminDashboard = ({ user, language = 'en' }) => {
     );
 
     // ==================== USER DETAIL PANEL ====================
-    const UserDetailPanel = ({ user: u, onClose }) => (
-        <div className="bg-white/90 backdrop-blur-sm rounded-xl border border-indigo-200 p-4 md:p-5 shadow-lg animate-in slide-in-from-top-2">
-            <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white text-lg font-bold">
-                        {(u.fullName || u.username || '?')[0].toUpperCase()}
+    const UserDetailPanel = ({ user: u, onClose }) => {
+        const [formData, setFormData] = useState({
+            credits: u.credits,
+            dailyLimit: u.dailyLimit,
+            isPremium: u.isPremium || false
+        });
+
+        useEffect(() => {
+            setFormData({
+                credits: u.credits,
+                dailyLimit: u.dailyLimit,
+                isPremium: u.isPremium || false
+            });
+        }, [u]);
+
+        const handleChange = (e) => {
+            const { name, value, type, checked } = e.target;
+            setFormData(prev => ({
+                ...prev,
+                [name]: type === 'checkbox' ? checked : value
+            }));
+        };
+
+        return (
+            <div className="bg-white/90 backdrop-blur-sm rounded-xl border border-indigo-200 p-4 md:p-5 shadow-lg animate-in slide-in-from-top-2">
+                <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white text-lg font-bold">
+                            {(u.fullName || u.username || '?')[0].toUpperCase()}
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-slate-800">{u.fullName}</h3>
+                            <p className="text-sm text-slate-500">@{u.username}</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="text-lg font-bold text-slate-800">{u.fullName}</h3>
-                        <p className="text-sm text-slate-500">@{u.username}</p>
+                    <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400">
+                        <XCircle className="w-5 h-5" />
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                    <Detail label={t.email} value={u.email} />
+                    <Detail label={t.phone} value={u.phone || '—'} />
+                    <Detail label={t.role} value={<RoleBadge role={u.role} />} />
+                    <Detail label={t.credits} value={`${u.credits} / ${u.dailyLimit}`} />
+                    <Detail label={t.district} value={u.district} />
+                    <Detail label="DS Division" value={u.dsDivision} />
+                    <Detail label="GN Division" value={u.gnDivision} />
+                    {u.role === 'officer' && (
+                        <>
+                            <Detail label={t.officerId} value={u.officerId} />
+                            <Detail label={t.department} value={u.department || '—'} />
+                            <Detail label={t.designation} value={u.designation || '—'} />
+                            <Detail label={t.approvalStatus} value={
+                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${u.approvalStatus === 'approved' ? 'bg-green-100 text-green-700' :
+                                    u.approvalStatus === 'rejected' ? 'bg-red-100 text-red-700' :
+                                        'bg-orange-100 text-orange-700'
+                                    }`}>
+                                    {u.approvalStatus === 'approved' ? <CheckCircle className="w-3 h-3" /> :
+                                        u.approvalStatus === 'rejected' ? <XCircle className="w-3 h-3" /> :
+                                            <Clock className="w-3 h-3" />}
+                                    {u.approvalStatus || 'approved'}
+                                </span>
+                            } />
+                        </>
+                    )}
+                    <Detail label={t.joined} value={formatDate(u.createdAt)} />
+                    <Detail label={t.status} value={
+                        u.account_flagged
+                            ? <span className="text-red-600 font-semibold flex items-center gap-1"><Flag className="w-3 h-3" /> Flagged</span>
+                            : <span className="text-green-600 font-semibold flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Active</span>
+                    } />
+                    <Detail label="Premium" value={u.isPremium ? 'Yes 🌟' : 'No'} />
+                </div>
+
+                {/* Role Change */}
+                <div className="mt-4 pt-4 border-t border-slate-200">
+                    <div className="flex items-center gap-3 mb-4">
+                        <span className="text-sm font-medium text-slate-600">{t.changeRole}:</span>
+                        <select
+                            value={u.role}
+                            onChange={(e) => changeRole(u._id, e.target.value)}
+                            disabled={actionLoading === u._id}
+                            className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        >
+                            <option value="farmer">Farmer</option>
+                            <option value="officer">Officer</option>
+                            <option value="buyer">Buyer</option>
+                            <option value="admin">Admin</option>
+                            <option value="moderator">Moderator</option>
+                        </select>
+                    </div>
+
+                    {/* Credit Management */}
+                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">{t.updateCredits}</h4>
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                updateCredits(u._id, formData.credits, formData.dailyLimit, formData.isPremium);
+                            }}
+                            className="flex flex-col gap-3"
+                        >
+                            <div className="flex gap-2">
+                                <div className="flex-1">
+                                    <label className="text-[10px] text-slate-500 font-bold mb-0.5 block">{t.credits}</label>
+                                    <input name="credits" type="number" value={formData.credits} onChange={handleChange} className="w-full px-2 py-1.5 text-sm border rounded" />
+                                </div>
+                                <div className="flex-1">
+                                    <label className="text-[10px] text-slate-500 font-bold mb-0.5 block">{t.dailyLimit}</label>
+                                    <input name="dailyLimit" type="number" value={formData.dailyLimit} onChange={handleChange} className="w-full px-2 py-1.5 text-sm border rounded" />
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        name="isPremium"
+                                        id="isPremium"
+                                        checked={formData.isPremium}
+                                        onChange={handleChange}
+                                        className="rounded text-indigo-600 focus:ring-indigo-500"
+                                    />
+                                    <label htmlFor="isPremium" className="text-sm text-slate-700 font-medium cursor-pointer">Premium User 🌟</label>
+                                </div>
+                                <button type="submit" className="px-4 py-1.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">Update</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400">
-                    <XCircle className="w-5 h-5" />
-                </button>
             </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                <Detail label={t.email} value={u.email} />
-                <Detail label={t.phone} value={u.phone || '—'} />
-                <Detail label={t.role} value={<RoleBadge role={u.role} />} />
-                <Detail label={t.district} value={u.district} />
-                <Detail label="DS Division" value={u.dsDivision} />
-                <Detail label="GN Division" value={u.gnDivision} />
-                {u.role === 'officer' && (
-                    <>
-                        <Detail label={t.officerId} value={u.officerId} />
-                        <Detail label={t.department} value={u.department || '—'} />
-                        <Detail label={t.designation} value={u.designation || '—'} />
-                        <Detail label={t.approvalStatus} value={
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${u.approvalStatus === 'approved' ? 'bg-green-100 text-green-700' :
-                                u.approvalStatus === 'rejected' ? 'bg-red-100 text-red-700' :
-                                    'bg-orange-100 text-orange-700'
-                                }`}>
-                                {u.approvalStatus === 'approved' ? <CheckCircle className="w-3 h-3" /> :
-                                    u.approvalStatus === 'rejected' ? <XCircle className="w-3 h-3" /> :
-                                        <Clock className="w-3 h-3" />}
-                                {u.approvalStatus || 'approved'}
-                            </span>
-                        } />
-                    </>
-                )}
-                <Detail label={t.joined} value={formatDate(u.createdAt)} />
-                <Detail label={t.status} value={
-                    u.account_flagged
-                        ? <span className="text-red-600 font-semibold flex items-center gap-1"><Flag className="w-3 h-3" /> Flagged</span>
-                        : <span className="text-green-600 font-semibold flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Active</span>
-                } />
-            </div>
-
-            {/* Role Change */}
-            <div className="mt-4 pt-4 border-t border-slate-200 flex items-center gap-3">
-                <span className="text-sm font-medium text-slate-600">{t.changeRole}:</span>
-                <select
-                    value={u.role}
-                    onChange={(e) => changeRole(u._id, e.target.value)}
-                    disabled={actionLoading === u._id}
-                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                    <option value="farmer">Farmer</option>
-                    <option value="officer">Officer</option>
-                    <option value="buyer">Buyer</option>
-                    <option value="admin">Admin</option>
-                    <option value="moderator">Moderator</option>
-                </select>
-            </div>
-        </div>
-    );
+        );
+    };
 
     const Detail = ({ label, value }) => (
         <div>

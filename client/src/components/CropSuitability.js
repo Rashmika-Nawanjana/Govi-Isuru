@@ -30,13 +30,13 @@ export default function CropSuitability({ lang = 'en', user, coords }) {
     en: {
       title: 'Crop Suitability Advisor',
       subtitle: 'Find best-fit crops for your land',
-      run: 'Recommend Crops',
+      run: 'Recommend Crops (20 Credits)',
       district: 'District', season: 'Season', soilPH: 'Soil pH', soilType: 'Soil Type', drainage: 'Drainage', slope: 'Slope', irrigation: 'Irrigation', rainfall: 'Annual Rainfall (mm)', temperature: 'Avg Temperature (°C)', landSizeHa: 'Land Size (ha)'
     },
     si: {
       title: 'බෝග සුදුසුකම් උපදේශක',
       subtitle: 'ඔබේ ඉඩමට ගැළපෙන බෝග සොයන්න',
-      run: 'බෝග නිර්දේශ',
+      run: 'බෝග නිර්දේශ (ණය 20)',
       district: 'දිස්ත්‍රික්කය', season: 'කාලය', soilPH: 'මණලේ pH', soilType: 'මණලේ වර්ගය', drainage: 'ජල නිකාසය', slope: 'ඇවිලීම', irrigation: 'නාය පද්ධතිය', rainfall: 'වාර්ෂික වැසි (මි.මී.)', temperature: 'සාමාන්‍ය උෂ්ණත්වය (°C)', landSizeHa: 'ඉඩම් ප්‍රමාණය (හෙක්ටයාර්)'
     }
   };
@@ -53,7 +53,12 @@ export default function CropSuitability({ lang = 'en', user, coords }) {
       const res = await axios.post(`${API_BASE}/api/suitability/recommend`, inputs);
       setResults(res.data.recommendations || []);
     } catch (err) {
-      setError(err.response?.data?.error || err.message);
+      if (err.response && err.response.status === 403) {
+        alert(lang === 'si' ? "ප්‍රමාණවත් මුදල් නොමැත!" : "Insufficient Credits!");
+        window.dispatchEvent(new CustomEvent('open-credit-purchase'));
+      } else {
+        setError(err.response?.data?.error || err.message);
+      }
       setResults([]);
     } finally {
       setLoading(false);

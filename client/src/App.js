@@ -12,6 +12,7 @@ import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import VerifyEmail from './components/VerifyEmail';
 import LlamaChatbot from './components/LlamaChatbot';
+import CreditPurchaseModal from './components/CreditPurchaseModal';
 
 import AlertsDashboard from './components/AlertsDashboard';
 import AgriNews from './components/AgriNews';
@@ -132,13 +133,44 @@ function MainApp() {
   const [coords, setCoords] = useState({ lat: 8.3114, lon: 80.4037 }); // Default to Anuradhapura
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showCreditModal, setShowCreditModal] = useState(false);
 
   const t = translations[lang];
+
+  const fetchCredits = async () => {
+    if (!user) return;
+    try {
+      const token = localStorage.getItem('token');
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const res = await fetch(`${API_URL}/api/credits/balance`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.credits !== undefined) {
+          const updatedUser = { ...user, credits: data.credits, dailyLimit: data.dailyLimit };
+          setUser(updatedUser);
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch credits", err);
+    }
+  };
 
   useEffect(() => {
     // Location is obtained from user profile during registration, no need to ask on homepage
     // Default to Anuradhapura for map/weather features
-  }, [user]);
+
+    // Fetch latest credits
+    fetchCredits();
+
+    // Listen for open-credit-purchase event from other components
+    const handleOpenCreditModal = () => setShowCreditModal(true);
+    window.addEventListener('open-credit-purchase', handleOpenCreditModal);
+
+    return () => window.removeEventListener('open-credit-purchase', handleOpenCreditModal);
+  }, [user?.username]); // Depend on username to avoid infinite loop with user object update
 
   // Map logged-in user's GN division or district to coordinates for weather (case-insensitive)
   const resolveUserCoords = (usr) => {
@@ -440,8 +472,9 @@ function MainApp() {
         {/* User Info Card */}
         {user && (
           <div className="mx-2 md:mx-4 mb-2 p-3 bg-green-700/40 backdrop-blur-sm rounded-lg md:rounded-xl border border-green-600/30">
-            <p className="text-[10px] md:text-xs text-green-300 font-medium">
-              {user?.role === 'admin' ? '🛡️ Admin' : user?.role === 'officer' ? '🏛️ Officer' : user?.role === 'buyer' ? '🛒 Buyer' : '👨‍🌾 Farmer'}
+            <p className="text-[10px] md:text-xs text-green-300 font-medium flex items-center gap-2">
+              <span>{user?.role === 'admin' ? '🛡️ Admin' : user?.role === 'officer' ? '🏛️ Officer' : user?.role === 'buyer' ? '🛒 Buyer' : '👨‍🌾 Farmer'}</span>
+              <span className="bg-green-800/50 px-1.5 py-0.5 rounded text-green-200">💳 {user.credits ?? 0}</span>
             </p>
             <p className="text-xs md:text-sm font-bold text-white truncate mt-0.5">{user.username}</p>
             <p className="text-[10px] md:text-xs text-green-400 mt-1 truncate">
@@ -619,6 +652,16 @@ function MainApp() {
 
       {/* Llama 3.1 AI Chatbot - Available on all pages */}
       <LlamaChatbot lang={lang} />
+      {/* Credit Purchase Modal */}
+      <CreditPurchaseModal
+        isOpen={showCreditModal}
+        onClose={() => setShowCreditModal(false)}
+        onPurchaseSuccess={() => {
+          fetchCredits(); // Refresh credits
+          // Also maybe show a toast?
+        }}
+        lang={lang}
+      />
     </div>
   );
 }
