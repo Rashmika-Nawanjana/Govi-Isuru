@@ -77,8 +77,7 @@ router.post('/purchase', authMiddleware, async (req, res) => {
 
         const user = await User.findByIdAndUpdate(
             req.user.id,
-            { $inc: { credits: creditsToAdd } },
-            { new: true }
+            { $inc: { credits: creditsToAdd } }
         );
 
         res.json({

@@ -197,8 +197,7 @@ router.put('/users/:id/role', adminAuthMiddleware, async (req, res) => {
 
         const user = await User.findByIdAndUpdate(
             req.params.id,
-            { role },
-            { new: true }
+            { role }
         ).select('-password');
 
         if (!user) {
@@ -226,8 +225,7 @@ router.put('/users/:id/status', adminAuthMiddleware, async (req, res) => {
 
         const user = await User.findByIdAndUpdate(
             req.params.id,
-            { account_flagged: !!flagged },
-            { new: true }
+            { account_flagged: !!flagged }
         ).select('-password');
 
         if (!user) {
@@ -427,8 +425,7 @@ router.put('/users/:id/credits', adminAuthMiddleware, async (req, res) => {
 
         const user = await User.findByIdAndUpdate(
             req.params.id,
-            update,
-            { new: true }
+            update
         ).select('-password');
 
         if (!user) {

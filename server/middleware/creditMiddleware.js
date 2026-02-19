@@ -2,7 +2,7 @@ const User = require('../models/User');
 
 /**
  * Middleware to check and deduct credits for API usage
- * Implements "Lazy Reset" pattern with Atomic Updates for thread safety
+ * Implements "Lazy Reset" pattern - compatible with Mongoose 9 / Express 5
  * @param {number} cost - Number of credits to deduct
  */
 const checkCredits = (cost) => {
@@ -14,56 +14,61 @@ const checkCredits = (cost) => {
                 return res.status(401).json({ error: "Authentication required for credit check" });
             }
 
-            // 2. Lazy Reset: Atomic check-and-set
-            // If lastCreditReset is before today 00:00:00, reset credits to dailyLimit
+            // 2. Lazy Reset: read user, check if daily reset is needed
             const startOfToday = new Date();
             startOfToday.setHours(0, 0, 0, 0);
 
-            // Try to reset. Use updateOne with filter for lastCreditReset < startOfToday.
-            // This ensures it only happens once per day, even with concurrent requests.
-            await User.updateOne(
-                {
-                    _id: userId,
-                    lastCreditReset: { $lt: startOfToday }
-                },
-                [
-                    // Use aggregation pipeline for update to reference dailyLimit field
-                    {
-                        $set: {
-                            credits: { $max: ["$credits", "$dailyLimit"] },
-                            lastCreditReset: new Date()
-                        }
-                    }
-                ]
-            );
+            const currentUser = await User.findById(userId);
+            if (!currentUser) {
+                return res.status(404).json({ error: "User not found" });
+            }
 
-            // 3. Atomic Deduction
-            const user = await User.findOneAndUpdate(
-                { _id: userId, credits: { $gte: cost } },
-                { $inc: { credits: -cost } },
-                { new: true } // Return updated document
-            );
+            // Auto-initialize credits for legacy users who don't have these fields
+            if (currentUser.credits === undefined || currentUser.credits === null) {
+                currentUser.credits = 200;
+            }
+            if (currentUser.dailyLimit === undefined || currentUser.dailyLimit === null) {
+                currentUser.dailyLimit = 200;
+            }
 
-            if (!user) {
-                // If user exists but update failed, it means insufficient credits OR credits field missing
-                const userExists = await User.findById(userId);
-                if (!userExists) {
-                    return res.status(404).json({ error: "User not found" });
-                }
+            // If lastCreditReset is before today, reset credits
+            if (!currentUser.lastCreditReset || currentUser.lastCreditReset < startOfToday) {
+                const resetCredits = Math.max(currentUser.credits, currentUser.dailyLimit);
+                await User.updateOne(
+                    { _id: userId },
+                    { $set: { credits: resetCredits, lastCreditReset: new Date() } }
+                );
+                currentUser.credits = resetCredits;
+            }
 
-                // Legacy data handling
-                const currentCredits = userExists.credits !== undefined ? userExists.credits : 0;
-
+            // 3. Check if user has enough credits
+            if (currentUser.credits < cost) {
                 return res.status(403).json({
                     error: "Insufficient credits",
                     msg: "You have used your daily credit limit. Please upgrade or wait for midnight reset.",
-                    credits: currentCredits,
+                    credits: currentUser.credits,
                     cost: cost
                 });
             }
 
-            // 4. Attach user to request (optional, but convenient) and proceed
-            req.user = user; // Update req.user with latest data
+            // 4. Atomic Deduction (Mongoose 9: returns updated doc by default)
+            const updatedUser = await User.findOneAndUpdate(
+                { _id: userId, credits: { $gte: cost } },
+                { $inc: { credits: -cost } }
+            );
+
+            if (!updatedUser) {
+                // Race condition: credits were consumed between check and deduction
+                return res.status(403).json({
+                    error: "Insufficient credits",
+                    msg: "Credits were consumed by a concurrent request. Please try again.",
+                    credits: 0,
+                    cost: cost
+                });
+            }
+
+            // 5. Attach updated credit info and proceed
+            req.user = { ...req.user, credits: updatedUser.credits };
             next();
 
         } catch (err) {

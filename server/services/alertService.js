@@ -706,8 +706,7 @@ async function reviewReport(reportId, reviewData) {
     
     const updatedReport = await DiseaseReport.findByIdAndUpdate(
       reportId,
-      update,
-      { new: true }
+      update
     );
     
     return updatedReport;
@@ -812,8 +811,7 @@ async function markNotificationRead(notificationId) {
   try {
     const notification = await Notification.findByIdAndUpdate(
       notificationId,
-      { read: true },
-      { new: true }
+      { read: true }
     );
     return notification;
   } catch (error) {
@@ -829,8 +827,7 @@ async function resolveAlert(alertId) {
   try {
     const alert = await CommunityAlert.findByIdAndUpdate(
       alertId,
-      { status: 'resolved', lastUpdatedAt: new Date() },
-      { new: true }
+      { status: 'resolved', lastUpdatedAt: new Date() }
     );
     return alert;
   } catch (error) {
