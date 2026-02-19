@@ -374,6 +374,14 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ msg: "Invalid credentials" });
     }
 
+    // Auto-initialize credits for legacy users
+    if (user.credits === undefined || user.dailyLimit === undefined) {
+      user.credits = 200;
+      user.dailyLimit = 200;
+      user.lastCreditReset = new Date();
+      await user.save();
+    }
+
     // Generate tokens
     const { accessToken, refreshToken } = generateTokens(user);
 

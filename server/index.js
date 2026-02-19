@@ -368,8 +368,8 @@ app.post('/api/login', async (req, res) => {
       dsDivision: user.dsDivision,
       gnDivision: user.gnDivision,
       role: user.role || 'farmer',
-      credits: user.credits,
-      dailyLimit: user.dailyLimit,
+      credits: user.credits !== undefined ? user.credits : 200,
+      dailyLimit: user.dailyLimit !== undefined ? user.dailyLimit : 200,
       isPremium: user.isPremium
     };
 

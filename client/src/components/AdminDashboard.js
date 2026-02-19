@@ -514,8 +514,8 @@ const AdminDashboard = ({ user, language = 'en' }) => {
                                             </td>
                                             <td className="px-4 py-3 text-slate-600">
                                                 <div className="text-xs">
-                                                    <span className="font-bold text-slate-700">{u.credits}</span>
-                                                    <span className="text-slate-400"> / {u.dailyLimit}</span>
+                                                    <span className="font-bold text-slate-700">{u.credits ?? 0}</span>
+                                                    <span className="text-slate-400"> / {u.dailyLimit ?? 200}</span>
                                                 </div>
                                             </td>
                                             <td className="px-4 py-3 text-slate-600 hidden lg:table-cell">{u.district}</td>
@@ -636,7 +636,7 @@ const AdminDashboard = ({ user, language = 'en' }) => {
                     <Detail label={t.email} value={u.email} />
                     <Detail label={t.phone} value={u.phone || '—'} />
                     <Detail label={t.role} value={<RoleBadge role={u.role} />} />
-                    <Detail label={t.credits} value={`${u.credits} / ${u.dailyLimit}`} />
+                    <Detail label={t.credits} value={`${u.credits ?? 0} / ${u.dailyLimit ?? 200}`} />
                     <Detail label={t.district} value={u.district} />
                     <Detail label="DS Division" value={u.dsDivision} />
                     <Detail label="GN Division" value={u.gnDivision} />

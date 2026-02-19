@@ -32,19 +32,24 @@ router.get('/balance', authMiddleware, async (req, res) => {
         const user = await User.findById(req.user.id).select('credits dailyLimit lastCreditReset isPremium');
         if (!user) return res.status(404).json({ error: "User not found" });
 
-        // Check if reset is needed (display purposes mainly, but good to show accurate future)
-        // The middleware does the actual reset on consumption, but here we can simulate it 
-        // or just return what's in DB. Lazy reset means DB might be stale "physically" 
-        // but logically it resets on next use. 
-        // Let's show the user what they WILL have if they use it now.
+        // Auto-initialize credits for legacy users
+        if (user.credits === undefined || user.dailyLimit === undefined) {
+            user.credits = 200;
+            user.dailyLimit = 200;
+            user.lastCreditReset = new Date();
+            await user.save();
+        }
 
+        // Check if reset is needed (display purposes mainly, but good to show accurate future)
         const startOfToday = new Date();
         startOfToday.setHours(0, 0, 0, 0);
 
         let effectiveCredits = user.credits;
 
         if (!user.lastCreditReset || user.lastCreditReset < startOfToday) {
-            effectiveCredits = Math.max(user.credits || 0, user.dailyLimit || 200);
+            // This is just for display. The actual reset happens in middleware on usage.
+            // But we should show them what they have available "today".
+            effectiveCredits = Math.max(user.credits, user.dailyLimit);
         }
 
         res.json({
