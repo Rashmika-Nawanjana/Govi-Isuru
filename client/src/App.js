@@ -421,8 +421,8 @@ function MainApp() {
                   setIsSidebarOpen(false);
                 }}
                 className={`group flex items-center gap-2 md:gap-3 w-full px-3 md:px-4 py-2.5 md:py-3 rounded-lg md:rounded-xl font-semibold text-sm md:text-base transition-all duration-200 active:scale-95 ${isActive
-                    ? 'bg-white text-green-800 shadow-lg'
-                    : 'text-green-100 hover:bg-white/10'
+                  ? 'bg-white text-green-800 shadow-lg'
+                  : 'text-green-100 hover:bg-white/10'
                   }`}
               >
                 <div className={`p-1 md:p-1.5 rounded-lg transition-colors flex-shrink-0 ${isActive ? 'bg-green-100' : 'bg-green-700/50'}`}>
@@ -441,13 +441,17 @@ function MainApp() {
         {user && (
           <div className="mx-2 md:mx-4 mb-2 p-3 bg-green-700/40 backdrop-blur-sm rounded-lg md:rounded-xl border border-green-600/30">
             <p className="text-[10px] md:text-xs text-green-300 font-medium">
-              {user?.role === 'officer' ? '🏛️ Officer' : '👨‍🌾 Farmer'}
+              {user?.role === 'admin' ? '🛡️ Admin' : user?.role === 'officer' ? '🏛️ Officer' : user?.role === 'buyer' ? '🛒 Buyer' : '👨‍🌾 Farmer'}
             </p>
             <p className="text-xs md:text-sm font-bold text-white truncate mt-0.5">{user.username}</p>
             <p className="text-[10px] md:text-xs text-green-400 mt-1 truncate">
               {user?.role === 'officer'
                 ? `📋 ${user.officerId || user.district}`
-                : `📍 ${user.gnDivision}`}
+                : user?.role === 'admin'
+                  ? `🛡️ Administrator`
+                  : user?.role === 'buyer'
+                    ? `📍 ${user.district}`
+                    : `📍 ${user.gnDivision}`}
             </p>
           </div>
         )}
@@ -509,8 +513,8 @@ function MainApp() {
                       key={item.id}
                       onClick={() => setView(item.id)}
                       className={`flex items-center gap-1 px-2.5 py-1 rounded-full whitespace-nowrap text-[10px] font-medium transition-all active:scale-95 flex-shrink-0 ${isActive
-                          ? 'bg-white text-green-700 shadow-sm'
-                          : 'bg-white/20 text-white hover:bg-white/30'
+                        ? 'bg-white text-green-700 shadow-sm'
+                        : 'bg-white/20 text-white hover:bg-white/30'
                         }`}
                     >
                       <Icon size={12} />

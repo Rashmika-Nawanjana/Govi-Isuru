@@ -332,6 +332,14 @@ app.post('/api/login', async (req, res) => {
       });
     }
 
+    // Check if account is flagged
+    if (user.account_flagged) {
+      return res.status(403).json({
+        msg: "Your account has been flagged for suspicious activity. Please contact support.",
+        code: 'ACCOUNT_FLAGGED'
+      });
+    }
+
     // 3. Validate password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
