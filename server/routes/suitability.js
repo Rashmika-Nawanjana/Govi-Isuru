@@ -21,12 +21,13 @@ router.post('/recommend', async (req, res) => {
       land_size_ha: Number(req.body.landSizeHa ?? 1.0)
     };
 
-    const mlResp = await axios.post(`${AI_SERVICE_URL}/suitability/predict`, mlPayload, { timeout: 5000 });
+    const mlResp = await axios.post(`${AI_SERVICE_URL}/suitability/predict`, mlPayload, { timeout: 3000 });
     if (mlResp?.data?.recommendations) {
       return res.json({ recommendations: mlResp.data.recommendations, source: 'ml', inputs: mlPayload });
     }
   } catch (err) {
-    console.error('ML suitability call failed, falling back to rules:', err.message);
+    console.error(`ML suitability call failed (URL: ${AI_SERVICE_URL}):`, err.message);
+    // Continue to rule-based fallback
   }
 
   // Rule-based fallback

@@ -64,7 +64,9 @@ router.get('/predict', authMiddleware, checkCredits(20), (req, res) => {
         temperature: 'Optimal'
       }
     });
+
   } catch (err) {
+    console.error("Yield predict error:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });

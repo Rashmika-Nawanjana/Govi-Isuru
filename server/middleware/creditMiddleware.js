@@ -37,29 +37,27 @@ const checkCredits = (cost) => {
                 ]
             );
 
-            // 3. Atomic Deduction: Check balance and deduct in one go
-            // This prevents race conditions where two requests check balance simultaneously
+            // 3. Atomic Deduction
             const user = await User.findOneAndUpdate(
-                {
-                    _id: userId,
-                    credits: { $gte: cost }
-                },
+                { _id: userId, credits: { $gte: cost } },
                 { $inc: { credits: -cost } },
                 { new: true } // Return updated document
             );
 
             if (!user) {
-                // If user is null, it means either user not found OR credits < cost
-                // Let's check which one it is for better error message
+                // If user exists but update failed, it means insufficient credits OR credits field missing
                 const userExists = await User.findById(userId);
                 if (!userExists) {
                     return res.status(404).json({ error: "User not found" });
                 }
 
+                // Legacy data handling
+                const currentCredits = userExists.credits !== undefined ? userExists.credits : 0;
+
                 return res.status(403).json({
                     error: "Insufficient credits",
                     msg: "You have used your daily credit limit. Please upgrade or wait for midnight reset.",
-                    credits: userExists.credits,
+                    credits: currentCredits,
                     cost: cost
                 });
             }
