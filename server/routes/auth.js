@@ -393,7 +393,10 @@ router.post('/login', async (req, res) => {
       district: user.district,
       dsDivision: user.dsDivision,
       gnDivision: user.gnDivision,
-      role: user.role || 'farmer'
+      role: user.role || 'farmer',
+      credits: user.credits,
+      dailyLimit: user.dailyLimit,
+      isPremium: user.isPremium
     };
 
     // Include officer fields if user is an officer
