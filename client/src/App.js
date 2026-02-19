@@ -572,6 +572,9 @@ function MainApp() {
                     <p className="text-xl font-bold text-slate-800 truncate">{user.username}</p>
                   </div>
                   <div className="flex items-center gap-2">
+                    <span className="hidden md:flex items-center gap-1 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold border border-yellow-200">
+                      🪙 {user.credits ?? 0}
+                    </span>
                     {user?.role === 'officer' ? (
                       <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-semibold">
                         📍 {user.district}

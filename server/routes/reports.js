@@ -21,8 +21,8 @@ router.post('/submit', authMiddleware, async (req, res) => {
 
     // Get phone from user object or fetch from database if not available
     let farmerPhone = currentUser.phone;
-    if (!farmerPhone && currentUser._id) {
-      const userFromDB = await User.findById(currentUser._id);
+    if (!farmerPhone && (currentUser.id || currentUser._id)) {
+      const userFromDB = await User.findById(currentUser.id || currentUser._id);
       if (userFromDB) {
         farmerPhone = userFromDB.phone;
       }
@@ -45,7 +45,7 @@ router.post('/submit', authMiddleware, async (req, res) => {
     // Create report
     const report = new Report({
       report_type: report_type || 'disease',
-      farmerId: currentUser._id,
+      farmerId: currentUser.id || currentUser._id,
       farmerName: currentUser.fullName || currentUser.username || 'Farmer',
       farmerPhone: farmerPhone,
       district: currentUser.district,
