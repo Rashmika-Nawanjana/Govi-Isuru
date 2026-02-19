@@ -162,7 +162,7 @@ const translations = {
   }
 };
 
-const YieldPrediction = ({ lang = 'en' }) => {
+const YieldPrediction = ({ lang = 'en', onInteraction }) => {
   // Get translations for current language
   const t = translations[lang] || translations.en;
   // State
@@ -206,6 +206,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
 
       if (data.success) {
         setYieldPrediction(data);
+        if (onInteraction) onInteraction();
       } else {
         // Check for credit error
         if (response.status === 403) {
@@ -258,6 +259,7 @@ const YieldPrediction = ({ lang = 'en' }) => {
 
       if (data.success) {
         setProfitPrediction(data);
+        if (onInteraction) onInteraction();
       } else {
         if (response.status === 403) {
           console.log("Insufficient credits for profit");

@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
-export default function CropSuitability({ lang = 'en', user, coords }) {
+export default function CropSuitability({ lang = 'en', user, coords, onInteraction }) {
   const [inputs, setInputs] = useState({
     district: user?.district || '',
     season: 'Maha',
@@ -57,6 +57,7 @@ export default function CropSuitability({ lang = 'en', user, coords }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setResults(res.data.recommendations || []);
+      if (onInteraction) onInteraction();
     } catch (err) {
       if (err.response && err.response.status === 403) {
         alert(lang === 'si' ? "ප්‍රමාණවත් මුදල් නොමැත!" : "Insufficient Credits!");

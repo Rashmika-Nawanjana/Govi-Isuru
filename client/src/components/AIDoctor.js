@@ -6,7 +6,7 @@ import {
   FileText, ChevronRight, Coffee, Flame
 } from 'lucide-react';
 
-const AIDoctor = ({ lang, user }) => {
+const AIDoctor = ({ lang, user, onInteraction }) => {
   const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -130,6 +130,7 @@ const AIDoctor = ({ lang, user }) => {
       };
 
       setResult(mappedResult);
+      if (onInteraction) onInteraction();
 
       // Automatically save disease report if user is logged in and disease detected
       if (user && data.prediction && !data.prediction.toLowerCase().includes('healthy')) {

@@ -10,7 +10,7 @@ import FeedbackList from './FeedbackList';
 
 const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
-const Marketplace = ({ lang, currentUser }) => {
+const Marketplace = ({ lang, currentUser, onInteraction }) => {
   const [listings, setListings] = useState([]);
   const [form, setForm] = useState({
     cropType: '', quantity: '', price: '', location: '', phone: ''
@@ -201,6 +201,7 @@ const Marketplace = ({ lang, currentUser }) => {
       fetchListings();
       setForm({ cropType: '', quantity: '', price: '', location: '', phone: '' });
       alert(lang === 'en' ? "Success! Your crop is listed." : "සාර්ථකයි! දැන්වීම ඇතුළත් කරන ලදී.");
+      if (onInteraction) onInteraction();
     } catch (err) {
       if (err.response && err.response.status === 403) {
         alert(lang === 'si' ? "ප්‍රමාණවත් මුදල් නොමැත!" : "Insufficient Credits!");
@@ -358,8 +359,8 @@ const Marketplace = ({ lang, currentUser }) => {
                   {/* WhatsApp Button */}
                   <a
                     href={`https://wa.me/${item.phone.replace(/\s/g, '').startsWith('0')
-                        ? '94' + item.phone.replace(/\s/g, '').substring(1)
-                        : item.phone.replace(/\s/g, '')
+                      ? '94' + item.phone.replace(/\s/g, '').substring(1)
+                      : item.phone.replace(/\s/g, '')
                       }?text=${encodeURIComponent(
                         lang === 'si'
                           ? `ආයුබෝවන් ${item.farmerName}, මම ඔබේ ${item.cropType} අස්වැන්න ගැන විමසීමට කැමතියි (Govi Isuru හරහා).`
@@ -385,8 +386,8 @@ const Marketplace = ({ lang, currentUser }) => {
                     <button
                       onClick={() => toggleSaveListing(item._id)}
                       className={`flex items-center justify-center gap-1 py-2 rounded-xl font-bold text-xs transition shadow-sm ${savedListingIds.includes(item._id)
-                          ? 'bg-yellow-500 text-white hover:bg-yellow-600'
-                          : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                        ? 'bg-yellow-500 text-white hover:bg-yellow-600'
+                        : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
                         }`}
                     >
                       <Bookmark size={14} fill={savedListingIds.includes(item._id) ? 'currentColor' : 'none'} />

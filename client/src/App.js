@@ -597,15 +597,15 @@ function MainApp() {
                 {/* Farmer Views */}
                 {(!user?.role || user?.role === 'farmer') && (
                   <>
-                    {view === 'doctor' && <AIDoctor lang={lang} user={user} />}
+                    {view === 'doctor' && <AIDoctor lang={lang} user={user} onInteraction={fetchCredits} />}
                     {view === 'myReports' && <MyReports user={user} lang={lang} />}
-                    {view === 'market' && <Marketplace lang={lang} currentUser={user} />}
+                    {view === 'market' && <Marketplace lang={lang} currentUser={user} onInteraction={fetchCredits} />}
                     {view === 'weather' && <WeatherAdvisor lang={lang} lat={coords.lat} lon={coords.lon} user={user} />}
                     {view === 'trends' && <MarketTrends lang={lang} />}
                     {view === 'alerts' && <AlertsDashboard user={user} language={lang} />}
                     {view === 'news' && <AgriNews lang={lang} user={user} />}
-                    {view === 'yield' && <YieldPrediction lang={lang} />}
-                    {view === 'suitability' && <CropSuitability lang={lang} user={user} coords={coords} />}
+                    {view === 'yield' && <YieldPrediction lang={lang} onInteraction={fetchCredits} />}
+                    {view === 'suitability' && <CropSuitability lang={lang} user={user} coords={coords} onInteraction={fetchCredits} />}
                     {view === 'riceVarieties' && <TraditionalRice lang={lang} />}
                     {view === 'profile' && <UserProfile />}
                   </>
