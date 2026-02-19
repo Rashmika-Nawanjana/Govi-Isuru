@@ -207,6 +207,9 @@ router.post('/register', async (req, res) => {
       userData.officerId = officerId;
       userData.department = department || null;
       userData.designation = designation || null;
+      // Officers require admin approval before they can log in
+      userData.isApproved = false;
+      userData.approvalStatus = 'pending';
     }
 
     const user = new User(userData);
@@ -219,10 +222,15 @@ router.post('/register', async (req, res) => {
       console.error('Failed to send verification email:', emailResult.error);
     }
 
+    const responseMsg = role === 'officer'
+      ? "Registration successful! Please verify your email. Your officer account will be reviewed by an admin before activation."
+      : "Registration successful! Please check your email to verify your account.";
+
     res.status(201).json({
       success: true,
-      msg: "Registration successful! Please check your email to verify your account.",
-      emailSent: emailResult.success
+      msg: responseMsg,
+      emailSent: emailResult.success,
+      requiresApproval: role === 'officer'
     });
 
   } catch (err) {
@@ -337,6 +345,18 @@ router.post('/login', async (req, res) => {
         msg: "Please verify your email before logging in",
         code: 'EMAIL_NOT_VERIFIED',
         email: user.email
+      });
+    }
+
+    // Check if officer account is approved by admin
+    if (user.role === 'officer' && !user.isApproved) {
+      const statusMsg = user.approvalStatus === 'rejected'
+        ? `Your officer registration was rejected. Reason: ${user.rejectionReason || 'No reason provided'}`
+        : 'Your officer account is pending admin approval. You will be notified once approved.';
+      return res.status(403).json({
+        msg: statusMsg,
+        code: 'OFFICER_NOT_APPROVED',
+        approvalStatus: user.approvalStatus
       });
     }
 
