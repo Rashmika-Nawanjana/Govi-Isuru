@@ -110,7 +110,7 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
       // Use crop-specific endpoint
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `${API_BASE}/ai/predict/${cropType}`,
+        `${API_BASE}/api/ai/predict/${cropType}`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );

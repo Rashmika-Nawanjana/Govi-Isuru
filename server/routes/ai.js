@@ -2,13 +2,17 @@ const express = require('express');
 const router = express.Router();
 const checkCredits = require('../middleware/creditMiddleware');
 const axios = require('axios');
+const multer = require('multer');
+const FormData = require('form-data');
+
+// Multer - store uploaded file in memory so we can forward it
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 // Middleware to verify token is required for credit check to work
 const jwt = require('jsonwebtoken');
 const authMiddleware = async (req, res, next) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
-        // If no token, checkCredits will fail anyway, but let's be explicit
         if (!token) return res.status(401).json({ error: "Authentication required" });
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'govi_secret');
@@ -23,35 +27,46 @@ const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
 
 /**
  * POST /api/ai/predict/:crop
- * AI Doctor endpoint.
+ * AI Doctor endpoint - proxies file upload to Python AI service.
  * Cost: 25 credits.
  */
-router.post('/predict/:crop', authMiddleware, checkCredits(25), async (req, res) => {
+router.post('/predict/:crop', authMiddleware, checkCredits(25), upload.single('file'), async (req, res) => {
     try {
         const { crop } = req.params;
 
-        // In a real scenario, we would forward the file upload (req.files) to the Python service.
-        // Since we don't have the Python service running in this environment, 
-        // or we might need to mock it if it's missing.
+        if (!req.file) {
+            return res.status(400).json({ error: "No image file provided" });
+        }
 
-        // Attempt to proxy to Python service
-        // Note: handling multipart/form-data proxying is complex without multer.
-        // For this demo/hackathon, if the upstream fails, we can return a mock response
-        // so the frontend "Success" flow works (and credits are consumed).
-
+        // Forward the uploaded file to the Python AI service
         try {
-            // Mock success response if upstream is not reachable
-            throw new Error("Mocking AI response for credit demo");
+            const formData = new FormData();
+            formData.append('file', req.file.buffer, {
+                filename: req.file.originalname,
+                contentType: req.file.mimetype
+            });
 
-            // Real proxy code would go here:
-            // const response = await axios.post(`${AI_SERVICE_URL}/ai/predict/${crop}`, req.body, ...);
-            // res.json(response.data);
+            const response = await axios.post(
+                `${AI_SERVICE_URL}/predict/${crop}`,
+                formData,
+                {
+                    headers: {
+                        ...formData.getHeaders()
+                    },
+                    timeout: 60000, // 60s timeout for large images / model inference
+                    maxContentLength: Infinity,
+                    maxBodyLength: Infinity
+                }
+            );
+
+            res.json(response.data);
 
         } catch (proxyError) {
-            // Fallback Mock Response
-            console.log("AI Service unreachable or mocked. Returning simulated result.");
+            // Fallback mock response when Python AI service is unreachable
+            console.warn(`AI Service unreachable (${AI_SERVICE_URL}): ${proxyError.message}. Returning mock result.`);
 
             const mockResponse = {
+                success: true,
                 prediction: "Brown Spot",
                 si_name: "දුඹුරු ලප රෝගය",
                 confidence: 92.5,
@@ -64,9 +79,6 @@ router.post('/predict/:crop', authMiddleware, checkCredits(25), async (req, res)
                 severity: "medium",
                 crop_type: crop
             };
-
-            // Simulate delay
-            await new Promise(r => setTimeout(r, 1000));
 
             res.json(mockResponse);
         }

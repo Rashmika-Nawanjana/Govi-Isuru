@@ -15,7 +15,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-const API_BASE = process.env.REACT_APP_AI_URL ?? 'http://localhost:8000';
+const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
 // Sri Lanka Districts
 const DISTRICTS = [
@@ -202,34 +202,23 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
       const response = await fetch(`${API_BASE}/api/yield/predict?${params}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      // fetch does NOT throw on HTTP errors, so check status first
+      if (response.status === 403) {
+        alert(lang === 'si' ? "ප්‍රමාණවත් මුදල් නොමැත!" : "Insufficient Credits!");
+        window.dispatchEvent(new CustomEvent('open-credit-purchase'));
+        return;
+      }
+
       const data = await response.json();
 
       if (data.success) {
         setYieldPrediction(data);
         if (onInteraction) onInteraction();
       } else {
-        // Check for credit error
-        if (response.status === 403) {
-          throw new Error('Insufficient credits');
-        }
         throw new Error(data.detail || data.error || 'Prediction failed');
       }
     } catch (err) {
-      if (err.message && err.message.includes('Insufficient credits')) {
-        // If message is from our throw above (which might not happen if fetch throws 403)
-      }
-
-      // Check if it was a fetch error with response status (not easily available in standard fetch catch unless we handled it)
-      // Actually standard fetch doesn't throw on 403. We need to check response.ok in logic.
-      // But my code above does: const response = await fetch(...); const data = await response.json();
-      // If 403, data will contain error.
-
-      if (err.message === 'Insufficient credits' || err.message === 'You have used your daily credit limit. Please upgrade or wait for midnight reset.') {
-        alert(lang === 'si' ? "ප්‍රමාණවත් මුදල් නොමැත!" : "Insufficient Credits!");
-        window.dispatchEvent(new CustomEvent('open-credit-purchase'));
-        return;
-      }
-
       setError(err.message);
     } finally {
       setLoading(false);
@@ -255,17 +244,19 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
       const response = await fetch(`${API_BASE}/api/yield/profit?${params}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      // fetch does NOT throw on HTTP errors, so check status first
+      if (response.status === 403) {
+        alert(lang === 'si' ? "ප්‍රමාණවත් මුදල් නොමැත!" : "Insufficient Credits!");
+        window.dispatchEvent(new CustomEvent('open-credit-purchase'));
+        return;
+      }
+
       const data = await response.json();
 
       if (data.success) {
         setProfitPrediction(data);
         if (onInteraction) onInteraction();
-      } else {
-        if (response.status === 403) {
-          console.log("Insufficient credits for profit");
-          // Optional: trigger modal here too, or just let the main one do it
-          window.dispatchEvent(new CustomEvent('open-credit-purchase'));
-        }
       }
     } catch (err) {
       console.error('Profit prediction error:', err);
