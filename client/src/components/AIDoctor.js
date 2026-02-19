@@ -108,7 +108,12 @@ const AIDoctor = ({ lang, user }) => {
       setTimeout(() => setAnalysisStep(3), 1600);
 
       // Use crop-specific endpoint
-      const response = await axios.post(`${API_BASE}/ai/predict/${cropType}`, formData);
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${API_BASE}/ai/predict/${cropType}`,
+        formData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       const data = response.data;
 
       const mappedResult = {
@@ -234,8 +239,8 @@ const AIDoctor = ({ lang, user }) => {
           <button
             onClick={() => { setCropType('rice'); setResult(null); }}
             className={`flex flex-col items-center gap-1 p-1.5 md:p-3 rounded-lg md:rounded-xl border-2 transition-all active:scale-95 shadow-sm ${cropType === 'rice'
-                ? 'border-green-500 bg-green-50 shadow-md'
-                : 'border-slate-200 bg-white hover:border-green-300 hover:bg-green-50/30'
+              ? 'border-green-500 bg-green-50 shadow-md'
+              : 'border-slate-200 bg-white hover:border-green-300 hover:bg-green-50/30'
               }`}
           >
             <div className={`p-1 md:p-2 rounded-lg flex-shrink-0 ${cropType === 'rice' ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
@@ -252,8 +257,8 @@ const AIDoctor = ({ lang, user }) => {
           <button
             onClick={() => { setCropType('tea'); setResult(null); }}
             className={`flex flex-col items-center gap-1 p-1.5 md:p-3 rounded-lg md:rounded-xl border-2 transition-all active:scale-95 shadow-sm ${cropType === 'tea'
-                ? 'border-green-500 bg-green-50 shadow-md'
-                : 'border-slate-200 bg-white hover:border-green-300 hover:bg-green-50/30'
+              ? 'border-green-500 bg-green-50 shadow-md'
+              : 'border-slate-200 bg-white hover:border-green-300 hover:bg-green-50/30'
               }`}
           >
             <div className={`p-1 md:p-2 rounded-lg flex-shrink-0 ${cropType === 'tea' ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
@@ -270,8 +275,8 @@ const AIDoctor = ({ lang, user }) => {
           <button
             onClick={() => { setCropType('chili'); setResult(null); }}
             className={`flex flex-col items-center gap-1 p-1.5 md:p-3 rounded-lg md:rounded-xl border-2 transition-all active:scale-95 shadow-sm ${cropType === 'chili'
-                ? 'border-red-500 bg-red-50 shadow-md'
-                : 'border-slate-200 bg-white hover:border-red-300 hover:bg-red-50/30'
+              ? 'border-red-500 bg-red-50 shadow-md'
+              : 'border-slate-200 bg-white hover:border-red-300 hover:bg-red-50/30'
               }`}
           >
             <div className={`p-1 md:p-2 rounded-lg flex-shrink-0 ${cropType === 'chili' ? 'bg-red-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
@@ -451,8 +456,8 @@ const AIDoctor = ({ lang, user }) => {
               <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${result.confidence > 0.75 ? 'bg-gradient-to-r from-green-400 to-green-600' :
-                      result.confidence > 0.5 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
-                        'bg-gradient-to-r from-red-400 to-red-600'
+                    result.confidence > 0.5 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
+                      'bg-gradient-to-r from-red-400 to-red-600'
                     }`}
                   style={{ width: `${result.confidence * 100}%` }}
                 />

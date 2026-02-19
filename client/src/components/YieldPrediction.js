@@ -198,7 +198,10 @@ const YieldPrediction = ({ lang = 'en' }) => {
         ...(area && { area_ha: area.toString() })
       });
 
-      const response = await fetch(`${API_BASE}/api/yield/predict?${params}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE}/api/yield/predict?${params}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       const data = await response.json();
 
       if (data.success) {
@@ -247,7 +250,10 @@ const YieldPrediction = ({ lang = 'en' }) => {
         ...(pricePerKg && { price_per_kg: pricePerKg })
       });
 
-      const response = await fetch(`${API_BASE}/api/yield/profit?${params}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE}/api/yield/profit?${params}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       const data = await response.json();
 
       if (data.success) {

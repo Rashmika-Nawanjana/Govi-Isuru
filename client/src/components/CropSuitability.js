@@ -50,7 +50,12 @@ export default function CropSuitability({ lang = 'en', user, coords }) {
   const handleSubmit = async () => {
     setLoading(true); setError('');
     try {
-      const res = await axios.post(`${API_BASE}/api/suitability/recommend`, inputs);
+      const token = localStorage.getItem('token');
+      const res = await axios.post(
+        `${API_BASE}/api/suitability/recommend`,
+        inputs,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setResults(res.data.recommendations || []);
     } catch (err) {
       if (err.response && err.response.status === 403) {

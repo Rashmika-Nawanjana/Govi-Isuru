@@ -42,8 +42,9 @@ router.get('/balance', authMiddleware, async (req, res) => {
         startOfToday.setHours(0, 0, 0, 0);
 
         let effectiveCredits = user.credits;
-        if (user.lastCreditReset < startOfToday) {
-            effectiveCredits = Math.max(user.credits, user.dailyLimit);
+
+        if (!user.lastCreditReset || user.lastCreditReset < startOfToday) {
+            effectiveCredits = Math.max(user.credits || 0, user.dailyLimit || 200);
         }
 
         res.json({
