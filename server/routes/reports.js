@@ -4,6 +4,7 @@ const Report = require('../models/Report');
 const Alert = require('../models/Alert');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/authMiddleware');
+const alertService = require('../services/alertService');
 
 /**
  * POST /api/reports/submit
@@ -60,6 +61,24 @@ router.post('/submit', authMiddleware, async (req, res) => {
     });
 
     await report.save();
+
+    // Also create a DiseaseReport entry so the officer dashboard picks it up
+    try {
+      await alertService.saveDiseaseReport({
+        farmerId: currentUser.id || currentUser._id,
+        farmerUsername: currentUser.fullName || currentUser.username || 'Farmer',
+        crop: (title || '').split(' - ')[0]?.toLowerCase() || 'rice',
+        disease: ai_prediction || title || 'Unknown',
+        confidence: confidence_score || 0,
+        district: currentUser.district,
+        dsDivision: currentUser.dsDivision,
+        gnDivision: currentUser.gnDivision,
+        treatment: ''
+      });
+    } catch (diseaseReportErr) {
+      // Log but don't fail the main report submission
+      console.error('Error creating DiseaseReport entry:', diseaseReportErr);
+    }
 
     // Find all government officers in this GN Division
     const officers = await User.find({
