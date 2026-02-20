@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Leaf, ShoppingBag, Languages, LayoutDashboard, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X, FileText, Bookmark, Shield, Users, Sun, Moon, Menu, CreditCard } from 'lucide-react';
+import { Leaf, ShoppingBag, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X, FileText, Bookmark, Shield, Sun, Moon, Menu, Search, User, Droplets, ClipboardCheck, Globe } from 'lucide-react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import CropSuitability from './components/CropSuitability';
 import AIDoctor from './components/AIDoctor';
@@ -365,7 +365,7 @@ function MainApp() {
     const isBuyer = user?.role === 'buyer';
     const isAdmin = user?.role === 'admin';
     // Add profile tab for all users
-    const profileTab = { id: 'profile', icon: Leaf, label: lang === 'si' ? 'පැතිකඩ' : 'Profile', emoji: '👤' };
+    const profileTab = { id: 'profile', icon: User, label: lang === 'si' ? 'පැතිකඩ' : 'Profile', emoji: '👤' };
     if (isAdmin) {
       // Admin tabs
       return [
@@ -376,7 +376,7 @@ function MainApp() {
     } else if (isFarmer) {
       // Farmer tabs
       return [
-        { id: 'doctor', icon: LayoutDashboard, label: t.doctor, emoji: '🩺' },
+        { id: 'doctor', icon: Search, label: t.doctor, emoji: '🩺' },
         { id: 'myReports', icon: FileText, label: lang === 'si' ? 'මගේ වාර්තා' : 'My Reports', emoji: '📋' },
         { id: 'yield', icon: BarChart3, label: t.yieldForecast, emoji: '🌾' },
         { id: 'trends', icon: TrendingUp, label: t.trends, emoji: '📈' },
@@ -384,14 +384,14 @@ function MainApp() {
         { id: 'weather', icon: CloudSun, label: t.weather, emoji: '🌤️' },
         { id: 'alerts', icon: AlertTriangle, label: t.alerts, emoji: '⚠️' },
         { id: 'news', icon: Newspaper, label: t.news, emoji: '📰' },
-        { id: 'suitability', icon: Leaf, label: t.suitability, emoji: '🌱' },
+        { id: 'suitability', icon: Droplets, label: t.suitability, emoji: '🌱' },
         { id: 'riceVarieties', icon: BookOpen, label: t.riceVarieties, emoji: '🌾' },
         profileTab,
       ];
     } else if (isBuyer) {
       // Buyer tabs
       return [
-        { id: 'buyerDashboard', icon: LayoutDashboard, label: t.buyerDashboard, emoji: '🛍️' },
+        { id: 'buyerDashboard', icon: ShoppingBag, label: t.buyerDashboard, emoji: '🛍️' },
         { id: 'marketplace', icon: ShoppingBag, label: t.marketplace, emoji: '🛒' },
         { id: 'savedListings', icon: Bookmark, label: t.savedListings, emoji: '🔖' },
         { id: 'news', icon: Newspaper, label: t.agriNews, emoji: '📰' },
@@ -401,8 +401,8 @@ function MainApp() {
     } else {
       // Government Officer tabs
       return [
-        { id: 'officerDashboard', icon: LayoutDashboard, label: 'Area Dashboard', emoji: '📊' },
-        { id: 'reportVerification', icon: AlertTriangle, label: 'Verify Reports', emoji: '✅' },
+        { id: 'officerDashboard', icon: ClipboardCheck, label: 'Area Dashboard', emoji: '📊' },
+        { id: 'reportVerification', icon: FileText, label: 'Verify Reports', emoji: '✅' },
         { id: 'alerts', icon: AlertTriangle, label: t.diseaseAlerts, emoji: '⚠️' },
         { id: 'news', icon: Newspaper, label: t.news, emoji: '📰' },
         { id: 'riceVarieties', icon: BookOpen, label: t.riceVarieties, emoji: '🌾' },
@@ -452,17 +452,18 @@ function MainApp() {
 
       {/* Sidebar Navigation - Modern Mobile Drawer */}
       <nav
-        className={`fixed md:static inset-y-0 left-0 z-40 w-72 md:w-80 max-w-[85%] md:max-w-none bg-gradient-to-b from-green-800 to-green-900 text-white shadow-2xl flex-shrink-0 flex flex-col transform transition-transform duration-300 ease-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        className={`fixed md:static inset-y-0 left-0 z-40 w-72 md:w-80 max-w-[85%] md:max-w-none text-white shadow-2xl flex-shrink-0 flex flex-col transform transition-transform duration-300 ease-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
           }`}
+        style={{ background: 'linear-gradient(180deg, #166534 0%, #14532d 40%, #052e16 100%)' }}
       >
         {/* Logo Header */}
-        <div className="sticky top-0 z-10 p-3 md:p-6 flex items-center gap-2 md:gap-3 border-b border-green-700/50 bg-green-800/95 backdrop-blur-sm">
-          <div className="p-1.5 md:p-2 bg-green-600 rounded-lg md:rounded-xl shadow-lg">
-            <Leaf className="h-5 w-5 md:h-8 md:w-8 text-green-200" />
+        <div className="sticky top-0 z-10 p-3 md:p-5 flex items-center gap-2.5 md:gap-3 border-b border-green-600/30" style={{ background: 'linear-gradient(135deg, rgba(22,101,52,0.95) 0%, rgba(21,128,61,0.9) 100%)', backdropFilter: 'blur(8px)' }}>
+          <div className="p-1.5 md:p-2.5 bg-gradient-to-br from-green-400 to-emerald-600 rounded-lg md:rounded-xl shadow-lg shadow-green-500/20">
+            <Leaf className="h-5 w-5 md:h-7 md:w-7 text-white" />
           </div>
           <div className="flex-1">
-            <span className="text-base md:text-2xl font-black tracking-tight leading-tight block">{t.title}</span>
-            <span className="text-[9px] md:text-xs text-green-300">Smart Farming</span>
+            <span className="text-base md:text-xl font-black tracking-tight leading-tight block">{t.title}</span>
+            <span className="text-[9px] md:text-xs text-green-300/80 font-medium">{lang === 'si' ? 'ස්මාර්ට් ගොවිතැන' : "Smart Farming Platform"}</span>
           </div>
           <button
             className="md:hidden p-1.5 rounded-lg hover:bg-white/10 transition-colors"
@@ -474,8 +475,8 @@ function MainApp() {
         </div>
 
         {/* Navigation Items - Scrollable */}
-        <div className="flex-1 overflow-y-auto p-2 md:p-4 flex flex-col gap-1">
-          {navItems.map((item) => {
+        <div className="flex-1 overflow-y-auto p-2 md:p-3 flex flex-col gap-0.5">
+          {navItems.map((item, idx) => {
             const Icon = item.icon;
             const isActive = view === item.id;
             return (
@@ -485,17 +486,20 @@ function MainApp() {
                   setView(item.id);
                   setIsSidebarOpen(false);
                 }}
-                className={`group flex items-center gap-2 md:gap-3 w-full px-3 md:px-4 py-2.5 md:py-3 rounded-lg md:rounded-xl font-semibold text-sm md:text-base transition-all duration-200 active:scale-95 ${isActive
-                  ? 'bg-white text-green-800 shadow-lg'
-                  : 'text-green-100 hover:bg-white/10'
+                className={`group flex items-center gap-2 md:gap-3 w-full px-3 md:px-4 py-2.5 md:py-2.5 rounded-lg md:rounded-xl font-semibold text-sm transition-all duration-200 active:scale-[0.97] shimmer-hover ${isActive
+                  ? 'bg-white/95 text-green-800 shadow-lg shadow-green-900/20'
+                  : 'text-green-100/90 hover:bg-white/10 hover:text-white'
                   }`}
+                style={{ animationDelay: `${idx * 30}ms` }}
               >
-                <div className={`p-1 md:p-1.5 rounded-lg transition-colors flex-shrink-0 ${isActive ? 'bg-green-100' : 'bg-green-700/50'}`}>
-                  <Icon size={18} className={isActive ? 'text-green-700' : 'text-green-200'} />
+                <div className={`p-1 md:p-1.5 rounded-lg transition-all flex-shrink-0 ${isActive ? 'bg-gradient-to-br from-green-100 to-emerald-100 shadow-sm' : 'bg-white/10'}`}>
+                  <Icon size={16} className={`md:w-[18px] md:h-[18px] ${isActive ? 'text-green-700' : 'text-green-300'}`} />
                 </div>
                 <span className="flex-grow text-left truncate">{item.label}</span>
                 {isActive && (
-                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse flex-shrink-0"></span>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                  </div>
                 )}
               </button>
             );
@@ -504,26 +508,32 @@ function MainApp() {
 
         {/* User Info Card */}
         {user && (
-          <div className="mx-2 md:mx-4 mb-2 p-3 bg-green-700/40 backdrop-blur-sm rounded-lg md:rounded-xl border border-green-600/30">
-            <p className="text-[10px] md:text-xs text-green-300 font-medium flex items-center gap-2">
-              <span>{user?.role === 'admin' ? '🛡️ Admin' : user?.role === 'officer' ? '🏛️ Officer' : user?.role === 'buyer' ? '🛒 Buyer' : '👨‍🌾 Farmer'}</span>
-              <span className="bg-green-800/50 px-1.5 py-0.5 rounded text-green-200">💳 {user.credits ?? 0}</span>
-            </p>
-            <p className="text-xs md:text-sm font-bold text-white truncate mt-0.5">{user.username}</p>
-            <p className="text-[10px] md:text-xs text-green-400 mt-1 truncate">
-              {user?.role === 'officer'
-                ? `📋 ${user.officerId || user.district}`
-                : user?.role === 'admin'
-                  ? `🛡️ Administrator`
-                  : user?.role === 'buyer'
-                    ? `📍 ${user.district}`
-                    : `📍 ${user.gnDivision}`}
-            </p>
+          <div className="mx-2 md:mx-3 mb-2 p-3 rounded-xl border border-green-500/20" style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(16,185,129,0.1) 100%)' }}>
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-sm shadow-md flex-shrink-0">
+                {user?.role === 'admin' ? '🛡️' : user?.role === 'officer' ? '🏛️' : user?.role === 'buyer' ? '🛒' : '👨‍🌾'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs md:text-sm font-bold text-white truncate">{user.username}</p>
+                <p className="text-[10px] text-green-300/80 font-medium truncate">
+                  {user?.role === 'officer'
+                    ? `📋 ${user.officerId || user.district}`
+                    : user?.role === 'admin'
+                      ? 'Administrator'
+                      : user?.role === 'buyer'
+                        ? `📍 ${user.district}`
+                        : `📍 ${user.gnDivision}`}
+                </p>
+              </div>
+              <div className="flex-shrink-0 bg-yellow-400/20 px-2 py-1 rounded-lg">
+                <span className="text-[10px] font-bold text-yellow-200">🪙 {user.credits ?? 0}</span>
+              </div>
+            </div>
           </div>
         )}
 
         {/* Bottom Actions */}
-        <div className="p-2 md:p-4 border-t border-green-700/50 space-y-1.5 md:space-y-2">
+        <div className="p-2 md:p-3 border-t border-green-600/20 space-y-1 md:space-y-1.5">
           <button
             onClick={() => setDarkMode(!darkMode)}
             className="flex items-center gap-2 md:gap-3 w-full px-3 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl font-semibold border border-green-600/50 hover:bg-green-700/50 hover:border-green-500 text-xs md:text-sm text-green-100 transition-all active:scale-95"
@@ -537,7 +547,7 @@ function MainApp() {
             onClick={() => setLang(lang === 'en' ? 'si' : 'en')}
             className="flex items-center gap-2 md:gap-3 w-full px-3 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl font-semibold border border-green-600/50 hover:bg-green-700/50 hover:border-green-500 text-xs md:text-sm text-green-100 transition-all active:scale-95"
           >
-            <Languages size={16} className="md:w-[18px] md:h-[18px]" />
+            <Globe size={16} className="md:w-[18px] md:h-[18px]" />
             <span>{lang === 'en' ? 'සිංහල' : 'English'}</span>
             <span className="ml-auto text-[9px] md:text-xs bg-green-700 px-1.5 md:px-2 py-0.5 rounded-full font-bold">{lang === 'en' ? 'EN' : 'SI'}</span>
           </button>
@@ -600,34 +610,37 @@ function MainApp() {
           {/* Content Wrapper - Direct Content Access */}
           <div className="flex-1 overflow-y-auto relative z-10 bg-white/25 dark:bg-gray-900/90">
             <div className="w-full mx-auto">
-              {/* Desktop Welcome Header Only */}
-              <div className="hidden md:block bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-b border-slate-200 dark:border-gray-700 md:m-4 md:rounded-xl md:border md:shadow-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-slate-500 dark:text-gray-400">
-                      {lang === 'si' ? 'ආයුබෝවන්' : 'Welcome back'},
-                    </p>
-                    <p className="text-xl font-bold text-slate-800 dark:text-white truncate">{user.username}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="hidden md:flex items-center gap-2 bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-bold border border-yellow-200 shadow-sm transition-transform hover:scale-105 active:scale-95 cursor-pointer" onClick={() => setShowCreditModal(true)}>
-                      <span className="text-xl">🪙</span>
-                      <span>{user.credits ?? 0}</span>
-                    </span>
-                    {user?.role === 'officer' ? (
-                      <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-semibold">
-                        📍 {user.district}
+              {/* Desktop Welcome Header */}
+              <div className="hidden md:block md:m-4 md:rounded-2xl overflow-hidden">
+                <div className="relative p-5" style={{ background: darkMode ? 'linear-gradient(135deg, rgba(22,101,52,0.3) 0%, rgba(6,78,59,0.2) 100%)' : 'linear-gradient(135deg, rgba(240,253,244,0.9) 0%, rgba(220,252,231,0.7) 100%)' }}>
+                  <div className="absolute inset-0 backdrop-blur-sm border border-green-200/30 dark:border-green-800/30 rounded-2xl" />
+                  <div className="relative flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-slate-500 dark:text-gray-400 font-medium">
+                        {lang === 'si' ? 'ආයුබෝවන්' : 'Welcome back'},
+                      </p>
+                      <p className="text-xl font-black text-slate-800 dark:text-white truncate">{user.username}</p>
+                      <span className="text-xs text-slate-400 dark:text-gray-500 font-medium mt-1 block">
+                        {new Date().toLocaleDateString(lang === 'si' ? 'si-LK' : 'en-LK', { weekday: 'long', day: 'numeric', month: 'long' })}
                       </span>
-                    ) : (
-                      <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full font-semibold">
-                        📍 {user.gnDivision}
-                      </span>
-                    )}
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <button onClick={() => setShowCreditModal(true)} className="hidden md:flex items-center gap-2 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/30 dark:to-amber-900/20 text-yellow-700 dark:text-yellow-300 px-4 py-2.5 rounded-xl text-sm font-bold border border-yellow-200/80 dark:border-yellow-700/30 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] active:scale-95 cursor-pointer">
+                        <span className="text-lg">🪙</span>
+                        <span>{user.credits ?? 0}</span>
+                      </button>
+                      {user?.role === 'officer' ? (
+                        <span className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg font-semibold border border-blue-100 dark:border-blue-800/30">
+                          📍 {user.district}
+                        </span>
+                      ) : (
+                        <span className="text-xs bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-1.5 rounded-lg font-semibold border border-green-100 dark:border-green-800/30">
+                          📍 {user.gnDivision}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <span className="text-xs text-slate-400 dark:text-gray-500 font-medium mt-1 block">
-                  {new Date().toLocaleDateString(lang === 'si' ? 'si-LK' : 'en-LK', { weekday: 'long', day: 'numeric', month: 'long' })}
-                </span>
               </div>
 
               {/* Main Content - Immediate Access */}
@@ -684,8 +697,8 @@ function MainApp() {
               </div>
 
               {/* Footer - Compact */}
-              <footer className="text-center text-slate-400 dark:text-gray-500 text-[10px] md:text-xs py-4 md:py-6 px-4 border-t border-slate-100 dark:border-gray-700 bg-white dark:bg-gray-900">
-                <p>© 2025 <span className="font-semibold text-green-600">{t.title}</span> — {t.footer}</p>
+              <footer className="text-center text-slate-400 dark:text-gray-500 text-[10px] md:text-xs py-4 md:py-6 px-4 border-t border-slate-100 dark:border-gray-700/50 bg-white/50 dark:bg-gray-900/50">
+                <p>© 2026 <span className="font-semibold text-green-600">{t.title}</span> — {t.footer}</p>
               </footer>
             </div>
           </div>
