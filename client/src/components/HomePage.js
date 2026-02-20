@@ -394,7 +394,7 @@ const HomePage = ({ onLogin, onRegister, darkMode, setDarkMode }) => {
               </div>
 
               {/* Title */}
-              <h1 className={`text-3xl sm:text-5xl md:text-6xl lg:text-[4.2rem] xl:text-7xl font-black leading-[1.1] tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+              <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-[4.2rem] xl:text-7xl font-black leading-[1.1] tracking-tight text-white">
                 {t.hero.title1}{' '}
                 <span className="homepage-gradient-text">
                   {t.hero.titleHighlight}
