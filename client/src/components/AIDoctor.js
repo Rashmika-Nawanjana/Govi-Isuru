@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import {
   Upload, Loader2, CheckCircle, AlertTriangle, MapPin, Info,
@@ -16,6 +16,8 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
   const [showGradCam, setShowGradCam] = useState(false);
   const [cropType, setCropType] = useState('rice'); // 'rice', 'tea', or 'chili'
   const [reportSaved, setReportSaved] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
 
   const t = {
     en: {
@@ -24,6 +26,9 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
       subtitle: "The smart AI solution for farming",
       uploadTitle: "Upload Leaf Photo",
       uploadDesc: "Take a clear photo of the affected crop leaf for instant AI diagnosis.",
+      dragDrop: "Drag & drop your image here, or click to browse",
+      dragActive: "Drop your image here...",
+      changeImage: "Click or drag to change image",
       analyzeBtn: "Analyze Disease (25 Credits)",
       analyzing: "Analyzing...",
       results: "Diagnosis Report",
@@ -55,6 +60,9 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
       subtitle: "ගොවිතැනට සුහුරු AI විසඳුම",
       uploadTitle: "පත්‍ර ඡායාරූපය උඩුගත කරන්න",
       uploadDesc: "ක්ෂණික AI විශ්ලේෂණය සඳහා බලපෑමට ලක් වූ බෝග පත්‍රයේ පැහැදිලි ඡායාරූපයක් ගන්න.",
+      dragDrop: "ඔබගේ රූපය මෙහි ඇදගෙන එන්න, නැතහොත් බ්‍රවුස් කිරීමට ක්ලික් කරන්න",
+      dragActive: "ඔබගේ රූපය මෙහි දමන්න...",
+      changeImage: "රූපය වෙනස් කිරීමට ක්ලික් කරන්න හෝ ඇදගෙන එන්න",
       analyzeBtn: "පරීක්ෂා කරන්න (ණය 25)",
       analyzing: "විශ්ලේෂණය කරමින්...",
       results: "රෝග විනිශ්චය වාර්තාව",
@@ -84,13 +92,42 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
 
   const text = t[lang] || t.en;
 
+  const processFile = (selectedFile) => {
+    if (selectedFile && selectedFile.type.startsWith('image/')) {
+      setFile(selectedFile);
+      setPreview(URL.createObjectURL(selectedFile));
+      setResult(null);
+      setAnalysisStep(0);
+      setReportSaved(false);
+    }
+  };
+
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
-    setPreview(URL.createObjectURL(selectedFile));
-    setResult(null);
-    setAnalysisStep(0);
-    setReportSaved(false);
+    processFile(e.target.files[0]);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const droppedFile = e.dataTransfer.files[0];
+    processFile(droppedFile);
+  };
+
+  const handleUploadAreaClick = () => {
+    fileInputRef.current?.click();
   };
 
   const handleAnalyze = async () => {
@@ -295,18 +332,42 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
       {/* Upload Card - Minimal Padding */}
       <div className="bg-white rounded-lg md:rounded-xl shadow-sm border border-slate-100">
         <div className="p-2 md:p-4">{/* Upload Area */}
-          <div className={`relative border-2 border-dashed rounded-lg p-2 md:p-4 transition-all duration-300 ${preview ? 'border-green-400 bg-green-50/50' : 'border-slate-300 hover:border-green-400 hover:bg-green-50/30'
-            }`}>
+          <div
+            onClick={handleUploadAreaClick}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`relative border-2 border-dashed rounded-lg p-2 md:p-4 transition-all duration-300 cursor-pointer select-none ${
+              isDragging
+                ? 'border-green-500 bg-green-50 scale-[1.02] shadow-lg'
+                : preview
+                  ? 'border-green-400 bg-green-50/50 hover:border-green-500 hover:bg-green-50'
+                  : 'border-slate-300 hover:border-green-400 hover:bg-green-50/30'
+            }`}
+          >
             <div className="flex flex-col items-center gap-2">
-              {preview ? (
-                <div className="relative w-full">
+              {isDragging ? (
+                <div className="w-full py-8 md:py-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg flex flex-col items-center justify-center">
+                  <div className="p-3 md:p-4 bg-white rounded-full shadow-lg mb-2 animate-bounce">
+                    <Upload className="h-6 w-6 md:h-8 md:w-8 text-green-600" />
+                  </div>
+                  <p className="text-xs md:text-base text-green-700 font-bold">{text.dragActive}</p>
+                </div>
+              ) : preview ? (
+                <div className="relative w-full group">
                   <img
                     src={preview}
                     alt="Crop preview"
-                    className="w-full max-h-40 md:max-h-64 object-cover rounded-lg shadow-sm"
+                    className="w-full max-h-40 md:max-h-64 object-cover rounded-lg shadow-sm transition-all duration-300 group-hover:brightness-90"
                   />
                   <div className="absolute top-1 right-1 bg-green-500 text-white px-1.5 py-0.5 rounded-full text-[9px] md:text-xs font-bold flex items-center gap-1 shadow-md">
                     <CheckCircle className="h-2.5 w-2.5" /> Ready
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20 rounded-lg">
+                    <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+                      <Upload className="h-3.5 w-3.5 text-green-600" />
+                      <span className="text-[10px] md:text-xs font-semibold text-green-700">{text.changeImage}</span>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -316,20 +377,16 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
                   </div>
                   <p className="text-[10px] md:text-sm text-slate-600 font-medium">{text.uploadTitle}</p>
                   <p className="text-[9px] md:text-xs text-slate-400 mt-0.5 text-center px-2">{text.uploadDesc}</p>
+                  <p className="text-[8px] md:text-xs text-green-500 mt-1.5 font-medium">{text.dragDrop}</p>
                 </div>
               )}
 
               <input
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
-                className="block w-full text-[9px] md:text-sm text-slate-500 
-                  file:mr-1 md:file:mr-3 file:py-1 md:file:py-2.5 file:px-2 md:file:px-5 
-                  file:rounded-full file:border-0 
-                  file:text-[8px] md:file:text-sm file:font-bold
-                  file:bg-green-100 file:text-green-700 
-                  hover:file:bg-green-200 file:cursor-pointer
-                  file:transition-all file:duration-200 file:active:scale-95 file:shadow-sm"
+                className="hidden"
               />
             </div>
           </div>
