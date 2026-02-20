@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   ShoppingBag, MapPin, Phone, User, PlusCircle, Sprout, MessageCircle,
-  Star, CheckCircle, Award, ThumbsUp, MessageSquare, Trash2, Bookmark
+  Star, CheckCircle, Award, ThumbsUp, MessageSquare, Trash2, Bookmark,
+  Filter, ArrowUpDown, ChevronDown
 } from 'lucide-react';
 import ReputationBadge, { MiniReputationBadge } from './ReputationBadge';
 import FeedbackForm from './FeedbackForm';
@@ -19,6 +20,8 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
   const [viewFeedbackListing, setViewFeedbackListing] = useState(null);
   const [topFarmers, setTopFarmers] = useState([]);
   const [savedListingIds, setSavedListingIds] = useState([]);
+  const [filterCrop, setFilterCrop] = useState('all');
+  const [sortBy, setSortBy] = useState('latest');
 
   const t = {
     en: {
@@ -38,7 +41,17 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
       deleteConfirm: "Are you sure you want to delete this listing?",
       postingAs: "Posting as",
       buyerViewOnly: "Buyers can browse listings. Posting is for farmers only.",
-      loginToPost: "Please log in as a farmer to post listings."
+      loginToPost: "Please log in as a farmer to post listings.",
+      filterAll: "All Crops",
+      filterPaddy: "Paddy",
+      filterTea: "Tea",
+      filterChili: "Chili",
+      sortLatest: "Latest First",
+      sortPriceLow: "Price: Low to High",
+      sortPriceHigh: "Price: High to Low",
+      sortLabel: "Sort by",
+      filterLabel: "Filter by Crop",
+      noListings: "No listings found for this filter."
     },
     si: {
       header: "අලෙවිසැල",
@@ -57,7 +70,17 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
       deleteConfirm: "මෙම දැන්වීම මැකීමට ඔබට විශ්වාසද?",
       postingAs: "ලෙස පළ කිරීම",
       buyerViewOnly: "ගැණුම්කරුවන්ට දැන්වීම් බැලීමට පමණක් හැකිය. දැන්වීම් පළ කරන්නේ ගොවියන් විසින් පමණි.",
-      loginToPost: "දැන්වීම් පළ කිරීමට ගොවියෙකු ලෙස පුරනය වන්න."
+      loginToPost: "දැන්වීම් පළ කිරීමට ගොවියෙකු ලෙස පුරනය වන්න.",
+      filterAll: "සියලු බෝග",
+      filterPaddy: "වී",
+      filterTea: "තේ",
+      filterChili: "මිරිස්",
+      sortLatest: "අවසන් පළමුව",
+      sortPriceLow: "මිල: අඩුවේ සිට ඉහළට",
+      sortPriceHigh: "මිල: ඉහළේ සිට අඩුවට",
+      sortLabel: "පෙල ගස්වන්න",
+      filterLabel: "බෝග මගින් පෙරන්න",
+      noListings: "මෙම පෙරනුම සඳහා දැන්වීම් හමු නොවීය."
     }
   };
 
@@ -275,7 +298,7 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
             <span className="font-bold text-green-700">{currentUser?.username}</span>
           </div>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input name="cropType" value={form.cropType} onChange={handleChange} placeholder="Crop (e.g. Rice)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+            <input name="cropType" value={form.cropType} onChange={handleChange} placeholder="Crop (e.g. Paddy)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
             <input name="quantity" value={form.quantity} onChange={handleChange} placeholder="Qty (e.g. 500kg)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
             <input name="price" value={form.price} onChange={handleChange} placeholder="Price (LKR)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
             <input name="location" value={form.location} onChange={handleChange} placeholder="Location" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
@@ -294,9 +317,83 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
         </div>
       )}
 
+      {/* Filter & Sort Controls */}
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-6">
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Crop Type Filter */}
+          <div className="flex-1">
+            <label className="block text-xs font-semibold text-gray-500 mb-1.5 flex items-center gap-1">
+              <Filter size={12} /> {t[lang].filterLabel}
+            </label>
+            <div className="flex gap-1.5 flex-wrap">
+              {[
+                { key: 'all', label: t[lang].filterAll, emoji: '🌱' },
+                { key: 'paddy', label: t[lang].filterPaddy, emoji: '🌾' },
+                { key: 'tea', label: t[lang].filterTea, emoji: '🍵' },
+                { key: 'chili', label: t[lang].filterChili, emoji: '🌶️' }
+              ].map(crop => (
+                <button
+                  key={crop.key}
+                  onClick={() => setFilterCrop(crop.key)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                    filterCrop === crop.key
+                      ? 'bg-green-600 text-white shadow-md scale-105'
+                      : 'bg-gray-100 text-gray-600 hover:bg-green-50 hover:text-green-700'
+                  }`}
+                >
+                  {crop.emoji} {crop.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Sort Dropdown */}
+          <div className="sm:w-52">
+            <label className="block text-xs font-semibold text-gray-500 mb-1.5 flex items-center gap-1">
+              <ArrowUpDown size={12} /> {t[lang].sortLabel}
+            </label>
+            <div className="relative">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none cursor-pointer pr-8"
+              >
+                <option value="latest">{t[lang].sortLatest}</option>
+                <option value="priceLow">{t[lang].sortPriceLow}</option>
+                <option value="priceHigh">{t[lang].sortPriceHigh}</option>
+              </select>
+              <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Listings Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {listings.map((item) => {
+        {listings
+          .filter(item => {
+            if (filterCrop === 'all') return true;
+            const cropName = (item.cropType || '').toLowerCase();
+            if (filterCrop === 'paddy') return cropName.includes('paddy') || cropName.includes('rice') || cropName.includes('වී') || cropName.includes('සහල්');
+            if (filterCrop === 'tea') return cropName.includes('tea') || cropName.includes('තේ');
+            if (filterCrop === 'chili') return cropName.includes('chili') || cropName.includes('chilli') || cropName.includes('මිරිස්');
+            return true;
+          })
+          .sort((a, b) => {
+            if (sortBy === 'priceLow') {
+              const priceA = parseFloat(String(a.price).replace(/[^0-9.]/g, '')) || 0;
+              const priceB = parseFloat(String(b.price).replace(/[^0-9.]/g, '')) || 0;
+              return priceA - priceB;
+            }
+            if (sortBy === 'priceHigh') {
+              const priceA = parseFloat(String(a.price).replace(/[^0-9.]/g, '')) || 0;
+              const priceB = parseFloat(String(b.price).replace(/[^0-9.]/g, '')) || 0;
+              return priceB - priceA;
+            }
+            // latest: sort by date descending (default from API)
+            return new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0);
+          })
+          .map((item) => {
           const isOwnListing =
             currentUser &&
             (item.farmerName === currentUser.username || item.farmer_id?.username === currentUser.username);
@@ -439,6 +536,19 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
             </div>
           );
         })}
+        {listings.filter(item => {
+          if (filterCrop === 'all') return true;
+          const cropName = (item.cropType || '').toLowerCase();
+          if (filterCrop === 'paddy') return cropName.includes('paddy') || cropName.includes('rice') || cropName.includes('වී') || cropName.includes('සහල්');
+          if (filterCrop === 'tea') return cropName.includes('tea') || cropName.includes('තේ');
+          if (filterCrop === 'chili') return cropName.includes('chili') || cropName.includes('chilli') || cropName.includes('මිරිස්');
+          return true;
+        }).length === 0 && listings.length > 0 && (
+          <div className="col-span-full text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+            <Filter size={32} className="mx-auto text-gray-300 mb-3" />
+            <p className="text-gray-500 font-medium">{t[lang].noListings}</p>
+          </div>
+        )}
       </div>
 
       {/* Feedback Form Modal */}

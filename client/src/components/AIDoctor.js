@@ -47,10 +47,10 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
       context: "Diagnosis Context",
 
       selectCrop: "Select Crop Type",
-      rice: "Rice",
+      rice: "Paddy",
       tea: "Tea",
       chili: "Chili",
-      riceDesc: "Analyze rice leaf diseases",
+      riceDesc: "Analyze paddy leaf diseases",
       teaDesc: "Analyze tea leaf diseases",
       chiliDesc: "Analyze chili plant diseases"
     },
@@ -482,7 +482,7 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
                   </div>
                   <div className="flex items-center gap-2 text-slate-600">
                     <Leaf className="h-4 w-4 text-slate-400" />
-                    <span>Rice</span>
+                    <span>{cropType === 'rice' ? text.rice : cropType === 'tea' ? text.tea : text.chili}</span>
                   </div>
                   <div className="flex items-center gap-2 text-slate-600">
                     <Calendar className="h-4 w-4 text-slate-400" />
