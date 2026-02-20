@@ -362,21 +362,21 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-gray-900 dark:to-gray-800 p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-gray-900 dark:to-gray-800 p-2 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-green-800 dark:text-green-400 flex items-center justify-center gap-3">
-            <TrendingUp className="w-10 h-10" />
+        <div className="text-center mb-4 md:mb-8">
+          <h1 className="text-xl md:text-4xl font-bold text-green-800 dark:text-green-400 flex items-center justify-center gap-2 md:gap-3">
+            <TrendingUp className="w-6 h-6 md:w-10 md:h-10" />
             {t.title}
           </h1>
-          <p className="text-green-600 dark:text-green-400 mt-2">
+          <p className="text-xs md:text-base text-green-600 dark:text-green-400 mt-1 md:mt-2">
             {t.subtitle}
           </p>
         </div>
 
         {/* Tabs */}
-        <div className="flex flex-wrap justify-center gap-2 mb-6">
+        <div className="flex flex-wrap justify-center gap-1.5 md:gap-2 mb-4 md:mb-6">
           {[
             { id: 'predict', label: t.tabs.predict, icon: Target },
             { id: 'rankings', label: t.tabs.rankings, icon: Award },
@@ -389,12 +389,12 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                 if (tab.id === 'rankings') fetchRankings();
                 if (tab.id === 'trends') fetchTrends();
               }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${activeTab === tab.id
+              className={`flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-medium text-xs md:text-base transition-all ${activeTab === tab.id
                 ? 'bg-green-600 text-white shadow-lg'
                 : 'bg-white dark:bg-gray-800 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700'
                 }`}
             >
-              <tab.icon className="w-5 h-5" />
+              <tab.icon className="w-4 h-4 md:w-5 md:h-5" />
               {tab.label}
             </button>
           ))}
@@ -402,12 +402,12 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
 
         {/* Prediction Tab */}
         {activeTab === 'predict' && (
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-3 md:gap-6">
             {/* Input Form */}
             <div className="md:col-span-1">
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
-                <h2 className="text-xl font-bold text-green-800 dark:text-green-400 mb-4 flex items-center gap-2">
-                  <Leaf className="w-6 h-6" />
+              <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl shadow-xl p-4 md:p-6">
+                <h2 className="text-base md:text-xl font-bold text-green-800 dark:text-green-400 mb-3 md:mb-4 flex items-center gap-2">
+                  <Leaf className="w-5 h-5 md:w-6 md:h-6" />
                   {t.form.parameters}
                 </h2>
 
@@ -541,32 +541,32 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
             </div>
 
             {/* Results */}
-            <div className="md:col-span-2 space-y-6">
+            <div className="md:col-span-2 space-y-3 md:space-y-6">
               {/* Yield Prediction Results */}
               {yieldPrediction && (
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
-                  <h2 className="text-xl font-bold text-green-800 dark:text-green-400 mb-4 flex items-center gap-2">
-                    <TrendingUp className="w-6 h-6" />
+                <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl shadow-xl p-4 md:p-6">
+                  <h2 className="text-base md:text-xl font-bold text-green-800 dark:text-green-400 mb-3 md:mb-4 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 md:w-6 md:h-6" />
                     {t.results.yieldResults}
                   </h2>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-4 text-white">
-                      <p className="text-xs opacity-80">{t.results.predictedYield}</p>
-                      <p className="text-2xl font-bold">{formatNumber(yieldPrediction.yield_kg_ha)}</p>
-                      <p className="text-sm">kg/ha</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+                    <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-3 md:p-4 text-white">
+                      <p className="text-[10px] md:text-xs opacity-80">{t.results.predictedYield}</p>
+                      <p className="text-lg md:text-2xl font-bold">{formatNumber(yieldPrediction.yield_kg_ha)}</p>
+                      <p className="text-[10px] md:text-sm">kg/ha</p>
                     </div>
 
-                    <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-4 text-white">
-                      <p className="text-xs opacity-80">{t.results.totalProduction}</p>
-                      <p className="text-2xl font-bold">{formatNumber(yieldPrediction.total_production_kg)}</p>
-                      <p className="text-sm">kg</p>
+                    <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-3 md:p-4 text-white">
+                      <p className="text-[10px] md:text-xs opacity-80">{t.results.totalProduction}</p>
+                      <p className="text-lg md:text-2xl font-bold">{formatNumber(yieldPrediction.total_production_kg)}</p>
+                      <p className="text-[10px] md:text-sm">kg</p>
                     </div>
 
-                    <div className="bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl p-4 text-white">
-                      <p className="text-xs opacity-80">{t.results.confidence}</p>
-                      <p className="text-2xl font-bold">{formatNumber(yieldPrediction.confidence * 100)}%</p>
-                      <p className="text-sm">{t.results.accuracy}</p>
+                    <div className="bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl p-3 md:p-4 text-white">
+                      <p className="text-[10px] md:text-xs opacity-80">{t.results.confidence}</p>
+                      <p className="text-lg md:text-2xl font-bold">{formatNumber(yieldPrediction.confidence * 100)}%</p>
+                      <p className="text-[10px] md:text-sm">{t.results.accuracy}</p>
                     </div>
 
                     <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-4 text-white">

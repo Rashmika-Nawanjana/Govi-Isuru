@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Leaf, ShoppingBag, Languages, LayoutDashboard, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X, FileText, Bookmark, Shield, Users, Sun, Moon } from 'lucide-react';
+import { Leaf, ShoppingBag, Languages, LayoutDashboard, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X, FileText, Bookmark, Shield, Users, Sun, Moon, Menu, CreditCard } from 'lucide-react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import CropSuitability from './components/CropSuitability';
 import AIDoctor from './components/AIDoctor';
@@ -554,49 +554,45 @@ function MainApp() {
       {/* Main Content Area - Clean Mobile Layout */}
       <main className="flex-1 overflow-y-auto bg-white dark:bg-gray-900" style={{ position: 'relative', zIndex: 1 }}>
         <div className="w-full h-full flex flex-col">
-          {/* Mobile Top Bar - Integrated User Info */}
-          <div className="md:hidden sticky top-0 z-20 bg-gradient-to-r from-green-600 to-emerald-600 shadow-md">
-            <div className="flex items-center justify-between px-3 py-2">
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <div className="p-1 bg-white/20 rounded-lg">
-                  <Leaf className="h-4 w-4 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-white truncate">{user.username}</p>
-                  <p className="text-[8px] text-green-100 truncate">
-                    {user?.role === 'officer' ? `📍 ${user.district}` : `📍 ${user.gnDivision}`}
-                  </p>
-                </div>
-              </div>
+          {/* Mobile Top Bar - Hamburger Menu */}
+          <div className="md:hidden sticky top-0 z-20 bg-gradient-to-r from-green-600 to-emerald-600 shadow-lg">
+            <div className="flex items-center justify-between px-4 py-3">
+              {/* Hamburger Button */}
               <button
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors active:scale-95 backdrop-blur-sm"
+                className="p-2 rounded-xl bg-white/15 hover:bg-white/25 transition-colors active:scale-95"
                 onClick={() => setIsSidebarOpen(true)}
                 aria-label="Open menu"
               >
-                <LayoutDashboard size={20} className="text-white" />
+                <Menu size={22} className="text-white" />
               </button>
-            </div>
 
-            {/* Mobile Horizontal Tabs - Compact */}
-            <div className="overflow-x-auto px-3 py-1.5 bg-white/10 backdrop-blur-sm">
-              <div className="flex gap-1.5 min-w-min">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = view === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => setView(item.id)}
-                      className={`flex items-center gap-1 px-2.5 py-1 rounded-full whitespace-nowrap text-[10px] font-medium transition-all active:scale-95 flex-shrink-0 ${isActive
-                        ? 'bg-white text-green-700 shadow-sm'
-                        : 'bg-white/20 text-white hover:bg-white/30'
-                        }`}
-                    >
-                      <Icon size={12} />
-                      <span className="hidden xs:inline">{item.emoji}</span>
-                    </button>
-                  );
-                })}
+              {/* Center - App Title & Current View */}
+              <div className="flex items-center gap-2">
+                <div className="p-1 bg-white/20 rounded-lg">
+                  <Leaf className="h-4 w-4 text-white" />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-bold text-white leading-tight">{t.title}</p>
+                  <p className="text-[9px] text-green-100 font-medium">
+                    {navItems.find(n => n.id === view)?.label || 'Dashboard'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Right - Credits & Language */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setShowCreditModal(true)}
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow-500/20 text-yellow-100 text-xs font-bold active:scale-95"
+                >
+                  🪙 {user.credits ?? 0}
+                </button>
+                <button
+                  onClick={() => setLang(lang === 'en' ? 'si' : 'en')}
+                  className="p-1.5 rounded-lg bg-white/15 text-white text-[10px] font-bold active:scale-95"
+                >
+                  {lang === 'en' ? 'SI' : 'EN'}
+                </button>
               </div>
             </div>
           </div>

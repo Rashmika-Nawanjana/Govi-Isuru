@@ -240,17 +240,17 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
   return (
     <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Section Header */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-green-800 flex items-center gap-2">
-          <ShoppingBag className="h-7 w-7" />
+      <div className="mb-3 md:mb-6">
+        <h2 className="text-lg md:text-2xl font-bold text-green-800 dark:text-green-400 flex items-center gap-2">
+          <ShoppingBag className="h-5 w-5 md:h-7 md:w-7" />
           🛒 {t[lang].header}
         </h2>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">{t[lang].sub}</p>
+        <p className="text-xs md:text-base text-gray-500 dark:text-gray-400 mt-1">{t[lang].sub}</p>
       </div>
 
       {/* Top Rated Farmers Section */}
       {topFarmers.length > 0 && (
-        <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 p-5 rounded-2xl mb-6 border border-amber-200 shadow-sm">
+        <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 p-3 md:p-5 rounded-xl md:rounded-2xl mb-4 md:mb-6 border border-amber-200 shadow-sm">
           <h3 className="text-sm font-bold text-amber-800 mb-3 flex items-center gap-2">
             <div className="p-1.5 bg-amber-500 rounded-lg">
               <Award size={14} className="text-white" />
@@ -283,7 +283,7 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
 
       {/* Sell Form */}
       {!isBuyer ? (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 mb-8">
+        <div className="bg-white dark:bg-gray-800 p-3 md:p-6 rounded-xl md:rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 mb-4 md:mb-8">
           <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
             <div className="p-2 bg-green-100 rounded-lg">
               <PlusCircle className="h-5 w-5 text-green-600" />
@@ -309,7 +309,7 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
           </form>
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 mb-8">
+        <div className="bg-white dark:bg-gray-800 p-3 md:p-6 rounded-xl md:rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 mb-4 md:mb-8">
           <div className="flex items-center gap-3 text-amber-700 font-semibold">
             <PlusCircle className="h-5 w-5 text-amber-600" />
             <span>{t[lang].buyerViewOnly}</span>
@@ -369,7 +369,7 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
       </div>
 
       {/* Listings Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5">
         {listings
           .filter(item => {
             if (filterCrop === 'all') return true;
@@ -399,11 +399,11 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
             (item.farmerName === currentUser.username || item.farmer_id?.username === currentUser.username);
 
           return (
-            <div key={item._id} className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-md hover:shadow-xl transition-all border-l-4 border-green-500 flex flex-col justify-between">
+            <div key={item._id} className="bg-white dark:bg-gray-800 p-3 md:p-5 rounded-xl md:rounded-2xl shadow-md hover:shadow-xl transition-all border-l-4 border-green-500 flex flex-col justify-between">
               <div>
                 <div className="flex justify-between items-start mb-2">
-                  <h4 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                    <Sprout className="h-5 w-5 text-green-500" /> {item.cropType}
+                  <h4 className="text-base md:text-xl font-bold text-gray-800 dark:text-white flex items-center gap-1.5 md:gap-2">
+                    <Sprout className="h-4 w-4 md:h-5 md:w-5 text-green-500" /> {item.cropType}
                   </h4>
                   <div className="flex items-center gap-2">
                     {item.verified && (
@@ -414,7 +414,7 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
                     <span className="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded-full">{item.quantity}</span>
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-green-700 mb-3">Rs. {item.price}</p>
+                <p className="text-lg md:text-2xl font-bold text-green-700 dark:text-green-400 mb-2 md:mb-3">Rs. {item.price}</p>
 
                 <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400 mb-4">
                   <div className="flex items-center justify-between">

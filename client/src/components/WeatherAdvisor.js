@@ -44,19 +44,19 @@ const WeatherAdvisor = ({ lat, lon, lang, user }) => {
   );
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-700">
+    <div className="space-y-3 md:space-y-6 animate-in fade-in duration-700">
       {/* Section Header */}
-      <div className="mb-2">
-        <h2 className="text-2xl font-bold text-green-800 flex items-center gap-2">
-          <CloudSun className="h-7 w-7 text-blue-500" />
+      <div className="mb-1 md:mb-2">
+        <h2 className="text-lg md:text-2xl font-bold text-green-800 dark:text-green-400 flex items-center gap-2">
+          <CloudSun className="h-5 w-5 md:h-7 md:w-7 text-blue-500" />
           🌤️ {lang === 'si' ? 'කාලගුණ උපදෙස්' : 'Weather Advisory'}
         </h2>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">{lang === 'si' ? 'ඔබේ ප්‍රදේශයේ කාලගුණ අනාවැකිය' : 'Local weather forecast for farming'}</p>
+        <p className="text-xs md:text-base text-gray-500 dark:text-gray-400 mt-1">{lang === 'si' ? 'ඔබේ ප්‍රදේශයේ කාලගුණ අනාවැකිය' : 'Local weather forecast for farming'}</p>
       </div>
 
       {/* SECTION 1: Current Weather & Agro-Advice */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700">
-        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-4 text-white">
+      <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700">
+        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-3 md:px-6 md:py-4 text-white">
           <div className="flex items-center gap-2 text-blue-100 text-sm mb-1">
             <MapPin size={14} /> {locationName}
           </div>
@@ -111,14 +111,14 @@ const WeatherAdvisor = ({ lat, lon, lang, user }) => {
       </div>
 
       {/* SECTION 2: 5-Day Forecast Grid */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5 border border-gray-100 dark:border-gray-700">
-        <h3 className="text-sm font-bold text-gray-600 dark:text-gray-400 mb-4 flex items-center gap-2">
-          <Calendar size={16} />
+      <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl shadow-lg p-3 md:p-5 border border-gray-100 dark:border-gray-700">
+        <h3 className="text-xs md:text-sm font-bold text-gray-600 dark:text-gray-400 mb-3 md:mb-4 flex items-center gap-2">
+          <Calendar size={14} />
           {lang === 'si' ? '5 දින අනාවැකිය' : '5-Day Forecast'}
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3">
           {forecast.map((day, index) => (
-            <div key={index} className="bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 p-4 rounded-xl border border-slate-200 dark:border-gray-700 text-center hover:shadow-md hover:scale-105 transition-all">
+            <div key={index} className="bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 p-2.5 md:p-4 rounded-xl border border-slate-200 dark:border-gray-700 text-center hover:shadow-md hover:scale-105 transition-all">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
                 {new Date(day.dt * 1000).toLocaleDateString(undefined, { weekday: 'short' })}
               </p>
@@ -127,7 +127,7 @@ const WeatherAdvisor = ({ lat, lon, lang, user }) => {
                 alt="weather icon" 
                 className="w-14 h-14 mx-auto"
               />
-              <p className="text-2xl font-black text-gray-800 dark:text-white">{Math.round(day.main.temp)}°C</p>
+              <p className="text-lg md:text-2xl font-black text-gray-800 dark:text-white">{Math.round(day.main.temp)}°C</p>
               <p className="text-[10px] font-bold text-blue-500 uppercase mt-0.5">{day.weather[0].main}</p>
               
               {/* Future Logic: Simple Recommendation per day */}
