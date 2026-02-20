@@ -184,7 +184,20 @@ function MainApp() {
     const handleOpenCreditModal = () => setShowCreditModal(true);
     window.addEventListener('open-credit-purchase', handleOpenCreditModal);
 
-    return () => window.removeEventListener('open-credit-purchase', handleOpenCreditModal);
+    // Listen for session expired event (from axios interceptor)
+    const handleSessionExpired = () => {
+      setUser(null);
+      setView('home');
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+    };
+    window.addEventListener('session-expired', handleSessionExpired);
+
+    return () => {
+      window.removeEventListener('open-credit-purchase', handleOpenCreditModal);
+      window.removeEventListener('session-expired', handleSessionExpired);
+    };
   }, [user?.username]); // Depend on username to avoid infinite loop with user object update
 
   // Map logged-in user's GN division or district to coordinates for weather (case-insensitive)
@@ -250,6 +263,7 @@ function MainApp() {
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     window.location.reload(); // Refresh to show Register screen
   };
 

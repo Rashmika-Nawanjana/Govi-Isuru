@@ -22,6 +22,9 @@ const Login = ({ onLoginSuccess, switchToRegister, switchToForgotPassword, lang 
       if (res.data && res.data.token && res.data.user) {
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
+        if (res.data.refreshToken) {
+          localStorage.setItem('refreshToken', res.data.refreshToken);
+        }
         onLoginSuccess(res.data.user);
       } else {
         throw new Error('Invalid response from server');

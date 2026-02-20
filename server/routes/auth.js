@@ -23,7 +23,7 @@ const generateTokens = (user) => {
       fullName: user.fullName
     },
     process.env.JWT_SECRET || 'govi_secret',
-    { expiresIn: '15m' } // Short-lived access token
+    { expiresIn: '7d' } // 7 day access token
   );
 
   const refreshToken = jwt.sign(
@@ -419,7 +419,7 @@ router.post('/login', async (req, res) => {
       accessToken,
       refreshToken,
       user: userResponse,
-      expiresIn: 900 // 15 minutes in seconds
+      expiresIn: 604800 // 7 days in seconds
     });
 
   } catch (err) {
