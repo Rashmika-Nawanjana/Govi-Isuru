@@ -497,6 +497,113 @@ router.get('/outbreak-summary', async (req, res) => {
 });
 
 /**
+ * GET /api/alerts/nationwide-diseases
+ * Get verified disease reports from ALL districts
+ * This allows farmers/officers to see diseases verified in other GN divisions
+ */
+router.get('/nationwide-diseases', async (req, res) => {
+  try {
+    const { district, crop, disease, days, page, limit: queryLimit } = req.query;
+    const daysNum = Number.parseInt(days) || 30;
+    const pageNum = Number.parseInt(page) || 1;
+    const limitNum = Math.min(Number.parseInt(queryLimit) || 50, 100);
+    const skip = (pageNum - 1) * limitNum;
+
+    const timeWindow = new Date(Date.now() - daysNum * 24 * 60 * 60 * 1000);
+
+    // Only show officer-verified reports
+    const matchQuery = {
+      verificationStatus: 'verified',
+      createdAt: { $gte: timeWindow }
+    };
+
+    if (district) matchQuery.district = district;
+    if (crop) matchQuery.crop = { $regex: new RegExp(crop, 'i') };
+    if (disease && disease !== 'Healthy' && disease !== 'නිරෝගී') {
+      matchQuery.disease = { $regex: new RegExp(disease, 'i') };
+    }
+
+    // Exclude healthy reports
+    matchQuery.disease = { ...(matchQuery.disease || {}), $nin: ['Healthy', 'healthy'] };
+
+    const [reports, totalCount, districtSummary, diseaseSummary] = await Promise.all([
+      DiseaseReport.find(matchQuery)
+        .select('crop disease district dsDivision gnDivision severity confidence verificationStatus reviewedBy reviewedAt createdAt coordinates')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+
+      DiseaseReport.countDocuments(matchQuery),
+
+      // Summary by district
+      DiseaseReport.aggregate([
+        { $match: matchQuery },
+        {
+          $group: {
+            _id: '$district',
+            count: { $sum: 1 },
+            diseases: { $addToSet: '$disease' },
+            latestReport: { $max: '$createdAt' }
+          }
+        },
+        { $sort: { count: -1 } }
+      ]),
+
+      // Summary by disease
+      DiseaseReport.aggregate([
+        { $match: matchQuery },
+        {
+          $group: {
+            _id: '$disease',
+            count: { $sum: 1 },
+            districts: { $addToSet: '$district' },
+            avgConfidence: { $avg: '$confidence' }
+          }
+        },
+        { $sort: { count: -1 } }
+      ])
+    ]);
+
+    res.json({
+      success: true,
+      totalCount,
+      page: pageNum,
+      totalPages: Math.ceil(totalCount / limitNum),
+      reports: reports.map(r => ({
+        id: r._id,
+        crop: r.crop,
+        disease: r.disease,
+        district: r.district,
+        dsDivision: r.dsDivision,
+        gnDivision: r.gnDivision,
+        severity: r.severity,
+        confidence: r.confidence,
+        verifiedBy: r.reviewedBy || 'Officer',
+        verifiedAt: r.reviewedAt,
+        reportedAt: r.createdAt,
+        coordinates: r.coordinates
+      })),
+      districtSummary: districtSummary.map(d => ({
+        district: d._id,
+        count: d.count,
+        diseases: d.diseases,
+        latestReport: d.latestReport
+      })),
+      diseaseSummary: diseaseSummary.map(d => ({
+        disease: d._id,
+        count: d.count,
+        districts: d.districts,
+        avgConfidence: Math.round(d.avgConfidence * 100)
+      }))
+    });
+  } catch (error) {
+    console.error('Error getting nationwide diseases:', error);
+    res.status(500).json({ error: 'Failed to get nationwide disease data' });
+  }
+});
+
+/**
  * PUT /api/alerts/:id/resolve
  * Resolve an alert (admin only - simplified for now)
  * NOTE: This route must be at the end to avoid catching named routes like /outbreak-summary

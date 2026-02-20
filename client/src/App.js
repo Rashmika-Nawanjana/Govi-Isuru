@@ -28,6 +28,7 @@ import AdminDashboard from './components/AdminDashboard';
 
 import MyReports from './components/MyReports';
 import SavedListings from './components/SavedListings';
+import NationwideDiseaseMap from './components/NationwideDiseaseMap';
 import { districtCoordinates } from './data/sriLankaCoordinates';
 
 const translations = {
@@ -38,6 +39,7 @@ const translations = {
     trends: "Market Trends",
     weather: "Weather Advisory",
     alerts: "Disease Alerts",
+    nationwideDiseases: "Nationwide Diseases",
     news: "Agri News",
     yieldForecast: "Yield Forecast",
     suitability: "Crop Suitability",
@@ -65,6 +67,7 @@ const translations = {
     trends: "මිල ප්‍රවණතා",
     weather: "කාලගුණ උපදෙස්",
     alerts: "රෝග අනතුරු ඇඟවීම්",
+    nationwideDiseases: "දිවයින පුරා රෝග",
     news: "ගොවි ප්‍රවෘත්ති",
     yieldForecast: "අස්වැන්න අනාවැකි",
     suitability: "බෝග සුදුසුකම",
@@ -383,6 +386,7 @@ function MainApp() {
         { id: 'market', icon: ShoppingBag, label: t.market, emoji: '🛒' },
         { id: 'weather', icon: CloudSun, label: t.weather, emoji: '🌤️' },
         { id: 'alerts', icon: AlertTriangle, label: t.alerts, emoji: '⚠️' },
+        { id: 'nationwideDiseases', icon: Globe, label: t.nationwideDiseases, emoji: '🌍' },
         { id: 'news', icon: Newspaper, label: t.news, emoji: '📰' },
         { id: 'suitability', icon: Droplets, label: t.suitability, emoji: '🌱' },
         { id: 'riceVarieties', icon: BookOpen, label: t.riceVarieties, emoji: '🌾' },
@@ -404,6 +408,7 @@ function MainApp() {
         { id: 'officerDashboard', icon: ClipboardCheck, label: 'Area Dashboard', emoji: '📊' },
         { id: 'reportVerification', icon: FileText, label: 'Verify Reports', emoji: '✅' },
         { id: 'alerts', icon: AlertTriangle, label: t.diseaseAlerts, emoji: '⚠️' },
+        { id: 'nationwideDiseases', icon: Globe, label: t.nationwideDiseases || 'Nationwide Diseases', emoji: '🌍' },
         { id: 'news', icon: Newspaper, label: t.news, emoji: '📰' },
         { id: 'riceVarieties', icon: BookOpen, label: t.riceVarieties, emoji: '🌾' },
         profileTab,
@@ -654,6 +659,7 @@ function MainApp() {
                     {view === 'weather' && <WeatherAdvisor lang={lang} lat={coords.lat} lon={coords.lon} user={user} />}
                     {view === 'trends' && <MarketTrends lang={lang} />}
                     {view === 'alerts' && <AlertsDashboard user={user} language={lang} />}
+                    {view === 'nationwideDiseases' && <NationwideDiseaseMap user={user} language={lang} />}
                     {view === 'news' && <AgriNews lang={lang} user={user} />}
                     {view === 'yield' && <YieldPrediction lang={lang} onInteraction={fetchCredits} />}
                     {view === 'suitability' && <CropSuitability lang={lang} user={user} coords={coords} onInteraction={fetchCredits} />}
@@ -680,6 +686,7 @@ function MainApp() {
                     {view === 'officerDashboard' && <OfficerDashboard user={user} language={lang} />}
                     {view === 'reportVerification' && <ReportVerification user={user} lang={lang} />}
                     {view === 'alerts' && <AlertsDashboard user={user} language={lang} />}
+                    {view === 'nationwideDiseases' && <NationwideDiseaseMap user={user} language={lang} />}
                     {view === 'news' && <AgriNews lang={lang} user={user} />}
                     {view === 'riceVarieties' && <TraditionalRice lang={lang} />}
                     {view === 'profile' && <UserProfile />}
