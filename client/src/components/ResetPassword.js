@@ -144,7 +144,7 @@ const ResetPassword = ({ switchToLogin, lang }) => {
   if (!token) {
     return (
       <div className="w-full max-w-md p-1 animate-in fade-in zoom-in duration-700">
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30">
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30 dark:border-gray-700/30">
           <div className="bg-gradient-to-br from-red-500 to-orange-600 p-10 text-center">
             <div className="w-20 h-20 mx-auto mb-4 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-sm shadow-xl">
               <AlertCircle className="h-10 w-10 text-white" />
@@ -152,7 +152,7 @@ const ResetPassword = ({ switchToLogin, lang }) => {
             <h2 className="text-2xl font-black text-white mb-2">{t.invalidToken}</h2>
           </div>
           <div className="p-8 text-center space-y-6">
-            <p className="text-gray-600">{t.invalidTokenMessage}</p>
+            <p className="text-gray-600 dark:text-gray-400">{t.invalidTokenMessage}</p>
             <button
               onClick={switchToLogin}
               className="w-full py-4 px-6 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all"
@@ -168,7 +168,7 @@ const ResetPassword = ({ switchToLogin, lang }) => {
   if (success) {
     return (
       <div className="w-full max-w-md p-1 animate-in fade-in zoom-in duration-700">
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30">
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30 dark:border-gray-700/30">
           <div className="bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700 p-10 text-center">
             <div className="w-20 h-20 mx-auto mb-4 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-sm shadow-xl">
               <CheckCircle className="h-10 w-10 text-white" />
@@ -176,8 +176,8 @@ const ResetPassword = ({ switchToLogin, lang }) => {
             <h2 className="text-2xl font-black text-white mb-2">{t.success}</h2>
           </div>
           <div className="p-8 text-center space-y-6">
-            <div className="bg-green-50 rounded-2xl p-6 border-2 border-green-200">
-              <p className="text-gray-700">{t.successMessage}</p>
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border-2 border-green-200 dark:border-green-800">
+              <p className="text-gray-700 dark:text-gray-300">{t.successMessage}</p>
             </div>
             <button
               onClick={switchToLogin}
@@ -194,7 +194,7 @@ const ResetPassword = ({ switchToLogin, lang }) => {
 
   return (
     <div className="w-full max-w-md p-1 animate-in fade-in zoom-in duration-700">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30">
+      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30 dark:border-gray-700/30">
         <div className="bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-700 p-10 text-center relative overflow-hidden">
           <div className="absolute inset-0 opacity-30">
             <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
@@ -210,14 +210,14 @@ const ResetPassword = ({ switchToLogin, lang }) => {
 
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           {error && (
-            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4 flex items-center gap-3 animate-in fade-in duration-300">
+            <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl p-4 flex items-center gap-3 animate-in fade-in duration-300">
               <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-              <p className="text-red-700 text-sm font-medium">{error}</p>
+              <p className="text-red-700 dark:text-red-400 text-sm font-medium">{error}</p>
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-xs font-bold text-gray-600 dark:text-gray-400 ml-1 uppercase tracking-wider flex items-center gap-1">
               <Lock size={12} /> {t.newPassword}
             </label>
             <div className="relative">
@@ -227,12 +227,12 @@ const ResetPassword = ({ switchToLogin, lang }) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={t.passwordPlaceholder}
-                className="w-full p-4 pr-12 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-purple-500 focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-purple-100"
+                className="w-full p-4 pr-12 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-600 focus:border-purple-500 focus:bg-white dark:focus:bg-gray-600 rounded-2xl transition-all outline-none text-gray-700 dark:text-white font-medium shadow-sm focus:shadow-lg focus:shadow-purple-100"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -240,10 +240,10 @@ const ResetPassword = ({ switchToLogin, lang }) => {
             
             {/* Password Strength Indicator */}
             {password && (
-              <div className="space-y-2 mt-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="space-y-2 mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
                 {/* Strength Bar */}
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                     <div 
                       className={`h-full transition-all duration-300 ${
                         passwordValidation.strength === 'weak' ? 'w-1/3 bg-red-500' :
@@ -261,7 +261,7 @@ const ResetPassword = ({ switchToLogin, lang }) => {
                 
                 {/* Requirements Checklist */}
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-gray-600">{t.passwordRequirements.title}</p>
+                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-400">{t.passwordRequirements.title}</p>
                   <div className="grid grid-cols-2 gap-1 text-xs">
                     <div className={`flex items-center gap-1 ${passwordValidation.checks.minLength ? 'text-green-600' : 'text-gray-400'}`}>
                       {passwordValidation.checks.minLength ? <CheckCircle size={12} /> : <X size={12} />}
@@ -290,7 +290,7 @@ const ResetPassword = ({ switchToLogin, lang }) => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-xs font-bold text-gray-600 dark:text-gray-400 ml-1 uppercase tracking-wider flex items-center gap-1">
               <Lock size={12} /> {t.confirmPassword}
             </label>
             <div className="relative">
@@ -300,18 +300,18 @@ const ResetPassword = ({ switchToLogin, lang }) => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder={t.confirmPlaceholder}
-                className={`w-full p-4 pr-12 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 ${
+                className={`w-full p-4 pr-12 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700 border-2 ${
                   confirmPassword 
                     ? passwordsMatch 
                       ? 'border-green-500 focus:border-green-500' 
                       : 'border-red-400 focus:border-red-500'
-                    : 'border-gray-200 focus:border-purple-500'
-                } focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-purple-100`}
+                    : 'border-gray-200 dark:border-gray-600 focus:border-purple-500'
+                } focus:bg-white dark:focus:bg-gray-600 rounded-2xl transition-all outline-none text-gray-700 dark:text-white font-medium shadow-sm focus:shadow-lg focus:shadow-purple-100`}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>

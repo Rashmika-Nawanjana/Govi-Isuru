@@ -70,7 +70,7 @@ const CreditPurchaseModal = ({ isOpen, onClose, onPurchaseSuccess, lang = 'en' }
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
 
                 {/* Header */}
                 <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6 text-white relative">
@@ -96,8 +96,8 @@ const CreditPurchaseModal = ({ isOpen, onClose, onPurchaseSuccess, lang = 'en' }
                             key={pack.id}
                             onClick={() => setSelectedPack(pack.id)}
                             className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-between ${selectedPack === pack.id
-                                    ? 'border-green-500 bg-green-50 ring-2 ring-green-200'
-                                    : 'border-slate-100 hover:border-green-200 hover:bg-slate-50'
+                                    ? 'border-green-500 bg-green-50 dark:bg-green-900/30 ring-2 ring-green-200 dark:ring-green-800'
+                                    : 'border-slate-100 dark:border-gray-700 hover:border-green-200 hover:bg-slate-50 dark:hover:bg-gray-700'
                                 }`}
                         >
                             {pack.popular && (
@@ -107,12 +107,12 @@ const CreditPurchaseModal = ({ isOpen, onClose, onPurchaseSuccess, lang = 'en' }
                             )}
 
                             <div className="flex items-center gap-4">
-                                <div className={`p-3 rounded-full ${selectedPack === pack.id ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-400'}`}>
+                                <div className={`p-3 rounded-full ${selectedPack === pack.id ? 'bg-green-100 text-green-600' : 'bg-slate-100 dark:bg-gray-700 text-slate-400 dark:text-gray-400'}`}>
                                     <Package size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-slate-800">{pack.credits} Credits</h3>
-                                    <p className="text-sm text-slate-500 font-medium">{pack.price}</p>
+                                    <h3 className="font-bold text-slate-800 dark:text-white">{pack.credits} Credits</h3>
+                                    <p className="text-sm text-slate-500 dark:text-gray-400 font-medium">{pack.price}</p>
                                 </div>
                             </div>
 
@@ -126,7 +126,7 @@ const CreditPurchaseModal = ({ isOpen, onClose, onPurchaseSuccess, lang = 'en' }
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t bg-slate-50">
+                <div className="p-6 border-t dark:border-gray-700 bg-slate-50 dark:bg-gray-900">
                     <button
                         disabled={!selectedPack || loading}
                         onClick={() => handlePurchase(text.packs.find(p => p.id === selectedPack))}
@@ -144,7 +144,7 @@ const CreditPurchaseModal = ({ isOpen, onClose, onPurchaseSuccess, lang = 'en' }
                             </>
                         )}
                     </button>
-                    <p className="text-center text-xs text-slate-400 mt-3">
+                    <p className="text-center text-xs text-slate-400 dark:text-gray-500 mt-3">
                         Secure Sandbox Payment (Mock)
                     </p>
                 </div>

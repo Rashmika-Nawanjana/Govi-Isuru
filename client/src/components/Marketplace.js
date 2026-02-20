@@ -245,7 +245,7 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
           <ShoppingBag className="h-7 w-7" />
           🛒 {t[lang].header}
         </h2>
-        <p className="text-gray-500 mt-1">{t[lang].sub}</p>
+        <p className="text-gray-500 dark:text-gray-400 mt-1">{t[lang].sub}</p>
       </div>
 
       {/* Top Rated Farmers Section */}
@@ -261,13 +261,13 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
             {topFarmers.map((farmer) => (
               <div
                 key={farmer._id}
-                className="flex-shrink-0 bg-white px-4 py-3 rounded-xl shadow-sm border border-amber-100 flex items-center gap-3 hover:shadow-md transition-shadow"
+                className="flex-shrink-0 bg-white dark:bg-gray-800 px-4 py-3 rounded-xl shadow-sm border border-amber-100 flex items-center gap-3 hover:shadow-md transition-shadow"
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-emerald-200 rounded-full flex items-center justify-center">
                   <User size={18} className="text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-gray-800">{farmer.username}</p>
+                  <p className="text-sm font-bold text-gray-800 dark:text-white">{farmer.username}</p>
                   <div className="flex items-center gap-1 mt-0.5">
                     <MiniReputationBadge score={farmer.reputation_score} />
                     {farmer.is_verified_farmer && (
@@ -283,8 +283,8 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
 
       {/* Sell Form */}
       {!isBuyer ? (
-        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 mb-8">
-          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 mb-8">
+          <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
             <div className="p-2 bg-green-100 rounded-lg">
               <PlusCircle className="h-5 w-5 text-green-600" />
             </div>
@@ -294,22 +294,22 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
             <div className="p-1.5 bg-green-500 rounded-full">
               <User size={14} className="text-white" />
             </div>
-            <span className="text-sm text-gray-600">{t[lang].postingAs}:</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">{t[lang].postingAs}:</span>
             <span className="font-bold text-green-700">{currentUser?.username}</span>
           </div>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input name="cropType" value={form.cropType} onChange={handleChange} placeholder="Crop (e.g. Paddy)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
-            <input name="quantity" value={form.quantity} onChange={handleChange} placeholder="Qty (e.g. 500kg)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
-            <input name="price" value={form.price} onChange={handleChange} placeholder="Price (LKR)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
-            <input name="location" value={form.location} onChange={handleChange} placeholder="Location" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
-            <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone (e.g. 0771234567)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+            <input name="cropType" value={form.cropType} onChange={handleChange} placeholder="Crop (e.g. Paddy)" className="p-3.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+            <input name="quantity" value={form.quantity} onChange={handleChange} placeholder="Qty (e.g. 500kg)" className="p-3.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+            <input name="price" value={form.price} onChange={handleChange} placeholder="Price (LKR)" className="p-3.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+            <input name="location" value={form.location} onChange={handleChange} placeholder="Location" className="p-3.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+            <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone (e.g. 0771234567)" className="p-3.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
             <button type="submit" className="md:col-span-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3.5 rounded-xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
               {t[lang].btn}
             </button>
           </form>
         </div>
       ) : (
-        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 mb-8">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 mb-8">
           <div className="flex items-center gap-3 text-amber-700 font-semibold">
             <PlusCircle className="h-5 w-5 text-amber-600" />
             <span>{t[lang].buyerViewOnly}</span>
@@ -318,11 +318,11 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
       )}
 
       {/* Filter & Sort Controls */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-6">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Crop Type Filter */}
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-gray-500 mb-1.5 flex items-center gap-1">
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
               <Filter size={12} /> {t[lang].filterLabel}
             </label>
             <div className="flex gap-1.5 flex-wrap">
@@ -338,7 +338,7 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
                   className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
                     filterCrop === crop.key
                       ? 'bg-green-600 text-white shadow-md scale-105'
-                      : 'bg-gray-100 text-gray-600 hover:bg-green-50 hover:text-green-700'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-green-50 hover:text-green-700'
                   }`}
                 >
                   {crop.emoji} {crop.label}
@@ -349,14 +349,14 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
 
           {/* Sort Dropdown */}
           <div className="sm:w-52">
-            <label className="block text-xs font-semibold text-gray-500 mb-1.5 flex items-center gap-1">
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
               <ArrowUpDown size={12} /> {t[lang].sortLabel}
             </label>
             <div className="relative">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none cursor-pointer pr-8"
+                className="w-full appearance-none bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none cursor-pointer pr-8"
               >
                 <option value="latest">{t[lang].sortLatest}</option>
                 <option value="priceLow">{t[lang].sortPriceLow}</option>
@@ -399,10 +399,10 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
             (item.farmerName === currentUser.username || item.farmer_id?.username === currentUser.username);
 
           return (
-            <div key={item._id} className="bg-white p-5 rounded-2xl shadow-md hover:shadow-xl transition-all border-l-4 border-green-500 flex flex-col justify-between">
+            <div key={item._id} className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-md hover:shadow-xl transition-all border-l-4 border-green-500 flex flex-col justify-between">
               <div>
                 <div className="flex justify-between items-start mb-2">
-                  <h4 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  <h4 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
                     <Sprout className="h-5 w-5 text-green-500" /> {item.cropType}
                   </h4>
                   <div className="flex items-center gap-2">
@@ -416,7 +416,7 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
                 </div>
                 <p className="text-2xl font-bold text-green-700 mb-3">Rs. {item.price}</p>
 
-                <div className="space-y-1 text-sm text-gray-600 mb-4">
+                <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400 mb-4">
                   <div className="flex items-center justify-between">
                     <p className="flex items-center gap-2"><User size={14} /> {item.farmerName}</p>
                     {/* Reputation Badge */}
@@ -430,20 +430,20 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
                     )}
                   </div>
                   <p className="flex items-center gap-2"><MapPin size={14} /> {item.location}</p>
-                  <p className="flex items-center gap-2 font-bold text-gray-800"><Phone size={14} /> {item.phone}</p>
+                  <p className="flex items-center gap-2 font-bold text-gray-800 dark:text-white"><Phone size={14} /> {item.phone}</p>
                 </div>
 
                 {/* Farmer Stats */}
                 {item.farmer_id && item.farmer_id.total_sales > 0 && (
-                  <div className="bg-gray-50 rounded-lg p-2 mb-4 flex items-center justify-around text-xs">
+                  <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-2 mb-4 flex items-center justify-around text-xs">
                     <div className="text-center">
-                      <p className="font-bold text-gray-800">{item.farmer_id.total_sales}</p>
-                      <p className="text-gray-500">{lang === 'si' ? 'විකුණුම්' : 'Sales'}</p>
+                      <p className="font-bold text-gray-800 dark:text-white">{item.farmer_id.total_sales}</p>
+                      <p className="text-gray-500 dark:text-gray-400">{lang === 'si' ? 'විකුණුම්' : 'Sales'}</p>
                     </div>
-                    <div className="w-px h-8 bg-gray-200"></div>
+                    <div className="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
                     <div className="text-center">
-                      <p className="font-bold text-gray-800">{item.farmer_id.reputation_score?.toFixed(1) || '3.0'}</p>
-                      <p className="text-gray-500">{lang === 'si' ? 'ශ්‍රේණිගත' : 'Rating'}</p>
+                      <p className="font-bold text-gray-800 dark:text-white">{item.farmer_id.reputation_score?.toFixed(1) || '3.0'}</p>
+                      <p className="text-gray-500 dark:text-gray-400">{lang === 'si' ? 'ශ්‍රේණිගත' : 'Rating'}</p>
                     </div>
                   </div>
                 )}
@@ -544,9 +544,9 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
           if (filterCrop === 'chili') return cropName.includes('chili') || cropName.includes('chilli') || cropName.includes('මිරිස්');
           return true;
         }).length === 0 && listings.length > 0 && (
-          <div className="col-span-full text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+          <div className="col-span-full text-center py-12 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
             <Filter size={32} className="mx-auto text-gray-300 mb-3" />
-            <p className="text-gray-500 font-medium">{t[lang].noListings}</p>
+            <p className="text-gray-500 dark:text-gray-400 font-medium">{t[lang].noListings}</p>
           </div>
         )}
       </div>

@@ -153,7 +153,7 @@ const UserProfile = () => {
 
   return (
     <div className="max-w-4xl mx-auto mt-8 p-1 animate-in fade-in zoom-in duration-500">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700">
 
         {/* Header */}
         <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 p-8 text-white relative overflow-hidden">
@@ -175,22 +175,22 @@ const UserProfile = () => {
 
           {/* Status Messages */}
           {message && (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3 animate-in fade-in mb-6">
+            <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl p-4 flex items-center gap-3 animate-in fade-in mb-6">
               <CheckCircle className="text-green-600 flex-shrink-0" />
-              <p className="text-green-800 font-medium">{message}</p>
+              <p className="text-green-800 dark:text-green-200 font-medium">{message}</p>
             </div>
           )}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3 animate-in fade-in mb-6">
+            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-4 flex items-center gap-3 animate-in fade-in mb-6">
               <AlertCircle className="text-red-600 flex-shrink-0" />
-              <p className="text-red-800 font-medium">{error}</p>
+              <p className="text-red-800 dark:text-red-200 font-medium">{error}</p>
             </div>
           )}
 
           {/* Section: Personal Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider flex items-center gap-1">
+              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1 uppercase tracking-wider flex items-center gap-1">
                 <User size={12} /> Full Name
               </label>
               <input
@@ -198,12 +198,12 @@ const UserProfile = () => {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
-                className="w-full p-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:bg-white transition-all outline-none font-medium text-gray-700"
+                className="w-full p-4 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 transition-all outline-none font-medium text-gray-700 dark:text-white"
                 required
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider flex items-center gap-1">
+              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1 uppercase tracking-wider flex items-center gap-1">
                 <Shield size={12} /> Username
               </label>
               <input
@@ -211,14 +211,14 @@ const UserProfile = () => {
                 name="username"
                 value={formData.username}
                 disabled
-                className="w-full p-4 bg-gray-100 border-2 border-transparent rounded-xl text-gray-500 font-medium cursor-not-allowed select-none"
+                className="w-full p-4 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-xl text-gray-500 dark:text-gray-400 font-medium cursor-not-allowed select-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider flex items-center gap-1">
+              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1 uppercase tracking-wider flex items-center gap-1">
                 <Phone size={12} /> Phone Number
               </label>
               <input
@@ -226,39 +226,39 @@ const UserProfile = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full p-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:bg-white transition-all outline-none font-medium text-gray-700"
+                className="w-full p-4 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 transition-all outline-none font-medium text-gray-700 dark:text-white"
                 placeholder="Optional"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider flex items-center gap-1">
+              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1 uppercase tracking-wider flex items-center gap-1">
                 <Shield size={12} /> Role
               </label>
               <input
                 type="text"
                 value={formData.role}
                 disabled
-                className="w-full p-4 bg-gray-100 border-2 border-transparent rounded-xl text-gray-500 font-medium capitalize cursor-not-allowed select-none"
+                className="w-full p-4 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-xl text-gray-500 dark:text-gray-400 font-medium capitalize cursor-not-allowed select-none"
               />
             </div>
           </div>
 
-          <hr className="border-gray-100" />
+          <hr className="border-gray-100 dark:border-gray-700" />
 
           {/* Section: Email */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
               <Mail className="text-green-600" size={20} /> Contact Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider">Email Address</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1 uppercase tracking-wider">Email Address</label>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full p-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:bg-white transition-all outline-none font-medium text-gray-700"
+                  className="w-full p-4 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 transition-all outline-none font-medium text-gray-700 dark:text-white"
                   required
                 />
               </div>
@@ -285,22 +285,22 @@ const UserProfile = () => {
             </div>
           </div>
 
-          <hr className="border-gray-100" />
+          <hr className="border-gray-100 dark:border-gray-700" />
 
           {/* Section: Location */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
               <MapPin className="text-green-600" size={20} /> Location Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider">District</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1 uppercase tracking-wider">District</label>
                 <div className="relative">
                   <select
                     name="district"
                     value={formData.district}
                     onChange={handleChange}
-                    className="w-full p-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:bg-white transition-all outline-none font-medium text-gray-700 appearance-none cursor-pointer"
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 transition-all outline-none font-medium text-gray-700 dark:text-white appearance-none cursor-pointer"
                     required
                   >
                     <option value="">Select District</option>
@@ -313,14 +313,14 @@ const UserProfile = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider">DS Division</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1 uppercase tracking-wider">DS Division</label>
                 <div className="relative">
                   <select
                     name="dsDivision"
                     value={formData.dsDivision}
                     onChange={handleChange}
                     disabled={!formData.district}
-                    className="w-full p-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:bg-white transition-all outline-none font-medium text-gray-700 appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 transition-all outline-none font-medium text-gray-700 dark:text-white appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     required
                   >
                     <option value="">Select Division</option>
@@ -333,14 +333,14 @@ const UserProfile = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider">GN Division</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1 uppercase tracking-wider">GN Division</label>
                 <div className="relative">
                   <select
                     name="gnDivision"
                     value={formData.gnDivision}
                     onChange={handleChange}
                     disabled={!formData.dsDivision}
-                    className="w-full p-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:bg-white transition-all outline-none font-medium text-gray-700 appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 transition-all outline-none font-medium text-gray-700 dark:text-white appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     required
                   >
                     <option value="">Select GN Division</option>
@@ -357,9 +357,9 @@ const UserProfile = () => {
           {/* Section: Officer Details (Conditionally Rendered) */}
           {isOfficer && (
             <>
-              <hr className="border-gray-100" />
-              <div className="bg-blue-50/50 p-6 rounded-2xl border-2 border-blue-100 space-y-4">
-                <h3 className="text-lg font-bold text-blue-800 flex items-center gap-2">
+              <hr className="border-gray-100 dark:border-gray-700" />
+              <div className="bg-blue-50/50 dark:bg-blue-900/20 p-6 rounded-2xl border-2 border-blue-100 dark:border-blue-800 space-y-4">
+                <h3 className="text-lg font-bold text-blue-800 dark:text-blue-200 flex items-center gap-2">
                   <Building2 className="text-blue-600" size={20} /> Officer Information
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

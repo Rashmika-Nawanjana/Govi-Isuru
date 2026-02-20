@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Leaf, ShoppingBag, Languages, LayoutDashboard, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X, FileText, Bookmark, Shield, Users } from 'lucide-react';
+import { Leaf, ShoppingBag, Languages, LayoutDashboard, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X, FileText, Bookmark, Shield, Users, Sun, Moon } from 'lucide-react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import CropSuitability from './components/CropSuitability';
 import AIDoctor from './components/AIDoctor';
@@ -134,6 +134,20 @@ function MainApp() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showCreditModal, setShowCreditModal] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  // Apply dark class to document
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
   const t = translations[lang];
 
@@ -247,6 +261,8 @@ function MainApp() {
         <HomePage
           onLogin={() => setView('login')}
           onRegister={() => setView('register')}
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
         />
       );
     }
@@ -402,7 +418,9 @@ function MainApp() {
     <div
       className="min-h-screen font-sans flex flex-col md:flex-row relative"
       style={{
-        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), url(${getBackgroundImage()})`,
+        backgroundImage: darkMode
+          ? `linear-gradient(rgba(17, 24, 39, 0.85), rgba(17, 24, 39, 0.85)), url(${getBackgroundImage()})`
+          : `linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), url(${getBackgroundImage()})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
@@ -493,6 +511,15 @@ function MainApp() {
         {/* Bottom Actions */}
         <div className="p-2 md:p-4 border-t border-green-700/50 space-y-1.5 md:space-y-2">
           <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="flex items-center gap-2 md:gap-3 w-full px-3 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl font-semibold border border-green-600/50 hover:bg-green-700/50 hover:border-green-500 text-xs md:text-sm text-green-100 transition-all active:scale-95"
+          >
+            {darkMode ? <Sun size={16} className="md:w-[18px] md:h-[18px]" /> : <Moon size={16} className="md:w-[18px] md:h-[18px]" />}
+            <span>{darkMode ? (lang === 'si' ? 'ආලෝක ප්‍රකාරය' : 'Light Mode') : (lang === 'si' ? 'අඳුරු ප්‍රකාරය' : 'Dark Mode')}</span>
+            <span className="ml-auto text-[9px] md:text-xs bg-green-700 px-1.5 md:px-2 py-0.5 rounded-full font-bold">{darkMode ? '☀️' : '🌙'}</span>
+          </button>
+
+          <button
             onClick={() => setLang(lang === 'en' ? 'si' : 'en')}
             className="flex items-center gap-2 md:gap-3 w-full px-3 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl font-semibold border border-green-600/50 hover:bg-green-700/50 hover:border-green-500 text-xs md:text-sm text-green-100 transition-all active:scale-95"
           >
@@ -511,7 +538,7 @@ function MainApp() {
       </nav>
 
       {/* Main Content Area - Clean Mobile Layout */}
-      <main className="flex-1 overflow-y-auto bg-white" style={{ position: 'relative', zIndex: 1 }}>
+      <main className="flex-1 overflow-y-auto bg-white dark:bg-gray-900" style={{ position: 'relative', zIndex: 1 }}>
         <div className="w-full h-full flex flex-col">
           {/* Mobile Top Bar - Integrated User Info */}
           <div className="md:hidden sticky top-0 z-20 bg-gradient-to-r from-green-600 to-emerald-600 shadow-md">
@@ -561,16 +588,16 @@ function MainApp() {
           </div>
 
           {/* Content Wrapper - Direct Content Access */}
-          <div className="flex-1 overflow-y-auto relative z-10 bg-white/25">
+          <div className="flex-1 overflow-y-auto relative z-10 bg-white/25 dark:bg-gray-900/90">
             <div className="w-full mx-auto">
               {/* Desktop Welcome Header Only */}
-              <div className="hidden md:block bg-white/70 backdrop-blur-sm border-b border-slate-200 md:m-4 md:rounded-xl md:border md:shadow-lg p-4">
+              <div className="hidden md:block bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-b border-slate-200 dark:border-gray-700 md:m-4 md:rounded-xl md:border md:shadow-lg p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-slate-500 dark:text-gray-400">
                       {lang === 'si' ? 'ආයුබෝවන්' : 'Welcome back'},
                     </p>
-                    <p className="text-xl font-bold text-slate-800 truncate">{user.username}</p>
+                    <p className="text-xl font-bold text-slate-800 dark:text-white truncate">{user.username}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="hidden md:flex items-center gap-2 bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-bold border border-yellow-200 shadow-sm transition-transform hover:scale-105 active:scale-95 cursor-pointer" onClick={() => setShowCreditModal(true)}>
@@ -588,7 +615,7 @@ function MainApp() {
                     )}
                   </div>
                 </div>
-                <span className="text-xs text-slate-400 font-medium mt-1 block">
+                <span className="text-xs text-slate-400 dark:text-gray-500 font-medium mt-1 block">
                   {new Date().toLocaleDateString(lang === 'si' ? 'si-LK' : 'en-LK', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </span>
               </div>
@@ -647,7 +674,7 @@ function MainApp() {
               </div>
 
               {/* Footer - Compact */}
-              <footer className="text-center text-slate-400 text-[10px] md:text-xs py-4 md:py-6 px-4 border-t border-slate-100 bg-white">
+              <footer className="text-center text-slate-400 dark:text-gray-500 text-[10px] md:text-xs py-4 md:py-6 px-4 border-t border-slate-100 dark:border-gray-700 bg-white dark:bg-gray-900">
                 <p>© 2025 <span className="font-semibold text-green-600">{t.title}</span> — {t.footer}</p>
               </footer>
             </div>

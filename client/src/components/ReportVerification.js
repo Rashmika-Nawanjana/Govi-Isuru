@@ -138,22 +138,22 @@ const ReportVerification = ({ lang, user }) => {
 
   if (user?.role !== 'officer') {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <p className="text-gray-600">{lang === 'en' ? 'Only officers can access this page' : 'නිලධාරීන් පමණක් මෙම පිටුවට ප්‍රවේශ විය හැක'}</p>
+          <p className="text-gray-600 dark:text-gray-400">{lang === 'en' ? 'Only officers can access this page' : 'නිලධාරීන් පමණක් මෙම පිටුවට ප්‍රවේශ විය හැක'}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white p-6">
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-900 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">{text.title}</h1>
-          <p className="text-gray-600">{text.subtitle}</p>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{text.title}</h1>
+          <p className="text-gray-600 dark:text-gray-400">{text.subtitle}</p>
         </div>
 
         {/* Main Content */}
@@ -165,21 +165,21 @@ const ReportVerification = ({ lang, user }) => {
                 <Loader2 className="h-8 w-8 animate-spin text-green-500" />
               </div>
             ) : pendingReports.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-md p-12 text-center">
-                <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg">{text.noReports}</p>
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-12 text-center">
+                <FileText className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                <p className="text-gray-500 dark:text-gray-400 text-lg">{text.noReports}</p>
               </div>
             ) : (
               <>
                 <div className="flex items-center gap-2 mb-4">
                   <AlertTriangle className="h-5 w-5 text-amber-500" />
-                  <span className="text-gray-700 font-medium">{pendingReports.length} {text.pending}</span>
+                  <span className="text-gray-700 dark:text-gray-300 font-medium">{pendingReports.length} {text.pending}</span>
                 </div>
 
                 {pendingReports.map((report) => (
                   <div
                     key={report._id}
-                    className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all border-l-4 border-amber-500 cursor-pointer overflow-hidden"
+                    className="bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-lg transition-all border-l-4 border-amber-500 cursor-pointer overflow-hidden"
                     onClick={() => setSelectedReport(report)}
                   >
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
@@ -197,29 +197,29 @@ const ReportVerification = ({ lang, user }) => {
                       {/* Content Section */}
                       <div className={report.image_url ? 'md:col-span-2' : 'md:col-span-3'}>
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-xl font-bold text-gray-900">{report.title}</h3>
+                          <h3 className="text-xl font-bold text-gray-900 dark:text-white">{report.title}</h3>
                           <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-semibold">
                             {lang === 'en' ? 'Pending' : 'ඉපැවුණු'}
                           </span>
                         </div>
-                        <p className="text-gray-600 mb-4">{report.description}</p>
+                        <p className="text-gray-600 dark:text-gray-400 mb-4">{report.description}</p>
 
                         <div className="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm">
-                          <div className="flex items-center gap-2 text-gray-600">
+                          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                             <User size={16} />
                             <span>{report.farmerName}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-gray-600">
+                          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                             <Phone size={16} />
                             <a href={`tel:${report.farmerPhone}`} className="text-blue-600 hover:underline">
                               {report.farmerPhone}
                             </a>
                           </div>
-                          <div className="flex items-center gap-2 text-gray-600">
+                          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                             <MapPin size={16} />
                             <span>{report.gnDivision}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-gray-600">
+                          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                             <Calendar size={16} />
                             <span>{formatDate(report.createdAt)}</span>
                           </div>
@@ -227,8 +227,8 @@ const ReportVerification = ({ lang, user }) => {
 
                         <div className="mt-4 space-y-2">
                           <div className="flex items-center gap-2">
-                            <span className="text-gray-700 font-semibold">{text.disease}:</span>
-                            <span className="text-gray-600">{report.ai_prediction}</span>
+                            <span className="text-gray-700 dark:text-gray-300 font-semibold">{text.disease}:</span>
+                            <span className="text-gray-600 dark:text-gray-400">{report.ai_prediction}</span>
                             <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
                               {Math.round(report.confidence_score * 100)}% {text.confidence}
                             </span>
@@ -247,41 +247,41 @@ const ReportVerification = ({ lang, user }) => {
           </div>
         ) : (
           // Report Details & Verification
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-3xl mx-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 max-w-3xl mx-auto">
             {/* Report Details */}
-            <div className="mb-8 pb-8 border-b">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">{selectedReport.title}</h2>
+            <div className="mb-8 pb-8 border-b dark:border-gray-700">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{selectedReport.title}</h2>
 
               <div className="grid grid-cols-2 gap-6 mb-6">
                 <div>
-                  <p className="text-sm text-gray-500 uppercase tracking-wider mb-1">{text.from}</p>
-                  <p className="text-lg font-semibold text-gray-900">{selectedReport.farmerName}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">{text.from}</p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">{selectedReport.farmerName}</p>
                   <a href={`tel:${selectedReport.farmerPhone}`} className="text-blue-600 hover:underline text-sm flex items-center gap-1 mt-1">
                     <Phone size={14} />
                     {selectedReport.farmerPhone}
                   </a>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 uppercase tracking-wider mb-1">{text.location}</p>
-                  <p className="text-lg font-semibold text-gray-900">{selectedReport.gnDivision}</p>
-                  <p className="text-sm text-gray-600 mt-1">{selectedReport.district}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">{text.location}</p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">{selectedReport.gnDivision}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{selectedReport.district}</p>
                 </div>
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm text-gray-500 uppercase tracking-wider mb-1">{text.disease}</p>
-                  <p className="text-lg font-semibold text-gray-900">{selectedReport.ai_prediction}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">{text.disease}</p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">{selectedReport.ai_prediction}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 uppercase tracking-wider mb-1">{text.confidence}</p>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">{text.confidence}</p>
+                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
                     <div
                       className="bg-green-500 h-2 rounded-full"
                       style={{ width: `${selectedReport.confidence_score * 100}%` }}
                     ></div>
                   </div>
-                  <p className="text-sm text-gray-600 mt-1">{Math.round(selectedReport.confidence_score * 100)}%</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{Math.round(selectedReport.confidence_score * 100)}%</p>
                 </div>
               </div>
 
@@ -296,11 +296,11 @@ const ReportVerification = ({ lang, user }) => {
             {/* Verification Form */}
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">{text.severity}</label>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">{text.severity}</label>
                 <select
                   value={severity}
                   onChange={(e) => setSeverity(e.target.value)}
-                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"
+                  className="w-full p-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-green-500 focus:outline-none dark:bg-gray-700 dark:text-white"
                 >
                   <option value="low">🟢 {lang === 'en' ? 'Low' : 'අඩු'}</option>
                   <option value="medium">🟡 {lang === 'en' ? 'Medium' : 'මධ්‍යම'}</option>
@@ -310,12 +310,12 @@ const ReportVerification = ({ lang, user }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">{text.notes}</label>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">{text.notes}</label>
                 <textarea
                   value={verificationNotes}
                   onChange={(e) => setVerificationNotes(e.target.value)}
                   placeholder={lang === 'en' ? 'Add any notes about your verification...' : 'ඔබගේ සත්‍යාපන පිළිබඳ කිසිදු සටහන් එක් කරන්න...'}
-                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none resize-none"
+                  className="w-full p-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-green-500 focus:outline-none resize-none dark:bg-gray-700 dark:text-white"
                   rows="4"
                 />
               </div>
@@ -354,7 +354,7 @@ const ReportVerification = ({ lang, user }) => {
                     setVerificationNotes('');
                     setSeverity('medium');
                   }}
-                  className="flex-1 bg-gray-200 text-gray-900 py-3 rounded-xl font-semibold hover:bg-gray-300 transition-all"
+                  className="flex-1 bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white py-3 rounded-xl font-semibold hover:bg-gray-300 dark:hover:bg-gray-500 transition-all"
                 >
                   {text.cancel}
                 </button>

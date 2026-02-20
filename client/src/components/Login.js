@@ -84,7 +84,7 @@ const Login = ({ onLoginSuccess, switchToRegister, switchToForgotPassword, lang 
         <Droplets className="text-cyan-300" size={24} />
       </div>
       
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30 transform hover:scale-[1.01] transition-transform duration-300">
+      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30 dark:border-gray-700/30 transform hover:scale-[1.01] transition-transform duration-300">
         {/* Header with animated gradient */}
         <div className="bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700 p-10 text-center relative overflow-hidden">
           {/* Animated background pattern */}
@@ -109,10 +109,10 @@ const Login = ({ onLoginSuccess, switchToRegister, switchToForgotPassword, lang 
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           {/* Error Display */}
           {error && (
-            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4 animate-in fade-in duration-300">
+            <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl p-4 animate-in fade-in duration-300">
               <div className="flex items-center gap-3">
                 <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-                <p className="text-red-700 text-sm font-medium">{error}</p>
+                <p className="text-red-700 dark:text-red-400 text-sm font-medium">{error}</p>
               </div>
               {showResendVerification && !resendSuccess && (
                 <button
@@ -144,7 +144,7 @@ const Login = ({ onLoginSuccess, switchToRegister, switchToForgotPassword, lang 
                 type="text" 
                 placeholder={lang === 'si' ? 'පරිශීලක නාමය' : 'Username'} 
                 required 
-                className="w-full pl-12 pr-4 py-4 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-green-500 focus:bg-white rounded-2xl outline-none transition-all text-gray-700 font-medium placeholder:text-gray-400 shadow-sm focus:shadow-lg focus:shadow-green-100" 
+                className="w-full pl-12 pr-4 py-4 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-600 focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 rounded-2xl outline-none transition-all text-gray-700 dark:text-white font-medium placeholder:text-gray-400 dark:placeholder:text-gray-400 shadow-sm focus:shadow-lg focus:shadow-green-100" 
                 onChange={(e) => setFormData({...formData, username: e.target.value})} 
               />
             </div>
@@ -156,7 +156,7 @@ const Login = ({ onLoginSuccess, switchToRegister, switchToForgotPassword, lang 
                 type="password" 
                 placeholder={lang === 'si' ? 'මුරපදය' : 'Password'} 
                 required 
-                className="w-full pl-12 pr-4 py-4 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-green-500 focus:bg-white rounded-2xl outline-none transition-all text-gray-700 font-medium placeholder:text-gray-400 shadow-sm focus:shadow-lg focus:shadow-green-100" 
+                className="w-full pl-12 pr-4 py-4 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-600 focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 rounded-2xl outline-none transition-all text-gray-700 dark:text-white font-medium placeholder:text-gray-400 dark:placeholder:text-gray-400 shadow-sm focus:shadow-lg focus:shadow-green-100" 
                 onChange={(e) => setFormData({...formData, password: e.target.value})} 
               />
             </div>
@@ -195,17 +195,17 @@ const Login = ({ onLoginSuccess, switchToRegister, switchToForgotPassword, lang 
 
           <div className="relative py-3">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
+              <div className="w-full border-t border-gray-200 dark:border-gray-600"></div>
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-white px-3 text-xs text-gray-400 uppercase tracking-wider">or</span>
+              <span className="bg-white dark:bg-gray-800 px-3 text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider">or</span>
             </div>
           </div>
 
           <button 
             type="button" 
             onClick={switchToRegister} 
-              className="w-full py-4 px-6 border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 font-bold rounded-2xl hover:bg-gradient-to-r hover:from-green-100 hover:to-emerald-100 hover:border-green-400 transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              className="w-full py-4 px-6 border-2 border-green-300 dark:border-green-700 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 text-green-700 dark:text-green-400 font-bold rounded-2xl hover:bg-gradient-to-r hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30 hover:border-green-400 transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
           >
               <Sparkles size={18} className="text-yellow-500" />
             {lang === 'si' ? 'අලුත් ගිණුමක් සාදන්න' : 'Create New Account'}

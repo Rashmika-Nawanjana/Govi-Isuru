@@ -99,11 +99,11 @@ const BuyerDashboard = ({ user, language = 'en', onNavigate }) => {
       </div>
 
       {/* Saved listings placeholder */}
-      <div className="bg-white rounded-lg md:rounded-2xl shadow-sm border border-slate-100 p-3 md:p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg md:rounded-2xl shadow-sm border border-slate-100 dark:border-gray-700 p-3 md:p-6">
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center gap-2">
-            <Bookmark className="text-slate-700" size={16} />
-            <h3 className="text-sm md:text-lg font-bold text-slate-800">{text.saved}</h3>
+            <Bookmark className="text-slate-700 dark:text-gray-300" size={16} />
+            <h3 className="text-sm md:text-lg font-bold text-slate-800 dark:text-white">{text.saved}</h3>
           </div>
           <button
             onClick={() => onNavigate && onNavigate('savedListings')}
@@ -112,16 +112,16 @@ const BuyerDashboard = ({ user, language = 'en', onNavigate }) => {
             {text.viewSaved}
           </button>
         </div>
-        <p className="text-[10px] md:text-sm text-slate-500">{text.emptySaved}</p>
+        <p className="text-[10px] md:text-sm text-slate-500 dark:text-gray-400">{text.emptySaved}</p>
       </div>
 
       {/* News strip */}
-      <div className="bg-white rounded-lg md:rounded-2xl shadow-sm border border-slate-100 p-3 md:p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg md:rounded-2xl shadow-sm border border-slate-100 dark:border-gray-700 p-3 md:p-6">
         <div className="flex items-center gap-2 mb-2">
           <Newspaper className="text-indigo-600" size={16} />
-          <h3 className="text-sm md:text-lg font-bold text-slate-800">{text.news}</h3>
+          <h3 className="text-sm md:text-lg font-bold text-slate-800 dark:text-white">{text.news}</h3>
         </div>
-        <p className="text-[10px] md:text-sm text-slate-600 mb-3">{language === 'si' ? 'නවතම කෘෂිකර්ම ප්‍රවෘත්ති බලන්න' : 'Stay updated with the latest agri news.'}</p>
+        <p className="text-[10px] md:text-sm text-slate-600 dark:text-gray-400 mb-3">{language === 'si' ? 'නවතම කෘෂිකර්ම ප්‍රවෘත්ති බලන්න' : 'Stay updated with the latest agri news.'}</p>
         <button
           onClick={() => onNavigate && onNavigate('news')}
           className="px-3 md:px-4 py-1.5 md:py-2 bg-indigo-600 text-white rounded-lg md:rounded-xl font-semibold text-sm hover:bg-indigo-700 transition"

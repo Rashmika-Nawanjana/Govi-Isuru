@@ -18,12 +18,14 @@ import {
   Newspaper,
   ExternalLink,
   Clock,
-  ChevronRight
+  ChevronRight,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
-const HomePage = ({ onLogin, onRegister }) => {
+const HomePage = ({ onLogin, onRegister, darkMode, setDarkMode }) => {
   const [news, setNews] = useState([]);
   const [loadingNews, setLoadingNews] = useState(true);
   const [scrollY, setScrollY] = useState(0);
@@ -174,7 +176,7 @@ const HomePage = ({ onLogin, onRegister }) => {
           {
             icon: Sparkles,
             title: "AI බෝග වෛද්‍යවරයා",
-            description: "උසස් ගැඹුරු ඉගෙනීම භාවිතයෙන් 94% නිරවද්‍යතාවයකින් ක්ෂණික රෝග හඳුනාගැනීම",
+            description: "උසස් ගැඹුරු ඉගෙනීම භාවිතයෙන් 80% නිරවද්‍යතාවයකින් ක්ෂණික රෝග හඳුනාගැනීම",
             color: "emerald"
           },
           {
@@ -275,7 +277,7 @@ const HomePage = ({ onLogin, onRegister }) => {
         left: 0,
         right: 0,
         bottom: 0,
-        background: 'rgba(255, 255, 255, 0.4)',
+        background: darkMode ? 'rgba(17, 24, 39, 0.85)' : 'rgba(255, 255, 255, 0.4)',
         zIndex: 0,
         pointerEvents: 'none'
       }} />
@@ -284,7 +286,7 @@ const HomePage = ({ onLogin, onRegister }) => {
       <div style={{ position: 'relative', zIndex: 1 }}>
       {/* Navigation Bar */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrollY > 50 ? 'bg-white/95 backdrop-blur-lg shadow-lg' : 'bg-transparent'
+        scrollY > 50 ? (darkMode ? 'bg-gray-900/95 backdrop-blur-lg shadow-lg' : 'bg-white/95 backdrop-blur-lg shadow-lg') : 'bg-transparent'
       }`}>
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 sm:h-20">
@@ -294,19 +296,28 @@ const HomePage = ({ onLogin, onRegister }) => {
                 <Leaf className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
               </div>
               <div>
-                <span className="text-lg sm:text-2xl font-black text-slate-800 tracking-tight">
+                <span className={`text-lg sm:text-2xl font-black tracking-tight ${darkMode ? 'text-white' : 'text-slate-800'}`}>
                   {lang === 'si' ? 'ගොවි ඉසුරු' : 'Govi Isuru'}
                 </span>
-                <div className="text-[10px] sm:text-xs text-slate-500 font-medium hidden xs:block">Smart Farming Platform</div>
+                <div className={`text-[10px] sm:text-xs font-medium hidden xs:block ${darkMode ? 'text-gray-400' : 'text-slate-500'}`}>Smart Farming Platform</div>
               </div>
             </div>
 
             {/* Auth Buttons */}
             <div className="flex items-center gap-1.5 sm:gap-3">
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className={`p-2 sm:p-2.5 rounded-lg transition-all flex items-center gap-1 sm:gap-2 font-semibold ${darkMode ? 'text-yellow-300 hover:text-yellow-200 hover:bg-gray-700' : 'text-slate-700 hover:text-green-600 hover:bg-green-50'}`}
+                title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              >
+                {darkMode ? <Sun size={18} className="sm:w-5 sm:h-5" /> : <Moon size={18} className="sm:w-5 sm:h-5" />}
+              </button>
+
               {/* Language Toggle */}
               <button
                 onClick={() => setLang(lang === 'en' ? 'si' : 'en')}
-                className="p-2 sm:p-2.5 text-slate-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all flex items-center gap-1 sm:gap-2 font-semibold"
+                className={`p-2 sm:p-2.5 rounded-lg transition-all flex items-center gap-1 sm:gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-green-400 hover:bg-gray-700' : 'text-slate-700 hover:text-green-600 hover:bg-green-50'}`}
                 title={lang === 'en' ? 'Switch to Sinhala' : 'Switch to English'}
               >
                 <Globe size={18} className="sm:w-5 sm:h-5" />
@@ -315,7 +326,7 @@ const HomePage = ({ onLogin, onRegister }) => {
               
               <button
                 onClick={onLogin}
-                className="px-3 py-2 sm:px-6 sm:py-2.5 text-slate-700 text-sm sm:text-base font-semibold hover:text-green-600 transition-colors"
+                className={`px-3 py-2 sm:px-6 sm:py-2.5 text-sm sm:text-base font-semibold transition-colors ${darkMode ? 'text-gray-300 hover:text-green-400' : 'text-slate-700 hover:text-green-600'}`}
               >
                 {t.nav.login}
               </button>
@@ -343,16 +354,16 @@ const HomePage = ({ onLogin, onRegister }) => {
           <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
             {/* Left Content */}
             <div className="space-y-3 sm:space-y-8 animate-in fade-in slide-in-from-left duration-700">
-              <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-green-100/90 backdrop-blur-sm border border-green-200 rounded-full">
+              <div className={`inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 backdrop-blur-sm border rounded-full ${darkMode ? 'bg-green-900/50 border-green-700' : 'bg-green-100/90 border-green-200'}`}>
                 <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                 <span className="text-xs sm:text-sm font-semibold text-green-700">{t.hero.badge}</span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-slate-900 leading-tight">
+              <h1 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
                 {t.hero.title}
               </h1>
 
-              <p className="text-sm sm:text-lg lg:text-xl text-slate-600 leading-relaxed">
+              <p className={`text-sm sm:text-lg lg:text-xl leading-relaxed ${darkMode ? 'text-gray-300' : 'text-slate-600'}`}>
                 {t.hero.subtitle}
               </p>
 
@@ -366,7 +377,7 @@ const HomePage = ({ onLogin, onRegister }) => {
                 </button>
                 <button
                   onClick={() => document.getElementById('features').scrollIntoView({ behavior: 'smooth' })}
-                  className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white/90 backdrop-blur-sm text-slate-700 font-bold rounded-xl border-2 border-slate-200 hover:border-green-500 hover:text-green-600 transition-all flex items-center justify-center gap-2 text-sm sm:text-lg"
+                  className={`w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 backdrop-blur-sm font-bold rounded-xl border-2 transition-all flex items-center justify-center gap-2 text-sm sm:text-lg ${darkMode ? 'bg-gray-800/90 text-gray-200 border-gray-600 hover:border-green-500 hover:text-green-400' : 'bg-white/90 text-slate-700 border-slate-200 hover:border-green-500 hover:text-green-600'}`}
                 >
                   {t.hero.cta2}
                   <ChevronRight size={16} className="sm:w-5 sm:h-5" />
@@ -376,9 +387,9 @@ const HomePage = ({ onLogin, onRegister }) => {
               {/* Stats */}
               <div className="grid grid-cols-2 gap-3 sm:gap-6 pt-8 sm:pt-8">
                 {t.hero.stats.map((stat, idx) => (
-                  <div key={idx} className="text-center bg-white/90 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-slate-100 shadow-sm">
+                  <div key={idx} className={`text-center backdrop-blur-sm rounded-xl p-3 sm:p-4 border shadow-sm ${darkMode ? 'bg-gray-800/90 border-gray-700' : 'bg-white/90 border-slate-100'}`}>
                     <div className="text-2xl sm:text-3xl font-black text-green-600">{stat.value}</div>
-                    <div className="text-xs sm:text-sm text-slate-600 font-medium mt-1">{stat.label}</div>
+                    <div className={`text-xs sm:text-sm font-medium mt-1 ${darkMode ? 'text-gray-300' : 'text-slate-600'}`}>{stat.label}</div>
                   </div>
                 ))}
               </div>
@@ -402,14 +413,14 @@ const HomePage = ({ onLogin, onRegister }) => {
                 </div>
 
                 {/* Floating Cards */}
-                <div className="absolute -top-6 -left-6 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 animate-float">
+                <div className={`absolute -top-6 -left-6 p-4 rounded-2xl shadow-xl border animate-float ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-slate-100'}`}>
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                       <CheckCircle className="h-6 w-6 text-green-600" />
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-slate-700">80% Accuracy</div>
-                      <div className="text-xs text-slate-500">Disease Detection</div>
+                      <div className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-700'}`}>80% Accuracy</div>
+                      <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-slate-500'}`}>Disease Detection</div>
                     </div>
                   </div>
                 </div>
@@ -422,13 +433,13 @@ const HomePage = ({ onLogin, onRegister }) => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-12 sm:py-16 lg:py-20 px-3 sm:px-6 lg:px-8 bg-white">
+      <section id="features" className={`py-12 sm:py-16 lg:py-20 px-3 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8 sm:mb-12 lg:mb-16 animate-in fade-in zoom-in duration-700">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black text-slate-900 mb-3 sm:mb-4">
+            <h2 className={`text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black mb-3 sm:mb-4 ${darkMode ? 'text-white' : 'text-slate-900'}`}>
               {t.features.title}
             </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto px-4">
+            <p className={`text-base sm:text-lg lg:text-xl max-w-2xl mx-auto px-4 ${darkMode ? 'text-gray-400' : 'text-slate-600'}`}>
               {t.features.subtitle}
             </p>
           </div>
@@ -440,14 +451,14 @@ const HomePage = ({ onLogin, onRegister }) => {
               return (
                 <div
                   key={idx}
-                  className="group p-4 sm:p-6 bg-white rounded-xl sm:rounded-2xl border-2 border-slate-100 hover:border-green-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer animate-in fade-in slide-in-from-bottom duration-700"
+                  className={`group p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer animate-in fade-in slide-in-from-bottom duration-700 ${darkMode ? 'bg-gray-800 border-gray-700 hover:border-green-600' : 'bg-white border-slate-100 hover:border-green-200'}`}
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   <div className={`w-12 h-12 sm:w-14 sm:h-14 ${colors.light} rounded-xl flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform`}>
                     <Icon className={`h-6 w-6 sm:h-7 sm:w-7 ${colors.text}`} />
                   </div>
-                  <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-2">{feature.title}</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">{feature.description}</p>
+                  <h3 className={`text-base sm:text-lg font-bold mb-2 ${darkMode ? 'text-white' : 'text-slate-800'}`}>{feature.title}</h3>
+                  <p className={`text-sm leading-relaxed ${darkMode ? 'text-gray-400' : 'text-slate-600'}`}>{feature.description}</p>
                 </div>
               );
             })}
@@ -456,14 +467,14 @@ const HomePage = ({ onLogin, onRegister }) => {
       </section>
 
       {/* Latest News Section */}
-      <section className="py-12 sm:py-16 lg:py-20 px-3 sm:px-6 lg:px-8 bg-gradient-to-br from-green-50 to-emerald-50/50">
+      <section className={`py-12 sm:py-16 lg:py-20 px-3 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-800/50' : 'bg-gradient-to-br from-green-50 to-emerald-50/50'}`}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8 sm:mb-12">
-            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-green-200 rounded-full mb-3 sm:mb-4">
+            <div className={`inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 border rounded-full mb-3 sm:mb-4 ${darkMode ? 'bg-gray-800 border-green-700' : 'bg-white border-green-200'}`}>
               <Newspaper className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
               <span className="text-xs sm:text-sm font-semibold text-green-700">{t.news.subtitle}</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 mb-3 sm:mb-4 px-4">
+            <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-black mb-3 sm:mb-4 px-4 ${darkMode ? 'text-white' : 'text-slate-900'}`}>
               {t.news.title}
             </h2>
           </div>
@@ -477,7 +488,7 @@ const HomePage = ({ onLogin, onRegister }) => {
               {news.map((article, idx) => (
                 <div
                   key={idx}
-                  className="group bg-white rounded-xl sm:rounded-2xl overflow-hidden border border-slate-200 hover:border-green-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  className={`group rounded-xl sm:rounded-2xl overflow-hidden border hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${darkMode ? 'bg-gray-800 border-gray-700 hover:border-green-600' : 'bg-white border-slate-200 hover:border-green-300'}`}
                 >
                   {article.urlToImage && (
                     <div className="aspect-video overflow-hidden">
@@ -489,14 +500,14 @@ const HomePage = ({ onLogin, onRegister }) => {
                     </div>
                   )}
                   <div className="p-4 sm:p-6">
-                    <div className="flex items-center gap-2 text-xs text-slate-500 mb-2 sm:mb-3">
+                    <div className={`flex items-center gap-2 text-xs mb-2 sm:mb-3 ${darkMode ? 'text-gray-400' : 'text-slate-500'}`}>
                       <Clock size={14} />
                       <span>{new Date(article.publishedAt).toLocaleDateString(lang === 'si' ? 'si-LK' : 'en-LK')}</span>
                     </div>
-                    <h3 className="font-bold text-sm sm:text-base text-slate-800 mb-2 sm:mb-3 line-clamp-2 group-hover:text-green-600 transition-colors">
+                    <h3 className={`font-bold text-sm sm:text-base mb-2 sm:mb-3 line-clamp-2 group-hover:text-green-600 transition-colors ${darkMode ? 'text-white' : 'text-slate-800'}`}>
                       {article.title}
                     </h3>
-                    <p className="text-xs sm:text-sm text-slate-600 mb-3 sm:mb-4 line-clamp-3">
+                    <p className={`text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3 ${darkMode ? 'text-gray-400' : 'text-slate-600'}`}>
                       {article.description}
                     </p>
                     <a
@@ -527,9 +538,9 @@ const HomePage = ({ onLogin, onRegister }) => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-12 sm:py-16 lg:py-20 px-3 sm:px-6 lg:px-8 bg-white">
+      <section className={`py-12 sm:py-16 lg:py-20 px-3 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 text-center mb-8 sm:mb-12 px-4">
+          <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-black text-center mb-8 sm:mb-12 px-4 ${darkMode ? 'text-white' : 'text-slate-900'}`}>
             {t.benefits.title}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
@@ -538,12 +549,12 @@ const HomePage = ({ onLogin, onRegister }) => {
               return (
                 <div
                   key={idx}
-                  className="flex items-start gap-3 sm:gap-4 p-4 sm:p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl sm:rounded-2xl border border-green-100"
+                  className={`flex items-start gap-3 sm:gap-4 p-4 sm:p-6 rounded-xl sm:rounded-2xl border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-100'}`}
                 >
                   <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-600 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
                     <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                   </div>
-                  <p className="text-sm sm:text-base text-slate-700 font-medium pt-1 sm:pt-2">{benefit.text}</p>
+                  <p className={`text-sm sm:text-base font-medium pt-1 sm:pt-2 ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>{benefit.text}</p>
                 </div>
               );
             })}
