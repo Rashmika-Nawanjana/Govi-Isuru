@@ -683,7 +683,7 @@ const NewsCard = ({ article, lang, onRead, isHeadline = false, tts, onShowSummar
 
   return (
     <div 
-      className={`bg-white rounded-xl shadow-sm border ${config.border} overflow-hidden cursor-pointer group transition-all duration-300 hover:shadow-md hover:-translate-y-0.5`}
+      className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border ${config.border} overflow-hidden cursor-pointer group transition-all duration-300 hover:shadow-md hover:-translate-y-0.5`}
       onClick={handleClick}
     >
       <div className="flex flex-col sm:flex-row">
@@ -746,12 +746,12 @@ const NewsCard = ({ article, lang, onRead, isHeadline = false, tts, onShowSummar
           </div>
           
           {/* Title */}
-          <h4 className="font-semibold text-gray-800 mb-1.5 line-clamp-2 group-hover:text-green-600 transition-colors">
+          <h4 className="font-semibold text-gray-800 dark:text-white mb-1.5 line-clamp-2 group-hover:text-green-600 transition-colors">
             {article.title}
           </h4>
           
           {/* Description */}
-          <p className="text-gray-500 text-sm line-clamp-2 mb-2">
+          <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mb-2">
             {article.description}
           </p>
           
@@ -773,7 +773,7 @@ const NewsCard = ({ article, lang, onRead, isHeadline = false, tts, onShowSummar
               {article.tags.slice(1, 4).map(tag => (
                 <span 
                   key={tag} 
-                  className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs"
+                  className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full text-xs"
                 >
                   {lang === 'si' && tagTranslations[tag] ? tagTranslations[tag] : tag}
                 </span>
@@ -798,7 +798,7 @@ const CategoryTab = ({ category, isActive, onClick, lang }) => {
       className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 whitespace-nowrap ${
         isActive
           ? `bg-gradient-to-r ${config.gradient} text-white shadow-md`
-          : `bg-white ${config.text} border ${config.border} hover:bg-gray-50`
+          : `bg-white dark:bg-gray-800 ${config.text} border ${config.border} hover:bg-gray-50 dark:hover:bg-gray-700`
       }`}
     >
       <CategoryIcon className="w-4 h-4" />
@@ -992,11 +992,11 @@ const AgriNews = ({ lang = 'en', user }) => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
             <Newspaper className="w-7 h-7 text-green-600" />
             {t.title}
           </h2>
-          <p className="text-gray-500 mt-1">{t.subtitle}</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">{t.subtitle}</p>
         </div>
         
         {/* Controls */}
@@ -1012,7 +1012,7 @@ const AgriNews = ({ lang = 'en', user }) => {
               className={`flex items-center gap-2 px-3 py-2 rounded-xl font-medium transition-all ${
                 pushNotifications.isSubscribed
                   ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
               title={pushNotifications.isSubscribed 
                 ? (lang === 'si' ? 'දැනුම්දීම් අක්‍රිය කරන්න' : 'Disable notifications')
@@ -1058,7 +1058,7 @@ const AgriNews = ({ lang = 'en', user }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t.searchPlaceholder}
-            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           {searchQuery && (
@@ -1099,7 +1099,7 @@ const AgriNews = ({ lang = 'en', user }) => {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-16">
           <Loader2 className="w-10 h-10 text-green-600 animate-spin mb-4" />
-          <p className="text-gray-500">{t.loading}</p>
+          <p className="text-gray-500 dark:text-gray-400">{t.loading}</p>
         </div>
       ) : error ? (
         /* Error State */
@@ -1119,7 +1119,7 @@ const AgriNews = ({ lang = 'en', user }) => {
           {/* Headlines Section */}
           {headlines.length > 0 && activeCategory === 'agriculture' && (
             <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
                 <span className="w-1.5 h-6 bg-green-500 rounded-full"></span>
                 {t.headlines}
               </h3>
@@ -1142,7 +1142,7 @@ const AgriNews = ({ lang = 'en', user }) => {
           {/* News List */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
                 <span className={`w-1.5 h-6 rounded-full bg-${categoryConfig[activeCategory].color}-500`}></span>
                 {t.categories[activeCategory]}
               </h3>
@@ -1155,9 +1155,9 @@ const AgriNews = ({ lang = 'en', user }) => {
             </div>
 
             {news.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-2xl">
+              <div className="flex flex-col items-center justify-center py-12 bg-gray-50 dark:bg-gray-900 rounded-2xl">
                 <Newspaper className="w-12 h-12 text-gray-300 mb-4" />
-                <p className="text-gray-500">{t.noNews}</p>
+                <p className="text-gray-500 dark:text-gray-400">{t.noNews}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -1180,7 +1180,7 @@ const AgriNews = ({ lang = 'en', user }) => {
       {/* AI Summary Modal */}
       {summaryModal.isOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden">
             {/* Modal Header */}
             <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4 text-white">
               <div className="flex items-center justify-between">
@@ -1204,14 +1204,14 @@ const AgriNews = ({ lang = 'en', user }) => {
               {summaryModal.loading ? (
                 <div className="flex flex-col items-center justify-center py-8">
                   <Loader2 className="w-8 h-8 text-purple-600 animate-spin mb-3" />
-                  <p className="text-gray-500">
+                  <p className="text-gray-500 dark:text-gray-400">
                     {lang === 'si' ? 'සාරාංශය ජනනය වෙමින්...' : 'Generating summary...'}
                   </p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {/* Article Title */}
-                  <h4 className="font-semibold text-gray-800 text-lg">
+                  <h4 className="font-semibold text-gray-800 dark:text-white text-lg">
                     {summaryModal.article?.title}
                   </h4>
                   
@@ -1223,7 +1223,7 @@ const AgriNews = ({ lang = 'en', user }) => {
                         {lang === 'si' ? 'සාරාංශය' : 'Summary'}
                       </span>
                     </div>
-                    <p className="text-gray-700 leading-relaxed">
+                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                       {lang === 'si' 
                         ? summaryModal.summary?.si 
                         : summaryModal.summary?.en}
@@ -1233,7 +1233,7 @@ const AgriNews = ({ lang = 'en', user }) => {
                   {/* Key Points */}
                   {summaryModal.summary?.keyPoints?.length > 0 && (
                     <div className="space-y-2">
-                      <h5 className="font-medium text-gray-700 flex items-center gap-2">
+                      <h5 className="font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                         <Tag className="w-4 h-4" />
                         {lang === 'si' ? 'ප්‍රධාන කරුණු' : 'Key Points'}
                       </h5>
@@ -1258,7 +1258,7 @@ const AgriNews = ({ lang = 'en', user }) => {
                   
                   {/* Read Time */}
                   {summaryModal.summary?.readTime && (
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                       <Clock className="w-4 h-4" />
                       <span>
                         {lang === 'si' 
@@ -1270,7 +1270,7 @@ const AgriNews = ({ lang = 'en', user }) => {
                   )}
                   
                   {/* Actions */}
-                  <div className="flex gap-3 pt-3 border-t">
+                  <div className="flex gap-3 pt-3 border-t dark:border-gray-700">
                     <button
                       onClick={() => {
                         tts.speak(summaryModal.article, lang);

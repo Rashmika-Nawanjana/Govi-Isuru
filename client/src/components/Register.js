@@ -227,7 +227,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
   if (registrationComplete) {
     return (
       <div className="w-full max-w-md p-1 animate-in fade-in zoom-in duration-700">
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30">
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30 dark:border-gray-700/30">
           <div className="bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700 p-10 text-center relative overflow-hidden">
             <div className="absolute inset-0 opacity-30">
               <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
@@ -240,12 +240,12 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
             </div>
           </div>
           <div className="p-8 text-center space-y-6">
-            <div className="bg-green-50 rounded-2xl p-6 border-2 border-green-200">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border-2 border-green-200 dark:border-green-700">
               <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-600" />
-              <p className="text-gray-700 font-medium mb-2">{t.verifyEmailMessage}</p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t.verifyEmailMessage}</p>
               <p className="text-green-700 font-bold text-lg">{registeredEmail}</p>
-              <p className="text-gray-600 text-sm mt-4">{t.checkInbox}</p>
-              <p className="text-gray-500 text-xs mt-2">{t.checkSpam}</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mt-4">{t.checkInbox}</p>
+              <p className="text-gray-500 dark:text-gray-400 text-xs mt-2">{t.checkSpam}</p>
             </div>
             <button
               onClick={switchToLogin}
@@ -273,7 +273,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
         <Droplets className="text-cyan-300" size={24} />
       </div>
 
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30 transform hover:scale-[1.005] transition-transform duration-300">
+      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30 dark:border-gray-700/30 transform hover:scale-[1.005] transition-transform duration-300">
         {/* Header with animated gradient */}
         <div className="bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700 p-8 text-center relative overflow-hidden">
           <div className="absolute inset-0 opacity-30">
@@ -297,15 +297,15 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           {/* Error Display */}
           {error && (
-            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4 flex items-center gap-3 animate-in fade-in duration-300">
+            <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-700 rounded-2xl p-4 flex items-center gap-3 animate-in fade-in duration-300">
               <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-              <p className="text-red-700 text-sm font-medium">{error}</p>
+              <p className="text-red-700 dark:text-red-400 text-sm font-medium">{error}</p>
             </div>
           )}
 
           {/* Role Selection */}
           <div className="mb-4">
-            <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider mb-3 block flex items-center gap-2">
+            <label className="text-xs font-bold text-gray-600 dark:text-gray-400 ml-1 uppercase tracking-wider mb-3 block flex items-center gap-2">
               <span className="text-lg">👤</span>
               {t.selectRole}
             </label>
@@ -316,7 +316,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 className={`p-5 rounded-2xl border-2 transition-all transform hover:scale-105 ${
                   formData.role === 'farmer'
                     ? 'border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg shadow-green-200/50'
-                    : 'border-gray-200 hover:border-green-300 bg-white hover:bg-green-50/30'
+                    : 'border-gray-200 dark:border-gray-600 hover:border-green-300 bg-white dark:bg-gray-800 hover:bg-green-50/30 dark:hover:bg-green-900/20'
                 }`}
               >
                 <Sprout className={`h-7 w-7 mx-auto mb-2 transition-all ${formData.role === 'farmer' ? 'text-green-600 drop-shadow' : 'text-gray-400'}`} />
@@ -329,7 +329,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 className={`p-5 rounded-2xl border-2 transition-all transform hover:scale-105 ${
                   formData.role === 'officer'
                     ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-cyan-50 shadow-lg shadow-blue-200/50'
-                    : 'border-gray-200 hover:border-blue-300 bg-white hover:bg-blue-50/30'
+                    : 'border-gray-200 dark:border-gray-600 hover:border-blue-300 bg-white dark:bg-gray-800 hover:bg-blue-50/30 dark:hover:bg-blue-900/20'
                 }`}
               >
                 <Shield className={`h-7 w-7 mx-auto mb-2 transition-all ${formData.role === 'officer' ? 'text-blue-600 drop-shadow' : 'text-gray-400'}`} />
@@ -342,7 +342,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 className={`p-5 rounded-2xl border-2 transition-all transform hover:scale-105 ${
                   formData.role === 'buyer'
                     ? 'border-amber-500 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg shadow-amber-200/50'
-                    : 'border-gray-200 hover:border-amber-300 bg-white hover:bg-amber-50/30'
+                    : 'border-gray-200 dark:border-gray-600 hover:border-amber-300 bg-white dark:bg-gray-800 hover:bg-amber-50/30 dark:hover:bg-amber-900/20'
                 }`}
               >
                 <ShoppingBag className={`h-7 w-7 mx-auto mb-2 transition-all ${formData.role === 'buyer' ? 'text-amber-600 drop-shadow' : 'text-gray-400'}`} />
@@ -355,7 +355,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider flex items-center gap-1">
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 ml-1 uppercase tracking-wider flex items-center gap-1">
                   <User size={12} /> {t.fullName}
                 </label>
                 <input
@@ -365,12 +365,12 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                   placeholder={t.fullNamePlaceholder}
                   value={formData.fullName}
                   onChange={handleChange}
-                  className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-green-500 focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
+                  className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-600 focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 rounded-2xl transition-all outline-none text-gray-700 dark:text-white font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider flex items-center gap-1">
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 ml-1 uppercase tracking-wider flex items-center gap-1">
                   <User size={12} /> {t.username}
                 </label>
                 <input
@@ -380,15 +380,15 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                   placeholder={t.usernamePlaceholder}
                   value={formData.username}
                   onChange={handleChange}
-                  className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-green-500 focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
+                  className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-600 focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 rounded-2xl transition-all outline-none text-gray-700 dark:text-white font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
                 />
-                <p className="text-xs text-gray-400 ml-1">{lang === 'si' ? 'ලිපිනය සඳහා භාවිතා කරනු ලැබේ' : 'Used for login'}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 ml-1">{lang === 'si' ? 'ලිපිනය සඳහා භාවිතා කරනු ලැබේ' : 'Used for login'}</p>
               </div>
             </div>
 
             {/* Email */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider flex items-center gap-1">
+              <label className="text-xs font-bold text-gray-600 dark:text-gray-400 ml-1 uppercase tracking-wider flex items-center gap-1">
                 <Mail size={12} /> {t.email}
               </label>
               <input
@@ -398,13 +398,13 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 placeholder={t.emailPlaceholder}
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-green-500 focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
+                className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-600 focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 rounded-2xl transition-all outline-none text-gray-700 dark:text-white font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
               />
             </div>
 
             {/* Phone Number - REQUIRED FOR ALL USERS */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider flex items-center gap-1">
+              <label className="text-xs font-bold text-gray-600 dark:text-gray-400 ml-1 uppercase tracking-wider flex items-center gap-1">
                 <Phone size={12} /> {t.phone}
               </label>
               <input
@@ -414,14 +414,14 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 placeholder={t.phonePlaceholder}
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-green-500 focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
+                className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-600 focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 rounded-2xl transition-all outline-none text-gray-700 dark:text-white font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
               />
             </div>
           </div>
 
           {/* Password Section */}
           <div className="space-y-4">
-            <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-xs font-bold text-gray-600 dark:text-gray-400 ml-1 uppercase tracking-wider flex items-center gap-1">
               <Lock size={12} /> {t.password}
             </label>
             <div className="relative">
@@ -432,12 +432,12 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 placeholder={lang === 'en' ? '••••••••' : '••••••••'}
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full p-4 pr-12 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-green-500 focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
+                className="w-full p-4 pr-12 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-600 focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 rounded-2xl transition-all outline-none text-gray-700 dark:text-white font-medium shadow-sm focus:shadow-lg focus:shadow-green-100"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -445,7 +445,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
             
             {/* Password Strength Indicator */}
             {formData.password && (
-              <div className="space-y-2 mt-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="space-y-2 mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
                 {/* Strength Bar */}
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -466,7 +466,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 
                 {/* Requirements Checklist */}
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-gray-600">{t.passwordRequirements.title}</p>
+                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-400">{t.passwordRequirements.title}</p>
                   <div className="grid grid-cols-2 gap-1 text-xs">
                     <div className={`flex items-center gap-1 ${passwordValidation.checks.minLength ? 'text-green-600' : 'text-gray-400'}`}>
                       {passwordValidation.checks.minLength ? <CheckCircle size={12} /> : <X size={12} />}
@@ -496,7 +496,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
 
           {/* Confirm Password */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-xs font-bold text-gray-600 dark:text-gray-400 ml-1 uppercase tracking-wider flex items-center gap-1">
               <Lock size={12} /> {t.confirmPassword}
             </label>
             <div className="relative">
@@ -507,18 +507,18 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                 placeholder={lang === 'en' ? '••••••••' : '••••••••'}
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`w-full p-4 pr-12 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 ${
+                className={`w-full p-4 pr-12 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700 border-2 ${
                   formData.confirmPassword 
                     ? passwordsMatch 
                       ? 'border-green-500 focus:border-green-500' 
                       : 'border-red-400 focus:border-red-500'
-                    : 'border-gray-200 focus:border-green-500'
-                } focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-green-100`}
+                    : 'border-gray-200 dark:border-gray-600 focus:border-green-500'
+                } focus:bg-white dark:focus:bg-gray-600 rounded-2xl transition-all outline-none text-gray-700 dark:text-white font-medium shadow-sm focus:shadow-lg focus:shadow-green-100`}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
               >
                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -533,14 +533,14 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
 
           {/* Officer-specific fields */}
           {formData.role === 'officer' && (
-            <div className="space-y-4 p-5 bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-50 rounded-2xl border-2 border-blue-200 shadow-lg shadow-blue-100/50 animate-in fade-in slide-in-from-top duration-300">
+            <div className="space-y-4 p-5 bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-50 dark:from-blue-900/20 dark:via-cyan-900/20 dark:to-blue-900/20 rounded-2xl border-2 border-blue-200 dark:border-blue-700 shadow-lg shadow-blue-100/50 animate-in fade-in slide-in-from-top duration-300">
               <div className="flex items-center gap-2 text-blue-700 font-bold mb-2">
                 <Building2 size={18} className="drop-shadow" />
                 <span className="text-sm"> {lang === 'si' ? 'රජ නිලධාරී තොරතුරු' : 'Government Officer Information'}</span>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider flex items-center gap-1">
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 ml-1 uppercase tracking-wider flex items-center gap-1">
                   <KeyRound size={12} /> {t.officerId} *
                 </label>
                 <input
@@ -550,39 +550,39 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
                   placeholder={t.officerIdPlaceholder}
                   value={formData.officerId}
                   onChange={handleChange}
-                  className="w-full p-4 bg-white border-2 border-blue-200 focus:border-blue-500 focus:bg-blue-50/20 rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-blue-100"
+                  className="w-full p-4 bg-white dark:bg-gray-700 border-2 border-blue-200 dark:border-gray-600 focus:border-blue-500 focus:bg-blue-50/20 rounded-2xl transition-all outline-none text-gray-700 dark:text-white font-medium shadow-sm focus:shadow-lg focus:shadow-blue-100"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider">{t.department}</label>
+                  <label className="text-xs font-bold text-gray-600 dark:text-gray-400 ml-1 uppercase tracking-wider">{t.department}</label>
                   <input
                     type="text"
                     name="department"
                     placeholder={t.departmentPlaceholder}
                     value={formData.department}
                     onChange={handleChange}
-                    className="w-full p-4 bg-white border-2 border-blue-200 focus:border-blue-500 focus:bg-blue-50/20 rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-blue-100"
+                    className="w-full p-4 bg-white dark:bg-gray-700 border-2 border-blue-200 dark:border-gray-600 focus:border-blue-500 focus:bg-blue-50/20 rounded-2xl transition-all outline-none text-gray-700 dark:text-white font-medium shadow-sm focus:shadow-lg focus:shadow-blue-100"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider">{t.designation}</label>
+                  <label className="text-xs font-bold text-gray-600 dark:text-gray-400 ml-1 uppercase tracking-wider">{t.designation}</label>
                   <input
                     type="text"
                     name="designation"
                     placeholder={t.designationPlaceholder}
                     value={formData.designation}
                     onChange={handleChange}
-                    className="w-full p-4 bg-white border-2 border-blue-200 focus:border-blue-500 focus:bg-blue-50/20 rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-blue-100"
+                    className="w-full p-4 bg-white dark:bg-gray-700 border-2 border-blue-200 dark:border-gray-600 focus:border-blue-500 focus:bg-blue-50/20 rounded-2xl transition-all outline-none text-gray-700 dark:text-white font-medium shadow-sm focus:shadow-lg focus:shadow-blue-100"
                   />
                 </div>
               </div>
             </div>
           )}
 
-          <hr className="border-gray-200 my-4" />
+          <hr className="border-gray-200 dark:border-gray-600 my-4" />
 
           {/* Location Section */}
           <div className="space-y-4">
@@ -590,18 +590,18 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
               <div className="p-2 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl shadow-sm">
                 <MapPin className="text-green-600" size={16} />
               </div>
-              <span className="text-sm font-bold text-gray-700">{lang === 'si' ? '📍 ඔබගේ ස්ථානය' : '📍 Your Location'}</span>
+              <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{lang === 'si' ? '📍 ඔබගේ ස්ථානය' : '📍 Your Location'}</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="space-y-1.5">
-                <label className="text-xs text-gray-500 ml-1 font-semibold">District</label>
+                <label className="text-xs text-gray-500 dark:text-gray-400 ml-1 font-semibold">District</label>
                 <select
                   name="district"
                   required
                   value={formData.district}
                   onChange={handleChange}
-                  className="w-full p-3.5 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 rounded-2xl focus:border-green-500 focus:bg-white outline-none font-medium text-gray-700 text-sm cursor-pointer transition-all shadow-sm focus:shadow-lg focus:shadow-green-100"
+                  className="w-full p-3.5 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 outline-none font-medium text-gray-700 dark:text-white text-sm cursor-pointer transition-all shadow-sm focus:shadow-lg focus:shadow-green-100"
                 >
                   <option value="">Select District</option>
                   {districts.map((d) => (
@@ -613,14 +613,14 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs text-gray-500 ml-1 font-semibold">DS Division</label>
+                <label className="text-xs text-gray-500 dark:text-gray-400 ml-1 font-semibold">DS Division</label>
                 <select
                   name="dsDivision"
                   required
                   value={formData.dsDivision}
                   onChange={handleChange}
                   disabled={!formData.district}
-                  className="w-full p-3.5 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 rounded-2xl focus:border-green-500 focus:bg-white outline-none font-medium text-gray-700 text-sm disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-sm focus:shadow-lg focus:shadow-green-100"
+                  className="w-full p-3.5 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 outline-none font-medium text-gray-700 dark:text-white text-sm disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-sm focus:shadow-lg focus:shadow-green-100"
                 >
                   <option value="">Select DS Division</option>
                   {dsDivisions.map((ds) => (
@@ -632,14 +632,14 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs text-gray-500 ml-1 font-semibold">GN Division</label>
+                <label className="text-xs text-gray-500 dark:text-gray-400 ml-1 font-semibold">GN Division</label>
                 <select
                   name="gnDivision"
                   required
                   value={formData.gnDivision}
                   onChange={handleChange}
                   disabled={!formData.dsDivision}
-                  className="w-full p-3.5 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 rounded-2xl focus:border-green-500 focus:bg-white outline-none font-medium text-gray-700 text-sm disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-sm focus:shadow-lg focus:shadow-green-100"
+                  className="w-full p-3.5 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:border-green-500 focus:bg-white dark:focus:bg-gray-600 outline-none font-medium text-gray-700 dark:text-white text-sm disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-sm focus:shadow-lg focus:shadow-green-100"
                 >
                   <option value="">Select GN Division</option>
                   {gnDivisions.map((gn) => (
@@ -653,7 +653,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
           </div>
 
           {/* Features List */}
-          <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-2xl p-5 border-2 border-green-200 shadow-lg shadow-green-100/50">
+          <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-900/20 dark:via-emerald-900/20 dark:to-teal-900/20 rounded-2xl p-5 border-2 border-green-200 dark:border-green-700 shadow-lg shadow-green-100/50">
             <p className="text-xs font-bold text-green-800 mb-3 flex items-center gap-2">
               <span className="text-lg">?</span>
               {lang === 'si' ? '??? ????? ????:' : "What you'll get:"}
@@ -694,17 +694,17 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
 
           <div className="relative py-2">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
+              <div className="w-full border-t border-gray-200 dark:border-gray-600"></div>
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-white px-3 text-xs text-gray-400 uppercase tracking-wider">or</span>
+              <span className="bg-white dark:bg-gray-800 px-3 text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider">or</span>
             </div>
           </div>
 
           <button
             type="button"
             onClick={switchToLogin}
-            className="w-full py-4 px-6 border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 font-bold rounded-2xl hover:bg-gradient-to-r hover:from-green-100 hover:to-emerald-100 hover:border-green-400 transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            className="w-full py-4 px-6 border-2 border-green-300 dark:border-green-600 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 text-green-700 dark:text-green-400 font-bold rounded-2xl hover:bg-gradient-to-r hover:from-green-100 hover:to-emerald-100 hover:border-green-400 transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
           >
             <KeyRound size={18} />
             {lang === 'si' ? '????? ???? ???? ??? ???' : 'Already have an account? Login'}

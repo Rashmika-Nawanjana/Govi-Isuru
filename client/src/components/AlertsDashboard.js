@@ -183,7 +183,7 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-white rounded-2xl shadow-lg p-2 flex flex-wrap gap-2">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-2 flex flex-wrap gap-2">
         {tabs.map(tab => {
           const Icon = tab.icon;
           return (
@@ -193,7 +193,7 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all ${
                 activeTab === tab.id
                   ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
               <Icon className="w-5 h-5" />
@@ -208,9 +208,9 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Top Diseases */}
-            <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-red-500" />
                   {text.topDiseases}
                 </h2>
@@ -223,7 +223,7 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
               </div>
               
               {loading ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
                   {text.loading}
                 </div>
@@ -232,13 +232,13 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
                   {summary.diseaseBreakdown.slice(0, 5).map((item, index) => (
                     <div 
                       key={item.disease}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-xl"
+                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-xl"
                     >
                       <div className="flex items-center gap-3">
                         <span className="w-8 h-8 bg-red-100 text-red-700 rounded-full flex items-center justify-center font-bold text-sm">
                           {index + 1}
                         </span>
-                        <span className="font-medium text-gray-800">{item.disease}</span>
+                        <span className="font-medium text-gray-800 dark:text-white">{item.disease}</span>
                       </div>
                       <span className={`px-3 py-1 rounded-full text-sm font-bold ${getSeverityColor(item.count)}`}>
                         {item.count} {text.reports}
@@ -247,14 +247,14 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">{text.noData}</div>
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">{text.noData}</div>
               )}
             </div>
 
             {/* Affected Districts */}
-            <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-orange-500" />
                   {text.affectedDistricts}
                 </h2>
@@ -267,7 +267,7 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
               </div>
               
               {loading ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
                   {text.loading}
                 </div>
@@ -275,14 +275,14 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
                 <div className="space-y-3">
                   {summary.topLocations.slice(0, 5).map((item, index) => (
                     <div 
-                      key={item.district}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-xl"
+                      key={item.gnDivision || item.district || index}
+                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-xl"
                     >
                       <div className="flex items-center gap-3">
                         <span className="w-8 h-8 bg-orange-100 text-orange-700 rounded-full flex items-center justify-center font-bold text-sm">
                           {index + 1}
                         </span>
-                        <span className="font-medium text-gray-800">{item.district}</span>
+                        <span className="font-medium text-gray-800 dark:text-white">{item.gnDivision || item.district}</span>
                       </div>
                       <span className={`px-3 py-1 rounded-full text-sm font-bold ${getSeverityColor(item.count)}`}>
                         {item.count} {text.reports}
@@ -291,14 +291,14 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">{text.noData}</div>
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">{text.noData}</div>
               )}
             </div>
 
             {/* Severity Breakdown */}
             {summary?.severityBreakdown?.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-xl p-6 lg:col-span-2">
-                <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 lg:col-span-2">
+                <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5 text-yellow-500" />
                   Severity Distribution
                 </h2>
@@ -313,11 +313,11 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
                       none: 'bg-gray-400'
                     };
                     return (
-                      <div key={severity} className="text-center p-4 bg-gray-50 rounded-xl">
+                      <div key={severity} className="text-center p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
                         <div className={`w-12 h-12 ${colors[severity]} rounded-full mx-auto mb-2 flex items-center justify-center text-white font-bold text-lg`}>
                           {data?.count || 0}
                         </div>
-                        <div className="text-sm font-medium text-gray-600 capitalize">{severity}</div>
+                        <div className="text-sm font-medium text-gray-600 dark:text-gray-400 capitalize">{severity}</div>
                       </div>
                     );
                   })}

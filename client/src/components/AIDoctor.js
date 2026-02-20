@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import {
   Upload, Loader2, CheckCircle, AlertTriangle, MapPin, Info,
@@ -16,6 +16,8 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
   const [showGradCam, setShowGradCam] = useState(false);
   const [cropType, setCropType] = useState('rice'); // 'rice', 'tea', or 'chili'
   const [reportSaved, setReportSaved] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
 
   const t = {
     en: {
@@ -24,6 +26,9 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
       subtitle: "The smart AI solution for farming",
       uploadTitle: "Upload Leaf Photo",
       uploadDesc: "Take a clear photo of the affected crop leaf for instant AI diagnosis.",
+      dragDrop: "Drag & drop your image here, or click to browse",
+      dragActive: "Drop your image here...",
+      changeImage: "Click or drag to change image",
       analyzeBtn: "Analyze Disease (25 Credits)",
       analyzing: "Analyzing...",
       results: "Diagnosis Report",
@@ -42,10 +47,10 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
       context: "Diagnosis Context",
 
       selectCrop: "Select Crop Type",
-      rice: "Rice",
+      rice: "Paddy",
       tea: "Tea",
       chili: "Chili",
-      riceDesc: "Analyze rice leaf diseases",
+      riceDesc: "Analyze paddy leaf diseases",
       teaDesc: "Analyze tea leaf diseases",
       chiliDesc: "Analyze chili plant diseases"
     },
@@ -55,6 +60,9 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
       subtitle: "ගොවිතැනට සුහුරු AI විසඳුම",
       uploadTitle: "පත්‍ර ඡායාරූපය උඩුගත කරන්න",
       uploadDesc: "ක්ෂණික AI විශ්ලේෂණය සඳහා බලපෑමට ලක් වූ බෝග පත්‍රයේ පැහැදිලි ඡායාරූපයක් ගන්න.",
+      dragDrop: "ඔබගේ රූපය මෙහි ඇදගෙන එන්න, නැතහොත් බ්‍රවුස් කිරීමට ක්ලික් කරන්න",
+      dragActive: "ඔබගේ රූපය මෙහි දමන්න...",
+      changeImage: "රූපය වෙනස් කිරීමට ක්ලික් කරන්න හෝ ඇදගෙන එන්න",
       analyzeBtn: "පරීක්ෂා කරන්න (ණය 25)",
       analyzing: "විශ්ලේෂණය කරමින්...",
       results: "රෝග විනිශ්චය වාර්තාව",
@@ -84,13 +92,42 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
 
   const text = t[lang] || t.en;
 
+  const processFile = (selectedFile) => {
+    if (selectedFile && selectedFile.type.startsWith('image/')) {
+      setFile(selectedFile);
+      setPreview(URL.createObjectURL(selectedFile));
+      setResult(null);
+      setAnalysisStep(0);
+      setReportSaved(false);
+    }
+  };
+
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
-    setPreview(URL.createObjectURL(selectedFile));
-    setResult(null);
-    setAnalysisStep(0);
-    setReportSaved(false);
+    processFile(e.target.files[0]);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const droppedFile = e.dataTransfer.files[0];
+    processFile(droppedFile);
+  };
+
+  const handleUploadAreaClick = () => {
+    fileInputRef.current?.click();
   };
 
   const handleAnalyze = async () => {
@@ -223,28 +260,28 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
   };
 
   return (
-    <div className="font-sans text-gray-800 w-full">
+    <div className="font-sans text-gray-800 dark:text-gray-200 w-full">
       {/* Section Header - Minimal Mobile Padding */}
-      <div className="bg-white rounded-lg md:rounded-xl p-2 md:p-4 shadow-sm border border-slate-100 mb-2 md:mb-4">
-        <h2 className="text-sm md:text-xl font-bold text-green-800 flex items-center gap-1.5">
+      <div className="bg-white dark:bg-gray-800 rounded-lg md:rounded-xl p-2 md:p-4 shadow-sm border border-slate-100 dark:border-gray-700 mb-2 md:mb-4">
+        <h2 className="text-sm md:text-xl font-bold text-green-800 dark:text-green-400 flex items-center gap-1.5">
           <Stethoscope className="h-4 w-4 md:h-6 md:w-6 flex-shrink-0" />
           {text.sectionTitle}
         </h2>
-        <p className="text-[10px] md:text-sm text-slate-500 mt-0.5">{text.subtitle}</p>
+        <p className="text-[10px] md:text-sm text-slate-500 dark:text-gray-400 mt-0.5">{text.subtitle}</p>
       </div>
 
       {/* Crop Type Selector - Show Names with Emojis */}
       <div className="mb-2 md:mb-4">
-        <label className="block text-[10px] md:text-sm font-semibold text-gray-700 mb-1.5 px-0.5">{text.selectCrop}</label>
+        <label className="block text-[10px] md:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 px-0.5">{text.selectCrop}</label>
         <div className="grid grid-cols-3 gap-1.5 md:gap-3">{/* Rice Button */}
           <button
             onClick={() => { setCropType('rice'); setResult(null); }}
             className={`flex flex-col items-center gap-1 p-1.5 md:p-3 rounded-lg md:rounded-xl border-2 transition-all active:scale-95 shadow-sm ${cropType === 'rice'
-              ? 'border-green-500 bg-green-50 shadow-md'
-              : 'border-slate-200 bg-white hover:border-green-300 hover:bg-green-50/30'
+              ? 'border-green-500 bg-green-50 dark:bg-green-900/30 shadow-md'
+              : 'border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-green-300 hover:bg-green-50/30'
               }`}
           >
-            <div className={`p-1 md:p-2 rounded-lg flex-shrink-0 ${cropType === 'rice' ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
+            <div className={`p-1 md:p-2 rounded-lg flex-shrink-0 ${cropType === 'rice' ? 'bg-green-500 text-white' : 'bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300'}`}>
               <Leaf className="h-3.5 w-3.5 md:h-5 md:w-5" />
             </div>
             <div className="text-center">
@@ -258,11 +295,11 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
           <button
             onClick={() => { setCropType('tea'); setResult(null); }}
             className={`flex flex-col items-center gap-1 p-1.5 md:p-3 rounded-lg md:rounded-xl border-2 transition-all active:scale-95 shadow-sm ${cropType === 'tea'
-              ? 'border-green-500 bg-green-50 shadow-md'
-              : 'border-slate-200 bg-white hover:border-green-300 hover:bg-green-50/30'
+              ? 'border-green-500 bg-green-50 dark:bg-green-900/30 shadow-md'
+              : 'border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-green-300 hover:bg-green-50/30'
               }`}
           >
-            <div className={`p-1 md:p-2 rounded-lg flex-shrink-0 ${cropType === 'tea' ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
+            <div className={`p-1 md:p-2 rounded-lg flex-shrink-0 ${cropType === 'tea' ? 'bg-green-500 text-white' : 'bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300'}`}>
               <Coffee className="h-3.5 w-3.5 md:h-5 md:w-5" />
             </div>
             <div className="text-center">
@@ -276,11 +313,11 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
           <button
             onClick={() => { setCropType('chili'); setResult(null); }}
             className={`flex flex-col items-center gap-1 p-1.5 md:p-3 rounded-lg md:rounded-xl border-2 transition-all active:scale-95 shadow-sm ${cropType === 'chili'
-              ? 'border-red-500 bg-red-50 shadow-md'
-              : 'border-slate-200 bg-white hover:border-red-300 hover:bg-red-50/30'
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/30 shadow-md'
+              : 'border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-red-300 hover:bg-red-50/30'
               }`}
           >
-            <div className={`p-1 md:p-2 rounded-lg flex-shrink-0 ${cropType === 'chili' ? 'bg-red-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
+            <div className={`p-1 md:p-2 rounded-lg flex-shrink-0 ${cropType === 'chili' ? 'bg-red-500 text-white' : 'bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300'}`}>
               <Flame className="h-3.5 w-3.5 md:h-5 md:w-5" />
             </div>
             <div className="text-center">
@@ -293,43 +330,63 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
       </div>
 
       {/* Upload Card - Minimal Padding */}
-      <div className="bg-white rounded-lg md:rounded-xl shadow-sm border border-slate-100">
+      <div className="bg-white dark:bg-gray-800 rounded-lg md:rounded-xl shadow-sm border border-slate-100 dark:border-gray-700">
         <div className="p-2 md:p-4">{/* Upload Area */}
-          <div className={`relative border-2 border-dashed rounded-lg p-2 md:p-4 transition-all duration-300 ${preview ? 'border-green-400 bg-green-50/50' : 'border-slate-300 hover:border-green-400 hover:bg-green-50/30'
-            }`}>
+          <div
+            onClick={handleUploadAreaClick}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`relative border-2 border-dashed rounded-lg p-2 md:p-4 transition-all duration-300 cursor-pointer select-none ${
+              isDragging
+                ? 'border-green-500 bg-green-50 scale-[1.02] shadow-lg'
+                : preview
+                  ? 'border-green-400 bg-green-50/50 hover:border-green-500 hover:bg-green-50'
+                  : 'border-slate-300 hover:border-green-400 hover:bg-green-50/30'
+            }`}
+          >
             <div className="flex flex-col items-center gap-2">
-              {preview ? (
-                <div className="relative w-full">
+              {isDragging ? (
+                <div className="w-full py-8 md:py-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg flex flex-col items-center justify-center">
+                  <div className="p-3 md:p-4 bg-white rounded-full shadow-lg mb-2 animate-bounce">
+                    <Upload className="h-6 w-6 md:h-8 md:w-8 text-green-600" />
+                  </div>
+                  <p className="text-xs md:text-base text-green-700 font-bold">{text.dragActive}</p>
+                </div>
+              ) : preview ? (
+                <div className="relative w-full group">
                   <img
                     src={preview}
                     alt="Crop preview"
-                    className="w-full max-h-40 md:max-h-64 object-cover rounded-lg shadow-sm"
+                    className="w-full max-h-40 md:max-h-64 object-cover rounded-lg shadow-sm transition-all duration-300 group-hover:brightness-90"
                   />
                   <div className="absolute top-1 right-1 bg-green-500 text-white px-1.5 py-0.5 rounded-full text-[9px] md:text-xs font-bold flex items-center gap-1 shadow-md">
                     <CheckCircle className="h-2.5 w-2.5" /> Ready
                   </div>
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20 rounded-lg">
+                    <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+                      <Upload className="h-3.5 w-3.5 text-green-600" />
+                      <span className="text-[10px] md:text-xs font-semibold text-green-700">{text.changeImage}</span>
+                    </div>
+                  </div>
                 </div>
               ) : (
-                <div className="w-full py-4 md:py-8 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg flex flex-col items-center justify-center">
-                  <div className="p-2 md:p-3 bg-white rounded-full shadow-md mb-1">
+                <div className="w-full py-4 md:py-8 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-600 rounded-lg flex flex-col items-center justify-center">
+                  <div className="p-2 md:p-3 bg-white dark:bg-gray-600 rounded-full shadow-md mb-1">
                     <Upload className="h-5 w-5 md:h-7 md:w-7 text-green-500" />
                   </div>
-                  <p className="text-[10px] md:text-sm text-slate-600 font-medium">{text.uploadTitle}</p>
-                  <p className="text-[9px] md:text-xs text-slate-400 mt-0.5 text-center px-2">{text.uploadDesc}</p>
+                  <p className="text-[10px] md:text-sm text-slate-600 dark:text-gray-300 font-medium">{text.uploadTitle}</p>
+                  <p className="text-[9px] md:text-xs text-slate-400 dark:text-gray-400 mt-0.5 text-center px-2">{text.uploadDesc}</p>
+                  <p className="text-[8px] md:text-xs text-green-500 mt-1.5 font-medium">{text.dragDrop}</p>
                 </div>
               )}
 
               <input
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
-                className="block w-full text-[9px] md:text-sm text-slate-500 
-                  file:mr-1 md:file:mr-3 file:py-1 md:file:py-2.5 file:px-2 md:file:px-5 
-                  file:rounded-full file:border-0 
-                  file:text-[8px] md:file:text-sm file:font-bold
-                  file:bg-green-100 file:text-green-700 
-                  hover:file:bg-green-200 file:cursor-pointer
-                  file:transition-all file:duration-200 file:active:scale-95 file:shadow-sm"
+                className="hidden"
               />
             </div>
           </div>
@@ -368,11 +425,11 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
       </div>
 
       {/* Divider */}
-      {result && <hr className="my-8 border-green-100" />}
+      {result && <hr className="my-8 border-green-100 dark:border-gray-700" />}
 
       {/* Results - Medical Report Style */}
       {result && (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden animate-fade-in">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden animate-fade-in">
           {/* Report Saved Status */}
           {reportSaved && user && (
             <div className="bg-green-600 text-white px-6 py-3 flex items-center justify-between">
@@ -400,11 +457,11 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
                   </div>
                 )}
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-gray-600" />
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                     {text.results}
                   </h3>
-                  <p className="text-xs text-gray-500 mt-0.5">AI-Powered Analysis • Govi Isuru</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">AI-Powered Analysis • Govi Isuru</p>
                 </div>
               </div>
               <span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${getSeverityStyle(result.severity).badge}`}>
@@ -416,8 +473,8 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
           <div className="p-6 space-y-5">
             {/* Farmer Context Box */}
             {user && (
-              <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{text.context}</p>
+              <div className="bg-slate-50 dark:bg-gray-700/50 rounded-xl p-4 border border-slate-200 dark:border-gray-600">
+                <p className="text-xs font-bold text-slate-400 dark:text-gray-400 uppercase tracking-wider mb-2">{text.context}</p>
                 <div className="grid grid-cols-3 gap-3 text-sm">
                   <div className="flex items-center gap-2 text-slate-600">
                     <MapPin className="h-4 w-4 text-slate-400" />
@@ -425,7 +482,7 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
                   </div>
                   <div className="flex items-center gap-2 text-slate-600">
                     <Leaf className="h-4 w-4 text-slate-400" />
-                    <span>Rice</span>
+                    <span>{cropType === 'rice' ? text.rice : cropType === 'tea' ? text.tea : text.chili}</span>
                   </div>
                   <div className="flex items-center gap-2 text-slate-600">
                     <Calendar className="h-4 w-4 text-slate-400" />
@@ -441,9 +498,9 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
                 <span className="text-lg">🦠</span>
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{text.diseaseDetected}</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900">{result.disease}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{result.disease}</p>
               {result.si_name && result.si_name !== result.disease && (
-                <p className="text-base text-gray-500">{result.si_name}</p>
+                <p className="text-base text-gray-500 dark:text-gray-400">{result.si_name}</p>
               )}
             </div>
 
@@ -452,9 +509,9 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
               <div className="flex items-center gap-2">
                 <span className="text-lg">📍</span>
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{text.confidence}</span>
-                <span className="ml-auto text-lg font-bold text-gray-900">{(result.confidence * 100).toFixed(0)}%</span>
+                <span className="ml-auto text-lg font-bold text-gray-900 dark:text-white">{(result.confidence * 100).toFixed(0)}%</span>
               </div>
-              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${result.confidence > 0.75 ? 'bg-gradient-to-r from-green-400 to-green-600' :
                     result.confidence > 0.5 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
@@ -467,12 +524,12 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
 
             {/* Description */}
             {result.description && (
-              <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-800">
                 <div className="flex items-center gap-2 mb-2">
                   <Info className="h-4 w-4 text-blue-600" />
                   <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">{text.description}</span>
                 </div>
-                <p className="text-gray-700 text-sm leading-relaxed">{result.description}</p>
+                <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{result.description}</p>
               </div>
             )}
 
@@ -519,7 +576,7 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
             )}
 
             {/* Treatment */}
-            <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
+            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">💊</span>
                 <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">{text.treatment}</span>

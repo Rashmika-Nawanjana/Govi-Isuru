@@ -100,7 +100,7 @@ const SavedListings = ({ lang, currentUser, onNavigate }) => {
       <div className="max-w-4xl mx-auto p-6 animate-in fade-in">
         <div className="flex flex-col items-center justify-center py-20">
           <Loader className="h-12 w-12 text-green-600 animate-spin mb-4" />
-          <p className="text-gray-600">{t[lang].loading}</p>
+          <p className="text-gray-600 dark:text-gray-400">{t[lang].loading}</p>
         </div>
       </div>
     );
@@ -114,13 +114,13 @@ const SavedListings = ({ lang, currentUser, onNavigate }) => {
             <Bookmark className="h-7 w-7" />
             {t[lang].title}
           </h2>
-          <p className="text-gray-600 mt-1">{t[lang].subtitle}</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">{t[lang].subtitle}</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
-          <Bookmark className="h-20 w-20 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-gray-800 mb-2">{t[lang].empty}</h3>
-          <p className="text-gray-600 mb-6">{t[lang].emptyDesc}</p>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-12 text-center">
+          <Bookmark className="h-20 w-20 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">{t[lang].empty}</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">{t[lang].emptyDesc}</p>
           <button
             onClick={() => onNavigate && onNavigate('marketplace')}
             className="px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition"
@@ -151,10 +151,10 @@ const SavedListings = ({ lang, currentUser, onNavigate }) => {
       {/* Saved Listings Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {savedListings.map((item) => (
-          <div key={item._id} className="bg-white p-5 rounded-2xl shadow-md hover:shadow-xl transition-all border-l-4 border-yellow-500 flex flex-col justify-between">
+          <div key={item._id} className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-md hover:shadow-xl transition-all border-l-4 border-yellow-500 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-start mb-2">
-                <h4 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <h4 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
                   <Sprout className="h-5 w-5 text-green-500" /> {item.cropType}
                 </h4>
                 <div className="flex items-center gap-2">
@@ -168,7 +168,7 @@ const SavedListings = ({ lang, currentUser, onNavigate }) => {
               </div>
               <p className="text-2xl font-bold text-green-700 mb-3">Rs. {item.price}</p>
               
-              <div className="space-y-1 text-sm text-gray-600 mb-4">
+              <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400 mb-4">
                 <div className="flex items-center justify-between">
                   <p className="flex items-center gap-2"><User size={14} /> {item.farmerName}</p>
                   {item.farmer_id && (
@@ -181,20 +181,20 @@ const SavedListings = ({ lang, currentUser, onNavigate }) => {
                   )}
                 </div>
                 <p className="flex items-center gap-2"><MapPin size={14} /> {item.location}</p>
-                <p className="flex items-center gap-2 font-bold text-gray-800"><Phone size={14} /> {item.phone}</p>
+                <p className="flex items-center gap-2 font-bold text-gray-800 dark:text-white"><Phone size={14} /> {item.phone}</p>
               </div>
 
               {/* Farmer Stats */}
               {item.farmer_id && item.farmer_id.total_sales > 0 && (
-                <div className="bg-gray-50 rounded-lg p-2 mb-4 flex items-center justify-around text-xs">
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 mb-4 flex items-center justify-around text-xs">
                   <div className="text-center">
-                    <p className="font-bold text-gray-800">{item.farmer_id.total_sales}</p>
-                    <p className="text-gray-500">{t[lang].sales}</p>
+                    <p className="font-bold text-gray-800 dark:text-white">{item.farmer_id.total_sales}</p>
+                    <p className="text-gray-500 dark:text-gray-400">{t[lang].sales}</p>
                   </div>
-                  <div className="w-px h-8 bg-gray-200"></div>
+                  <div className="w-px h-8 bg-gray-200 dark:bg-gray-600"></div>
                   <div className="text-center">
-                    <p className="font-bold text-gray-800">{item.farmer_id.reputation_score?.toFixed(1) || '3.0'}</p>
-                    <p className="text-gray-500">{t[lang].rating}</p>
+                    <p className="font-bold text-gray-800 dark:text-white">{item.farmer_id.reputation_score?.toFixed(1) || '3.0'}</p>
+                    <p className="text-gray-500 dark:text-gray-400">{t[lang].rating}</p>
                   </div>
                 </div>
               )}

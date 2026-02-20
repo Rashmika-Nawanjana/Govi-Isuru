@@ -58,7 +58,7 @@ const ForgotPassword = ({ switchToLogin, lang }) => {
   if (sent) {
     return (
       <div className="w-full max-w-md p-1 animate-in fade-in zoom-in duration-700">
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30">
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30 dark:border-gray-700/30">
           <div className="bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700 p-10 text-center">
             <div className="w-20 h-20 mx-auto mb-4 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-sm shadow-xl">
               <CheckCircle className="h-10 w-10 text-white" />
@@ -67,16 +67,16 @@ const ForgotPassword = ({ switchToLogin, lang }) => {
           </div>
 
           <div className="p-8 text-center space-y-6">
-            <div className="bg-green-50 rounded-2xl p-6 border-2 border-green-200">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border-2 border-green-200 dark:border-green-800">
               <Mail className="h-12 w-12 mx-auto mb-4 text-green-600" />
-              <p className="text-gray-700 font-medium mb-2">{t.sentMessage}</p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t.sentMessage}</p>
               <p className="text-green-700 font-bold text-lg">{email}</p>
-              <p className="text-gray-500 text-sm mt-4">{t.checkSpam}</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mt-4">{t.checkSpam}</p>
             </div>
 
             <button
               onClick={() => setSent(false)}
-              className="w-full py-4 px-6 border-2 border-gray-300 text-gray-700 font-bold rounded-2xl hover:bg-gray-50 transition-all"
+              className="w-full py-4 px-6 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-bold rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
             >
               {t.sendAnother}
             </button>
@@ -96,7 +96,7 @@ const ForgotPassword = ({ switchToLogin, lang }) => {
 
   return (
     <div className="w-full max-w-md p-1 animate-in fade-in zoom-in duration-700">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30">
+      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30 dark:border-gray-700/30">
         <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-700 p-10 text-center relative overflow-hidden">
           <div className="absolute inset-0 opacity-30">
             <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
@@ -112,14 +112,14 @@ const ForgotPassword = ({ switchToLogin, lang }) => {
 
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           {error && (
-            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4 flex items-center gap-3 animate-in fade-in duration-300">
+            <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl p-4 flex items-center gap-3 animate-in fade-in duration-300">
               <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-              <p className="text-red-700 text-sm font-medium">{error}</p>
+              <p className="text-red-700 dark:text-red-400 text-sm font-medium">{error}</p>
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-600 ml-1 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-xs font-bold text-gray-600 dark:text-gray-400 ml-1 uppercase tracking-wider flex items-center gap-1">
               <Mail size={12} /> {t.email}
             </label>
             <input
@@ -128,7 +128,7 @@ const ForgotPassword = ({ switchToLogin, lang }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t.emailPlaceholder}
-              className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none text-gray-700 font-medium shadow-sm focus:shadow-lg focus:shadow-blue-100"
+              className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 rounded-2xl transition-all outline-none text-gray-700 dark:text-white font-medium shadow-sm focus:shadow-lg focus:shadow-blue-100"
             />
           </div>
 
@@ -153,7 +153,7 @@ const ForgotPassword = ({ switchToLogin, lang }) => {
           <button
             type="button"
             onClick={switchToLogin}
-            className="w-full py-4 px-6 border-2 border-gray-300 text-gray-700 font-bold rounded-2xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+            className="w-full py-4 px-6 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-bold rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2"
           >
             <ArrowLeft size={18} />
             {t.backToLogin}

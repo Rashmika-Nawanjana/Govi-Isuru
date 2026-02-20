@@ -319,7 +319,7 @@ export default function LlamaChatbot({ lang = 'en' }) {
 
       {/* Chat Window - Full Screen on Mobile */}
       {isOpen && (
-        <div className="fixed inset-0 md:bottom-6 md:right-6 md:top-auto md:left-auto md:w-96 md:h-[600px] w-full h-full bg-white md:rounded-2xl shadow-2xl flex flex-col z-50 border-0 md:border md:border-slate-200 overflow-hidden">
+        <div className="fixed inset-0 md:bottom-6 md:right-6 md:top-auto md:left-auto md:w-96 md:h-[600px] w-full h-full bg-white dark:bg-gray-800 md:rounded-2xl shadow-2xl flex flex-col z-50 border-0 md:border md:border-slate-200 dark:border-gray-700 overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-br from-emerald-500 via-green-500 to-emerald-600 text-white p-4 md:p-5 flex justify-between items-center">
             <div className="flex items-center gap-2 md:gap-3">
@@ -356,7 +356,7 @@ export default function LlamaChatbot({ lang = 'en' }) {
           </div>
 
           {/* Messages Container */}
-          <div className="flex-1 overflow-y-auto p-3 md:p-5 space-y-3 md:space-y-4 bg-gradient-to-b from-slate-50 to-white">
+          <div className="flex-1 overflow-y-auto p-3 md:p-5 space-y-3 md:space-y-4 bg-gradient-to-b from-slate-50 to-white dark:from-gray-900 dark:to-gray-800">
             {messages.map((message, index) => (
               <div
                 key={index}
@@ -370,8 +370,8 @@ export default function LlamaChatbot({ lang = 'en' }) {
                     message.role === 'user'
                       ? 'bg-gradient-to-br from-emerald-500 to-green-600 text-white rounded-br-md'
                       : message.isError
-                      ? 'bg-red-50 text-red-800 rounded-bl-md border border-red-200'
-                      : 'bg-white text-slate-800 rounded-bl-md border border-slate-200'
+                      ? 'bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-bl-md border border-red-200 dark:border-red-800'
+                      : 'bg-white dark:bg-gray-700 text-slate-800 dark:text-white rounded-bl-md border border-slate-200 dark:border-gray-600'
                   }`}
                 >
                   <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
@@ -382,8 +382,8 @@ export default function LlamaChatbot({ lang = 'en' }) {
                       message.role === 'user'
                         ? 'text-emerald-100'
                         : message.isError
-                        ? 'text-red-600'
-                        : 'text-slate-400'
+                        ? 'text-red-600 dark:text-red-400'
+                        : 'text-slate-400 dark:text-gray-400'
                     }`}
                   >
                     {new Date(message.timestamp).toLocaleTimeString([], {
@@ -398,10 +398,10 @@ export default function LlamaChatbot({ lang = 'en' }) {
             {/* Loading Indicator */}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-white text-slate-800 p-4 rounded-2xl rounded-bl-md shadow-sm border border-slate-200">
+                <div className="bg-white dark:bg-gray-700 text-slate-800 dark:text-white p-4 rounded-2xl rounded-bl-md shadow-sm border border-slate-200 dark:border-gray-600">
                   <div className="flex items-center gap-2">
                     <Loader2 size={18} className="animate-spin text-emerald-500" />
-                    <span className="text-sm text-slate-600 font-medium">
+                    <span className="text-sm text-slate-600 dark:text-gray-400 font-medium">
                       AI is thinking...
                     </span>
                   </div>
@@ -413,9 +413,9 @@ export default function LlamaChatbot({ lang = 'en' }) {
           </div>
 
           {/* Input Area */}
-          <div className="p-3 md:p-5 border-t border-slate-200 bg-white">
+          <div className="p-3 md:p-5 border-t border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800">
             {error && (
-              <div className="mb-2 md:mb-3 text-xs text-red-700 bg-red-50 p-2 md:p-3 rounded-xl border border-red-200 flex items-start gap-2">
+              <div className="mb-2 md:mb-3 text-xs text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 p-2 md:p-3 rounded-xl border border-red-200 dark:border-red-800 flex items-start gap-2">
                 <AlertTriangle size={14} className="mt-0.5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -433,7 +433,7 @@ export default function LlamaChatbot({ lang = 'en' }) {
                         ? 'ඔබගේ ප්‍රශ්නය ටයිප් කරන්න...'
                         : 'Type your question...')
                 }
-                className="flex-1 px-3 md:px-4 py-2 md:py-3 text-sm md:text-base border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-slate-50 text-slate-800 placeholder-slate-400"
+                className="flex-1 px-3 md:px-4 py-2 md:py-3 text-sm md:text-base border border-slate-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-slate-50 dark:bg-gray-700 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-400"
                 disabled={isLoading || isListening}
               />
               {/* Voice input - show on HTTPS or localhost/127.0.0.1 */}
@@ -467,7 +467,7 @@ export default function LlamaChatbot({ lang = 'en' }) {
                 )}
               </button>
             </div>
-            <p className="text-[10px] md:text-xs text-slate-400 mt-2 md:mt-3 text-center flex items-center justify-center gap-1">
+            <p className="text-[10px] md:text-xs text-slate-400 dark:text-gray-500 mt-2 md:mt-3 text-center flex items-center justify-center gap-1">
               <Sparkles size={10} className="md:w-3 md:h-3 text-emerald-500" />
               Powered by Meta Llama 3.3 via Hugging Face
             </p>

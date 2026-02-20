@@ -59,7 +59,7 @@ const VerifyEmail = ({ switchToLogin, lang }) => {
   if (loading) {
     return (
       <div className="w-full max-w-md p-1 animate-in fade-in zoom-in duration-700">
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30">
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30 dark:border-gray-700/30">
           <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-700 p-10 text-center">
             <div className="w-20 h-20 mx-auto mb-4 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-sm shadow-xl">
               <Loader2 className="h-10 w-10 text-white animate-spin" />
@@ -68,8 +68,8 @@ const VerifyEmail = ({ switchToLogin, lang }) => {
           </div>
           <div className="p-8 text-center">
             <div className="animate-pulse flex flex-col items-center">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-4"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2"></div>
             </div>
           </div>
         </div>
@@ -80,7 +80,7 @@ const VerifyEmail = ({ switchToLogin, lang }) => {
   if (verified) {
     return (
       <div className="w-full max-w-md p-1 animate-in fade-in zoom-in duration-700">
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30">
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30 dark:border-gray-700/30">
           <div className="bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700 p-10 text-center">
             <div className="w-20 h-20 mx-auto mb-4 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-sm shadow-xl">
               <CheckCircle className="h-10 w-10 text-white" />
@@ -88,9 +88,9 @@ const VerifyEmail = ({ switchToLogin, lang }) => {
             <h2 className="text-2xl font-black text-white mb-2">{t.success}</h2>
           </div>
           <div className="p-8 text-center space-y-6">
-            <div className="bg-green-50 rounded-2xl p-6 border-2 border-green-200">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border-2 border-green-200 dark:border-green-800">
               <Mail className="h-12 w-12 mx-auto mb-4 text-green-600" />
-              <p className="text-gray-700">{t.successMessage}</p>
+              <p className="text-gray-700 dark:text-gray-300">{t.successMessage}</p>
             </div>
             <button
               onClick={switchToLogin}
@@ -107,7 +107,7 @@ const VerifyEmail = ({ switchToLogin, lang }) => {
 
   return (
     <div className="w-full max-w-md p-1 animate-in fade-in zoom-in duration-700">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30">
+      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden border-2 border-white/30 dark:border-gray-700/30">
         <div className="bg-gradient-to-br from-red-500 to-orange-600 p-10 text-center">
           <div className="w-20 h-20 mx-auto mb-4 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-sm shadow-xl">
             <AlertCircle className="h-10 w-10 text-white" />
@@ -115,8 +115,8 @@ const VerifyEmail = ({ switchToLogin, lang }) => {
           <h2 className="text-2xl font-black text-white mb-2">{t.failed}</h2>
         </div>
         <div className="p-8 text-center space-y-6">
-          <div className="bg-red-50 rounded-2xl p-6 border-2 border-red-200">
-            <p className="text-gray-700">{error || t.failedMessage}</p>
+          <div className="bg-red-50 dark:bg-red-900/20 rounded-2xl p-6 border-2 border-red-200 dark:border-red-800">
+            <p className="text-gray-700 dark:text-gray-300">{error || t.failedMessage}</p>
           </div>
           <button
             onClick={switchToLogin}

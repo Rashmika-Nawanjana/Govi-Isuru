@@ -400,8 +400,8 @@ const AdminDashboard = ({ user, language = 'en' }) => {
 
                 {/* Top Districts */}
                 {stats.districtBreakdown?.length > 0 && (
-                    <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 p-4 md:p-6 shadow-sm">
-                        <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl border border-slate-200 dark:border-gray-700 p-4 md:p-6 shadow-sm">
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
                             <MapPin className="w-5 h-5 text-indigo-500" />
                             {t.topDistricts}
                         </h3>
@@ -411,8 +411,8 @@ const AdminDashboard = ({ user, language = 'en' }) => {
                                 const pct = Math.round((d.count / maxCount) * 100);
                                 return (
                                     <div key={i} className="flex items-center gap-3">
-                                        <span className="w-28 md:w-36 text-sm font-medium text-slate-700 truncate">{d._id || 'Unknown'}</span>
-                                        <div className="flex-1 h-6 bg-slate-100 rounded-full overflow-hidden">
+                                        <span className="w-28 md:w-36 text-sm font-medium text-slate-700 dark:text-gray-300 truncate">{d._id || 'Unknown'}</span>
+                                        <div className="flex-1 h-6 bg-slate-100 dark:bg-gray-700 rounded-full overflow-hidden">
                                             <div
                                                 className="h-full bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-full transition-all duration-700 flex items-center justify-end pr-2"
                                                 style={{ width: `${Math.max(pct, 8)}%` }}
@@ -434,7 +434,7 @@ const AdminDashboard = ({ user, language = 'en' }) => {
     const UsersTab = () => (
         <div className="space-y-4">
             {/* Search & Filters */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 p-3 md:p-4 shadow-sm">
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl border border-slate-200 dark:border-gray-700 p-3 md:p-4 shadow-sm">
                 <div className="flex flex-col md:flex-row gap-3">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -443,14 +443,14 @@ const AdminDashboard = ({ user, language = 'en' }) => {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder={t.searchPlaceholder}
-                            className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            className="w-full pl-9 pr-3 py-2.5 bg-white dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white"
                         />
                     </div>
                     <div className="flex gap-2">
                         <select
                             value={roleFilter}
                             onChange={(e) => setRoleFilter(e.target.value)}
-                            className="px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="px-3 py-2.5 bg-white dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white"
                         >
                             <option value="all">{t.allRoles}</option>
                             <option value="farmer">{t.farmers}</option>
@@ -461,7 +461,7 @@ const AdminDashboard = ({ user, language = 'en' }) => {
                         <select
                             value={districtFilter}
                             onChange={(e) => setDistrictFilter(e.target.value)}
-                            className="px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="px-3 py-2.5 bg-white dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white"
                         >
                             <option value="all">{t.allDistricts}</option>
                             {districts.map(d => (
@@ -477,44 +477,44 @@ const AdminDashboard = ({ user, language = 'en' }) => {
                 <EmptyState message={t.noUsers} icon={Users} />
             ) : (
                 <>
-                    <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
-                                <thead className="bg-slate-50 border-b border-slate-200">
+                                <thead className="bg-slate-50 dark:bg-gray-700 border-b border-slate-200 dark:border-gray-600">
                                     <tr>
-                                        <th className="text-left px-4 py-3 font-semibold text-slate-600">{t.users}</th>
-                                        <th className="text-left px-4 py-3 font-semibold text-slate-600 hidden md:table-cell">{t.email}</th>
-                                        <th className="text-left px-4 py-3 font-semibold text-slate-600">{t.role}</th>
-                                        <th className="text-left px-4 py-3 font-semibold text-slate-600">{t.credits}</th>
-                                        <th className="text-left px-4 py-3 font-semibold text-slate-600 hidden lg:table-cell">{t.district}</th>
-                                        <th className="text-left px-4 py-3 font-semibold text-slate-600 hidden md:table-cell">{t.joined}</th>
-                                        <th className="text-left px-4 py-3 font-semibold text-slate-600">{t.actions}</th>
+                                        <th className="text-left px-4 py-3 font-semibold text-slate-600 dark:text-gray-300">{t.users}</th>
+                                        <th className="text-left px-4 py-3 font-semibold text-slate-600 dark:text-gray-300 hidden md:table-cell">{t.email}</th>
+                                        <th className="text-left px-4 py-3 font-semibold text-slate-600 dark:text-gray-300">{t.role}</th>
+                                        <th className="text-left px-4 py-3 font-semibold text-slate-600 dark:text-gray-300">{t.credits}</th>
+                                        <th className="text-left px-4 py-3 font-semibold text-slate-600 dark:text-gray-300 hidden lg:table-cell">{t.district}</th>
+                                        <th className="text-left px-4 py-3 font-semibold text-slate-600 dark:text-gray-300 hidden md:table-cell">{t.joined}</th>
+                                        <th className="text-left px-4 py-3 font-semibold text-slate-600 dark:text-gray-300">{t.actions}</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100">
+                                <tbody className="divide-y divide-slate-100 dark:divide-gray-700">
                                     {users.map((u) => (
-                                        <tr key={u._id} className={`hover:bg-slate-50/50 transition-colors ${u.account_flagged ? 'bg-red-50/40' : ''}`}>
+                                        <tr key={u._id} className={`hover:bg-slate-50/50 dark:hover:bg-gray-700/50 transition-colors ${u.account_flagged ? 'bg-red-50/40 dark:bg-red-900/20' : ''}`}>
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                                                         {(u.fullName || u.username || '?')[0].toUpperCase()}
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <p className="font-semibold text-slate-800 truncate">{u.fullName || u.username}</p>
+                                                        <p className="font-semibold text-slate-800 dark:text-white truncate">{u.fullName || u.username}</p>
                                                         <p className="text-xs text-slate-400 truncate">@{u.username}</p>
                                                     </div>
                                                     {u.account_flagged && <Flag className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />}
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-3 text-slate-600 hidden md:table-cell">
+                                            <td className="px-4 py-3 text-slate-600 dark:text-gray-400 hidden md:table-cell">
                                                 <span className="truncate block max-w-[180px]">{u.email}</span>
                                             </td>
                                             <td className="px-4 py-3">
                                                 <RoleBadge role={u.role} />
                                             </td>
-                                            <td className="px-4 py-3 text-slate-600">
+                                            <td className="px-4 py-3 text-slate-600 dark:text-gray-400">
                                                 <div className="text-xs">
-                                                    <span className="font-bold text-slate-700">{u.credits ?? 0}</span>
+                                                    <span className="font-bold text-slate-700 dark:text-gray-300">{u.credits ?? 0}</span>
                                                     <span className="text-slate-400"> / {u.dailyLimit ?? 200}</span>
                                                 </div>
                                             </td>
@@ -561,8 +561,8 @@ const AdminDashboard = ({ user, language = 'en' }) => {
 
                     {/* Pagination */}
                     {pagination.totalPages > 1 && (
-                        <div className="flex items-center justify-between bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 px-4 py-3 shadow-sm">
-                            <span className="text-sm text-slate-500">
+                        <div className="flex items-center justify-between bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl border border-slate-200 dark:border-gray-700 px-4 py-3 shadow-sm">
+                            <span className="text-sm text-slate-500 dark:text-gray-400">
                                 {t.showing} {((pagination.page - 1) * 15) + 1}–{Math.min(pagination.page * 15, pagination.totalCount)} {t.of} {pagination.totalCount}
                             </span>
                             <div className="flex items-center gap-2">
@@ -573,7 +573,7 @@ const AdminDashboard = ({ user, language = 'en' }) => {
                                 >
                                     <ChevronLeft className="w-4 h-4" />
                                 </button>
-                                <span className="text-sm font-medium text-slate-700">
+                                <span className="text-sm font-medium text-slate-700 dark:text-gray-300">
                                     {t.page} {pagination.page} {t.of} {pagination.totalPages}
                                 </span>
                                 <button
@@ -616,15 +616,15 @@ const AdminDashboard = ({ user, language = 'en' }) => {
         };
 
         return (
-            <div className="bg-white/90 backdrop-blur-sm rounded-xl border border-indigo-200 p-4 md:p-5 shadow-lg animate-in slide-in-from-top-2">
+            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl border border-indigo-200 dark:border-indigo-800 p-4 md:p-5 shadow-lg animate-in slide-in-from-top-2">
                 <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white text-lg font-bold">
                             {(u.fullName || u.username || '?')[0].toUpperCase()}
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-slate-800">{u.fullName}</h3>
-                            <p className="text-sm text-slate-500">@{u.username}</p>
+                            <h3 className="text-lg font-bold text-slate-800 dark:text-white">{u.fullName}</h3>
+                            <p className="text-sm text-slate-500 dark:text-gray-400">@{u.username}</p>
                         </div>
                     </div>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400">
@@ -668,14 +668,14 @@ const AdminDashboard = ({ user, language = 'en' }) => {
                 </div>
 
                 {/* Role Change */}
-                <div className="mt-4 pt-4 border-t border-slate-200">
+                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-gray-700">
                     <div className="flex items-center gap-3 mb-4">
-                        <span className="text-sm font-medium text-slate-600">{t.changeRole}:</span>
+                        <span className="text-sm font-medium text-slate-600 dark:text-gray-400">{t.changeRole}:</span>
                         <select
                             value={u.role}
                             onChange={(e) => changeRole(u._id, e.target.value)}
                             disabled={actionLoading === u._id}
-                            className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white"
                         >
                             <option value="farmer">Farmer</option>
                             <option value="officer">Officer</option>
@@ -686,8 +686,8 @@ const AdminDashboard = ({ user, language = 'en' }) => {
                     </div>
 
                     {/* Credit Management */}
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                        <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">{t.updateCredits}</h4>
+                    <div className="p-3 bg-slate-50 dark:bg-gray-700 rounded-lg border border-slate-200 dark:border-gray-600">
+                        <h4 className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase mb-2">{t.updateCredits}</h4>
                         <form
                             onSubmit={(e) => {
                                 e.preventDefault();
@@ -741,7 +741,7 @@ const AdminDashboard = ({ user, language = 'en' }) => {
         return (
             <div className="space-y-3">
                 {pendingOfficers.map((officer) => (
-                    <div key={officer._id} className="bg-white/90 backdrop-blur-sm rounded-xl border border-orange-200 p-4 md:p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div key={officer._id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl border border-orange-200 dark:border-orange-800 p-4 md:p-5 shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex flex-col md:flex-row md:items-center gap-4">
                             {/* Officer Info */}
                             <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -750,7 +750,7 @@ const AdminDashboard = ({ user, language = 'en' }) => {
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2 flex-wrap">
-                                        <h4 className="font-bold text-slate-800">{officer.fullName}</h4>
+                                        <h4 className="font-bold text-slate-800 dark:text-white">{officer.fullName}</h4>
                                         <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
                                             <Clock className="w-3 h-3" /> {t.pending}
                                         </span>
@@ -800,14 +800,14 @@ const AdminDashboard = ({ user, language = 'en' }) => {
         return (
             <div className="space-y-3">
                 {flaggedUsers.map((u) => (
-                    <div key={u._id} className="bg-white/90 backdrop-blur-sm rounded-xl border border-red-200 p-4 md:p-5 shadow-sm">
+                    <div key={u._id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl border border-red-200 dark:border-red-800 p-4 md:p-5 shadow-sm">
                         <div className="flex flex-col md:flex-row md:items-center gap-3">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white font-bold flex-shrink-0">
                                     {(u.fullName || u.username || '?')[0].toUpperCase()}
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="font-bold text-slate-800">{u.fullName || u.username}</p>
+                                    <p className="font-bold text-slate-800 dark:text-white">{u.fullName || u.username}</p>
                                     <p className="text-xs text-slate-500">@{u.username} · {u.email}</p>
                                     <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
                                         <RoleBadge role={u.role} />
@@ -883,7 +883,7 @@ const AdminDashboard = ({ user, language = 'en' }) => {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1.5 bg-white/60 backdrop-blur-sm rounded-xl p-1.5 border border-slate-200 shadow-sm overflow-x-auto">
+            <div className="flex gap-1.5 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl p-1.5 border border-slate-200 dark:border-gray-700 shadow-sm overflow-x-auto">
                 {tabs.map((tab) => {
                     const Icon = tab.icon;
                     const isActive = activeTab === tab.id;
@@ -893,7 +893,7 @@ const AdminDashboard = ({ user, language = 'en' }) => {
                             onClick={() => { setActiveTab(tab.id); setError(null); }}
                             className={`flex items-center gap-1.5 px-3 md:px-4 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all whitespace-nowrap ${isActive
                                 ? 'bg-indigo-600 text-white shadow-md'
-                                : 'text-slate-600 hover:bg-slate-100'
+                                : 'text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-700'
                                 }`}
                         >
                             <Icon className="w-4 h-4" />
@@ -928,8 +928,8 @@ const AdminDashboard = ({ user, language = 'en' }) => {
             {/* Rejection Modal */}
             {rejectionModal && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => { setRejectionModal(null); setRejectionReason(''); }}>
-                    <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
-                        <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1 flex items-center gap-2">
                             <XCircle className="w-5 h-5 text-red-500" />
                             {t.reject} Officer
                         </h3>
@@ -940,7 +940,7 @@ const AdminDashboard = ({ user, language = 'en' }) => {
                             value={rejectionReason}
                             onChange={(e) => setRejectionReason(e.target.value)}
                             placeholder={t.rejectionReason}
-                            className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                            className="w-full p-3 border border-slate-200 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none dark:bg-gray-700 dark:text-white"
                             rows={3}
                             autoFocus
                         />

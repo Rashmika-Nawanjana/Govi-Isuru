@@ -362,21 +362,21 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-gray-900 dark:to-gray-800 p-2 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-green-800 flex items-center justify-center gap-3">
-            <TrendingUp className="w-10 h-10" />
+        <div className="text-center mb-4 md:mb-8">
+          <h1 className="text-xl md:text-4xl font-bold text-green-800 dark:text-green-400 flex items-center justify-center gap-2 md:gap-3">
+            <TrendingUp className="w-6 h-6 md:w-10 md:h-10" />
             {t.title}
           </h1>
-          <p className="text-green-600 mt-2">
+          <p className="text-xs md:text-base text-green-600 dark:text-green-400 mt-1 md:mt-2">
             {t.subtitle}
           </p>
         </div>
 
         {/* Tabs */}
-        <div className="flex flex-wrap justify-center gap-2 mb-6">
+        <div className="flex flex-wrap justify-center gap-1.5 md:gap-2 mb-4 md:mb-6">
           {[
             { id: 'predict', label: t.tabs.predict, icon: Target },
             { id: 'rankings', label: t.tabs.rankings, icon: Award },
@@ -389,12 +389,12 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                 if (tab.id === 'rankings') fetchRankings();
                 if (tab.id === 'trends') fetchTrends();
               }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${activeTab === tab.id
+              className={`flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-medium text-xs md:text-base transition-all ${activeTab === tab.id
                 ? 'bg-green-600 text-white shadow-lg'
-                : 'bg-white text-green-700 hover:bg-green-50'
+                : 'bg-white dark:bg-gray-800 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700'
                 }`}
             >
-              <tab.icon className="w-5 h-5" />
+              <tab.icon className="w-4 h-4 md:w-5 md:h-5" />
               {tab.label}
             </button>
           ))}
@@ -402,25 +402,25 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
 
         {/* Prediction Tab */}
         {activeTab === 'predict' && (
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-3 md:gap-6">
             {/* Input Form */}
             <div className="md:col-span-1">
-              <div className="bg-white rounded-2xl shadow-xl p-6">
-                <h2 className="text-xl font-bold text-green-800 mb-4 flex items-center gap-2">
-                  <Leaf className="w-6 h-6" />
+              <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl shadow-xl p-4 md:p-6">
+                <h2 className="text-base md:text-xl font-bold text-green-800 dark:text-green-400 mb-3 md:mb-4 flex items-center gap-2">
+                  <Leaf className="w-5 h-5 md:w-6 md:h-6" />
                   {t.form.parameters}
                 </h2>
 
                 {/* District */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     <MapPin className="w-4 h-4 inline mr-1" />
                     {t.form.district}
                   </label>
                   <select
                     value={district}
                     onChange={(e) => setDistrict(e.target.value)}
-                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   >
                     {DISTRICTS.map(d => (
                       <option key={d} value={d}>{d}</option>
@@ -430,7 +430,7 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
 
                 {/* Season */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     <Calendar className="w-4 h-4 inline mr-1" />
                     {t.form.season}
                   </label>
@@ -441,7 +441,7 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                         onClick={() => setSeason(s)}
                         className={`p-3 rounded-lg font-medium transition-all ${season === s
                           ? 'bg-green-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                           }`}
                       >
                         {s === 'Maha' ? `🌧️ ${t.seasons.maha}` : `☀️ ${t.seasons.yala}`}
@@ -452,7 +452,7 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
 
                 {/* Year */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {t.form.year}
                   </label>
                   <input
@@ -461,13 +461,13 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                     onChange={(e) => setYear(parseInt(e.target.value))}
                     min={2020}
                     max={2030}
-                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   />
                 </div>
 
                 {/* Area */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {t.form.area}
                   </label>
                   <input
@@ -476,7 +476,7 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                     onChange={(e) => setArea(parseFloat(e.target.value))}
                     min={0.1}
                     step={0.1}
-                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   />
                 </div>
 
@@ -490,9 +490,9 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                 </button>
 
                 {showAdvanced && (
-                  <div className="space-y-3 p-3 bg-gray-50 rounded-lg mb-4">
+                  <div className="space-y-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg mb-4">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">
+                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
                         {t.form.costPerHa}
                       </label>
                       <input
@@ -500,11 +500,11 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                         value={costPerHa}
                         onChange={(e) => setCostPerHa(e.target.value)}
                         placeholder="e.g., 150000"
-                        className="w-full p-2 border rounded text-sm"
+                        className="w-full p-2 border rounded text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">
+                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
                         {t.form.pricePerKg}
                       </label>
                       <input
@@ -512,7 +512,7 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                         value={pricePerKg}
                         onChange={(e) => setPricePerKg(e.target.value)}
                         placeholder="e.g., 85"
-                        className="w-full p-2 border rounded text-sm"
+                        className="w-full p-2 border rounded text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       />
                     </div>
                   </div>
@@ -533,7 +533,7 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                 </button>
 
                 {error && (
-                  <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                  <div className="mt-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm">
                     {error}
                   </div>
                 )}
@@ -541,32 +541,32 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
             </div>
 
             {/* Results */}
-            <div className="md:col-span-2 space-y-6">
+            <div className="md:col-span-2 space-y-3 md:space-y-6">
               {/* Yield Prediction Results */}
               {yieldPrediction && (
-                <div className="bg-white rounded-2xl shadow-xl p-6">
-                  <h2 className="text-xl font-bold text-green-800 mb-4 flex items-center gap-2">
-                    <TrendingUp className="w-6 h-6" />
+                <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl shadow-xl p-4 md:p-6">
+                  <h2 className="text-base md:text-xl font-bold text-green-800 dark:text-green-400 mb-3 md:mb-4 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 md:w-6 md:h-6" />
                     {t.results.yieldResults}
                   </h2>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-4 text-white">
-                      <p className="text-xs opacity-80">{t.results.predictedYield}</p>
-                      <p className="text-2xl font-bold">{formatNumber(yieldPrediction.yield_kg_ha)}</p>
-                      <p className="text-sm">kg/ha</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+                    <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-3 md:p-4 text-white">
+                      <p className="text-[10px] md:text-xs opacity-80">{t.results.predictedYield}</p>
+                      <p className="text-lg md:text-2xl font-bold">{formatNumber(yieldPrediction.yield_kg_ha)}</p>
+                      <p className="text-[10px] md:text-sm">kg/ha</p>
                     </div>
 
-                    <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-4 text-white">
-                      <p className="text-xs opacity-80">{t.results.totalProduction}</p>
-                      <p className="text-2xl font-bold">{formatNumber(yieldPrediction.total_production_kg)}</p>
-                      <p className="text-sm">kg</p>
+                    <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-3 md:p-4 text-white">
+                      <p className="text-[10px] md:text-xs opacity-80">{t.results.totalProduction}</p>
+                      <p className="text-lg md:text-2xl font-bold">{formatNumber(yieldPrediction.total_production_kg)}</p>
+                      <p className="text-[10px] md:text-sm">kg</p>
                     </div>
 
-                    <div className="bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl p-4 text-white">
-                      <p className="text-xs opacity-80">{t.results.confidence}</p>
-                      <p className="text-2xl font-bold">{formatNumber(yieldPrediction.confidence * 100)}%</p>
-                      <p className="text-sm">{t.results.accuracy}</p>
+                    <div className="bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl p-3 md:p-4 text-white">
+                      <p className="text-[10px] md:text-xs opacity-80">{t.results.confidence}</p>
+                      <p className="text-lg md:text-2xl font-bold">{formatNumber(yieldPrediction.confidence * 100)}%</p>
+                      <p className="text-[10px] md:text-sm">{t.results.accuracy}</p>
                     </div>
 
                     <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-4 text-white">
@@ -578,13 +578,13 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
 
                   {/* Yield Range */}
                   {yieldPrediction.yield_range && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600 mb-2">{t.results.yieldRange}</p>
+                    <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{t.results.yieldRange}</p>
                       <div className="flex items-center gap-4">
                         <span className="text-lg font-semibold text-orange-600">
                           {formatNumber(yieldPrediction.yield_range.min)} kg/ha
                         </span>
-                        <div className="flex-1 h-2 bg-gray-200 rounded-full relative">
+                        <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full relative">
                           <div
                             className="absolute h-full bg-gradient-to-r from-orange-400 via-green-500 to-blue-400 rounded-full"
                             style={{ width: '100%' }}
@@ -601,8 +601,8 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
 
               {/* Profit Prediction */}
               {profitPrediction && (
-                <div className="bg-white rounded-2xl shadow-xl p-6">
-                  <h2 className="text-xl font-bold text-green-800 mb-4 flex items-center gap-2">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
+                  <h2 className="text-xl font-bold text-green-800 dark:text-green-400 mb-4 flex items-center gap-2">
                     <DollarSign className="w-6 h-6" />
                     {t.results.profitForecast}
                   </h2>
@@ -612,7 +612,7 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                       ? 'bg-green-100'
                       : 'bg-red-100'
                       }`}>
-                      <p className="text-xs text-gray-600">{t.results.estimatedProfit}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{t.results.estimatedProfit}</p>
                       <p className={`text-2xl font-bold ${profitPrediction.estimated_profit > 0
                         ? 'text-green-700'
                         : 'text-red-700'
@@ -622,14 +622,14 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                     </div>
 
                     <div className="bg-blue-100 rounded-xl p-4">
-                      <p className="text-xs text-gray-600">{t.results.expectedRevenue}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{t.results.expectedRevenue}</p>
                       <p className="text-2xl font-bold text-blue-700">
                         Rs. {formatNumber(profitPrediction.revenue)}
                       </p>
                     </div>
 
                     <div className="bg-orange-100 rounded-xl p-4">
-                      <p className="text-xs text-gray-600">{t.results.totalCost}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{t.results.totalCost}</p>
                       <p className="text-2xl font-bold text-orange-700">
                         Rs. {formatNumber(profitPrediction.total_cost)}
                       </p>
@@ -637,7 +637,7 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                   </div>
 
                   {/* Profit Breakdown */}
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                     <div className="flex justify-between text-sm mb-2">
                       <span>{t.results.roi}</span>
                       <span className={`font-semibold ${profitPrediction.roi > 0 ? 'text-green-600' : 'text-red-600'
@@ -675,7 +675,7 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                       } ${getRiskStyle(warning.risk_level).text}`}>
                       {t.warning.riskLevel}: {warning.risk_level?.toUpperCase()}
                     </span>
-                    <span className="text-gray-600">
+                    <span className="text-gray-600 dark:text-gray-400">
                       {t.warning.riskScore}: {formatNumber(warning.risk_score * 100)}%
                     </span>
                   </div>
@@ -683,10 +683,10 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                   {/* Warnings List */}
                   {warning.warnings && warning.warnings.length > 0 && (
                     <div className="space-y-2">
-                      <p className="font-semibold text-gray-700">{t.warning.warnings}:</p>
+                      <p className="font-semibold text-gray-700 dark:text-gray-300">{t.warning.warnings}:</p>
                       {warning.warnings.map((w, i) => (
-                        <div key={i} className="p-3 bg-white bg-opacity-50 rounded-lg">
-                          <p className="text-gray-800">
+                        <div key={i} className="p-3 bg-white dark:bg-gray-800 bg-opacity-50 rounded-lg">
+                          <p className="text-gray-800 dark:text-white">
                             {lang === 'si' && w.message_si ? w.message_si : w.message}
                           </p>
                         </div>
@@ -697,10 +697,10 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                   {/* Recommendations */}
                   {warning.recommendations && warning.recommendations.length > 0 && (
                     <div className="mt-4">
-                      <p className="font-semibold text-gray-700 mb-2">{t.warning.recommendations}:</p>
+                      <p className="font-semibold text-gray-700 dark:text-gray-300 mb-2">{t.warning.recommendations}:</p>
                       <ul className="space-y-2">
                         {warning.recommendations.map((rec, i) => (
-                          <li key={i} className="flex items-start gap-2 text-gray-700">
+                          <li key={i} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
                             <Info className="w-4 h-4 mt-1 flex-shrink-0" />
                             <span>
                               {typeof rec === 'object'
@@ -720,8 +720,8 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
 
         {/* Rankings Tab */}
         {activeTab === 'rankings' && (
-          <div className="bg-white rounded-2xl shadow-xl p-6">
-            <h2 className="text-xl font-bold text-green-800 mb-6 flex items-center gap-2">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
+            <h2 className="text-xl font-bold text-green-800 dark:text-green-400 mb-6 flex items-center gap-2">
               <Award className="w-6 h-6" />
               {t.rankings.title}
             </h2>
@@ -731,15 +731,15 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                 <RefreshCw className="w-8 h-8 animate-spin text-green-600" />
               </div>
             ) : rankings.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <Award className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                <Award className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                 <p>{lang === 'si' ? 'ශ්‍රේණිගත කිරීම් දත්ත නොමැත' : 'No rankings data available'}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-green-50">
+                    <tr className="bg-green-50 dark:bg-green-900/20">
                       <th className="p-3 text-left">{t.rankings.rank}</th>
                       <th className="p-3 text-left">{t.rankings.district}</th>
                       <th className="p-3 text-right">{t.rankings.avgYield}</th>
@@ -752,7 +752,7 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                     {rankings.map((r, i) => (
                       <tr
                         key={r.district}
-                        className={`border-b hover:bg-gray-50 ${i < 3 ? 'bg-yellow-50' : ''}`}
+                        className={`border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 ${i < 3 ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''}`}
                       >
                         <td className="p-3">
                           {i < 3 ? (
@@ -760,7 +760,7 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                               {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
                             </span>
                           ) : (
-                            <span className="text-gray-500">{i + 1}</span>
+                            <span className="text-gray-500 dark:text-gray-400">{i + 1}</span>
                           )}
                         </td>
                         <td className="p-3 font-medium">{r.district}</td>
@@ -794,8 +794,8 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
 
         {/* Trends Tab */}
         {activeTab === 'trends' && (
-          <div className="bg-white rounded-2xl shadow-xl p-6">
-            <h2 className="text-xl font-bold text-green-800 mb-6 flex items-center gap-2">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
+            <h2 className="text-xl font-bold text-green-800 dark:text-green-400 mb-6 flex items-center gap-2">
               <BarChart3 className="w-6 h-6" />
               {t.trends.title}
             </h2>
@@ -805,8 +805,8 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                 <RefreshCw className="w-8 h-8 animate-spin text-green-600" />
               </div>
             ) : trends.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                 <p>{lang === 'si' ? 'ප්‍රවණතා දත්ත නොමැත' : 'No trends data available'}</p>
               </div>
             ) : (
@@ -818,7 +818,7 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                       <div className="w-24 text-sm font-medium">
                         {trend.year} {trend.season === 'Maha' ? '🌧️' : '☀️'}
                       </div>
-                      <div className="flex-1 bg-gray-100 rounded-full h-8 relative overflow-hidden">
+                      <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-8 relative overflow-hidden">
                         <div
                           className={`h-full rounded-full ${trend.season === 'Maha' ? 'bg-blue-500' : 'bg-orange-500'
                             }`}
@@ -830,7 +830,7 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                           {formatNumber(trend.avg_yield_kg_ha)} kg/ha
                         </span>
                       </div>
-                      <div className="w-32 text-right text-sm text-gray-600">
+                      <div className="w-32 text-right text-sm text-gray-600 dark:text-gray-400">
                         {formatNumber(trend.total_production_mt)} MT
                       </div>
                     </div>
@@ -840,26 +840,26 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                 {/* Summary Stats */}
                 {trends.length > 0 && (
                   <div className="mt-8 grid grid-cols-3 gap-4">
-                    <div className="bg-green-50 rounded-xl p-4 text-center">
-                      <p className="text-sm text-gray-600">{t.trends.avgYield}</p>
-                      <p className="text-2xl font-bold text-green-700">
+                    <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 text-center">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{t.trends.avgYield}</p>
+                      <p className="text-2xl font-bold text-green-700 dark:text-green-400">
                         {formatNumber(trends.reduce((a, b) => a + b.avg_yield_kg_ha, 0) / trends.length)}
                       </p>
-                      <p className="text-sm text-gray-500">kg/ha</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">kg/ha</p>
                     </div>
-                    <div className="bg-blue-50 rounded-xl p-4 text-center">
-                      <p className="text-sm text-gray-600">{t.trends.totalProduction}</p>
-                      <p className="text-2xl font-bold text-blue-700">
+                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{t.trends.totalProduction}</p>
+                      <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">
                         {formatNumber(trends.reduce((a, b) => a + b.total_production_mt, 0))}
                       </p>
-                      <p className="text-sm text-gray-500">{t.trends.allYears}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{t.trends.allYears}</p>
                     </div>
-                    <div className="bg-purple-50 rounded-xl p-4 text-center">
-                      <p className="text-sm text-gray-600">{t.trends.dataPoints}</p>
-                      <p className="text-2xl font-bold text-purple-700">
+                    <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 text-center">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{t.trends.dataPoints}</p>
+                      <p className="text-2xl font-bold text-purple-700 dark:text-purple-400">
                         {trends.length}
                       </p>
-                      <p className="text-sm text-gray-500">{t.trends.seasons}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{t.trends.seasons}</p>
                     </div>
                   </div>
                 )}

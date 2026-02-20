@@ -340,7 +340,7 @@ const TraditionalRice = ({ lang = 'en' }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-900 dark:to-gray-900 p-6">
       {/* Header */}
       <div className="max-w-7xl mx-auto">
         <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl shadow-2xl p-8 mb-8">
@@ -352,7 +352,7 @@ const TraditionalRice = ({ lang = 'en' }) => {
         </div>
 
         {/* Search and Filter */}
-        <div className="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-8">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -361,7 +361,7 @@ const TraditionalRice = ({ lang = 'en' }) => {
                 placeholder={t.search}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none transition-colors"
+                className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:border-green-500 focus:outline-none transition-colors dark:bg-gray-700 dark:text-white"
               />
             </div>
             <div className="flex flex-wrap gap-2">
@@ -372,7 +372,7 @@ const TraditionalRice = ({ lang = 'en' }) => {
                   className={`px-4 md:px-6 py-2 md:py-3 rounded-lg text-sm md:text-base font-semibold transition-all flex-shrink-0 ${
                     selectedCategory === category
                       ? 'bg-green-600 text-white shadow-lg'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
                   {t[category]}
@@ -387,7 +387,7 @@ const TraditionalRice = ({ lang = 'en' }) => {
           {filteredVarieties.map((variety) => (
             <div
               key={variety.name}
-              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300"
             >
               {/* Card Header */}
               <div className={`p-6 ${variety.type === 'traditional' ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-blue-500 to-cyan-500'}`}>
@@ -405,22 +405,22 @@ const TraditionalRice = ({ lang = 'en' }) => {
               {/* Card Body */}
               <div className="p-6">
                 {/* Description */}
-                <p className="text-gray-700 mb-4 leading-relaxed">{variety.description}</p>
+                <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">{variety.description}</p>
 
                 {/* Quick Info Grid */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="flex items-center space-x-2">
                     <Calendar className="h-5 w-5 text-green-600" />
                     <div>
-                      <p className="text-xs text-gray-500">{t.duration}</p>
-                      <p className="font-semibold text-gray-800">{variety.duration} {t.days}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{t.duration}</p>
+                      <p className="font-semibold text-gray-800 dark:text-white">{variety.duration} {t.days}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Droplets className="h-5 w-5 text-blue-600" />
                     <div>
-                      <p className="text-xs text-gray-500">{t.zone}</p>
-                      <p className="font-semibold text-gray-800">{getLocalizedZone(variety.zone)}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{t.zone}</p>
+                      <p className="font-semibold text-gray-800 dark:text-white">{getLocalizedZone(variety.zone)}</p>
                     </div>
                   </div>
                 </div>
@@ -430,7 +430,7 @@ const TraditionalRice = ({ lang = 'en' }) => {
                   <div className="mb-4">
                     <div className="flex items-center space-x-2 mb-2">
                       <TrendingUp className="h-5 w-5 text-purple-600" />
-                      <h4 className="font-semibold text-gray-800">{t.special}</h4>
+                      <h4 className="font-semibold text-gray-800 dark:text-white">{t.special}</h4>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {variety.special.map((feature, idx) => (
@@ -448,7 +448,7 @@ const TraditionalRice = ({ lang = 'en' }) => {
                 {/* Expandable Details */}
                 <button
                   onClick={() => toggleExpanded(variety.name)}
-                  className="w-full flex items-center justify-center space-x-2 py-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors font-semibold text-green-700"
+                  className="w-full flex items-center justify-center space-x-2 py-3 bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg transition-colors font-semibold text-green-700 dark:text-green-400"
                 >
                   <BookOpen className="h-5 w-5" />
                   <span>{expandedVariety === variety.name ? t.hideDetails : t.viewDetails}</span>
@@ -463,10 +463,10 @@ const TraditionalRice = ({ lang = 'en' }) => {
                 {expandedVariety === variety.name && (
                   <div className="mt-4 space-y-4 animate-in slide-in-from-top duration-300">
                     {/* Diseases */}
-                    <div className="border-t pt-4">
+                    <div className="border-t dark:border-gray-700 pt-4">
                       <div className="flex items-center space-x-2 mb-3">
                         <AlertTriangle className="h-5 w-5 text-red-600" />
-                        <h4 className="font-semibold text-gray-800">{t.diseases}</h4>
+                        <h4 className="font-semibold text-gray-800 dark:text-white">{t.diseases}</h4>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {variety.diseases.map((disease, idx) => (
@@ -481,16 +481,16 @@ const TraditionalRice = ({ lang = 'en' }) => {
                     </div>
 
                     {/* Prevention */}
-                    <div className="border-t pt-4">
+                    <div className="border-t dark:border-gray-700 pt-4">
                       <div className="flex items-center space-x-2 mb-3">
                         <Shield className="h-5 w-5 text-blue-600" />
-                        <h4 className="font-semibold text-gray-800">{t.prevention}</h4>
+                        <h4 className="font-semibold text-gray-800 dark:text-white">{t.prevention}</h4>
                       </div>
                       <ul className="space-y-2">
                         {variety.prevention.map((tip, idx) => (
                           <li key={idx} className="flex items-start space-x-2">
                             <span className="text-green-600 font-bold">•</span>
-                            <span className="text-gray-700 text-sm">{tip}</span>
+                            <span className="text-gray-700 dark:text-gray-300 text-sm">{tip}</span>
                           </li>
                         ))}
                       </ul>
@@ -498,24 +498,24 @@ const TraditionalRice = ({ lang = 'en' }) => {
 
                     {/* Nutrition */}
                     {variety.nutrition && (
-                      <div className="border-t pt-4">
+                      <div className="border-t dark:border-gray-700 pt-4">
                         <div className="flex items-center space-x-2 mb-3">
                           <Leaf className="h-5 w-5 text-green-600" />
-                          <h4 className="font-semibold text-gray-800">{t.nutrition}</h4>
+                          <h4 className="font-semibold text-gray-800 dark:text-white">{t.nutrition}</h4>
                         </div>
-                        <p className="text-gray-700 text-sm leading-relaxed bg-green-50 p-3 rounded-lg">
+                        <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
                           {variety.nutrition}
                         </p>
                       </div>
                     )}
 
                     {/* Harvesting */}
-                    <div className="border-t pt-4">
+                    <div className="border-t dark:border-gray-700 pt-4">
                       <div className="flex items-center space-x-2 mb-3">
                         <Calendar className="h-5 w-5 text-orange-600" />
-                        <h4 className="font-semibold text-gray-800">{t.harvesting}</h4>
+                        <h4 className="font-semibold text-gray-800 dark:text-white">{t.harvesting}</h4>
                       </div>
-                      <p className="text-gray-700 text-sm leading-relaxed bg-orange-50 p-3 rounded-lg">
+                      <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg">
                         {variety.harvesting}
                       </p>
                     </div>
@@ -529,8 +529,8 @@ const TraditionalRice = ({ lang = 'en' }) => {
         {/* No Results */}
         {filteredVarieties.length === 0 && (
           <div className="text-center py-12">
-            <Leaf className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">
+            <Leaf className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-gray-400 text-lg">
               {lang === 'si' ? 'ප්‍රතිඵල හමු නොවීය' : 'No varieties found'}
             </p>
           </div>

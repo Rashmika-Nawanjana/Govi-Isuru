@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   ShoppingBag, MapPin, Phone, User, PlusCircle, Sprout, MessageCircle,
-  Star, CheckCircle, Award, ThumbsUp, MessageSquare, Trash2, Bookmark
+  Star, CheckCircle, Award, ThumbsUp, MessageSquare, Trash2, Bookmark,
+  Filter, ArrowUpDown, ChevronDown
 } from 'lucide-react';
 import ReputationBadge, { MiniReputationBadge } from './ReputationBadge';
 import FeedbackForm from './FeedbackForm';
@@ -19,6 +20,8 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
   const [viewFeedbackListing, setViewFeedbackListing] = useState(null);
   const [topFarmers, setTopFarmers] = useState([]);
   const [savedListingIds, setSavedListingIds] = useState([]);
+  const [filterCrop, setFilterCrop] = useState('all');
+  const [sortBy, setSortBy] = useState('latest');
 
   const t = {
     en: {
@@ -38,7 +41,17 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
       deleteConfirm: "Are you sure you want to delete this listing?",
       postingAs: "Posting as",
       buyerViewOnly: "Buyers can browse listings. Posting is for farmers only.",
-      loginToPost: "Please log in as a farmer to post listings."
+      loginToPost: "Please log in as a farmer to post listings.",
+      filterAll: "All Crops",
+      filterPaddy: "Paddy",
+      filterTea: "Tea",
+      filterChili: "Chili",
+      sortLatest: "Latest First",
+      sortPriceLow: "Price: Low to High",
+      sortPriceHigh: "Price: High to Low",
+      sortLabel: "Sort by",
+      filterLabel: "Filter by Crop",
+      noListings: "No listings found for this filter."
     },
     si: {
       header: "අලෙවිසැල",
@@ -57,7 +70,17 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
       deleteConfirm: "මෙම දැන්වීම මැකීමට ඔබට විශ්වාසද?",
       postingAs: "ලෙස පළ කිරීම",
       buyerViewOnly: "ගැණුම්කරුවන්ට දැන්වීම් බැලීමට පමණක් හැකිය. දැන්වීම් පළ කරන්නේ ගොවියන් විසින් පමණි.",
-      loginToPost: "දැන්වීම් පළ කිරීමට ගොවියෙකු ලෙස පුරනය වන්න."
+      loginToPost: "දැන්වීම් පළ කිරීමට ගොවියෙකු ලෙස පුරනය වන්න.",
+      filterAll: "සියලු බෝග",
+      filterPaddy: "වී",
+      filterTea: "තේ",
+      filterChili: "මිරිස්",
+      sortLatest: "අවසන් පළමුව",
+      sortPriceLow: "මිල: අඩුවේ සිට ඉහළට",
+      sortPriceHigh: "මිල: ඉහළේ සිට අඩුවට",
+      sortLabel: "පෙල ගස්වන්න",
+      filterLabel: "බෝග මගින් පෙරන්න",
+      noListings: "මෙම පෙරනුම සඳහා දැන්වීම් හමු නොවීය."
     }
   };
 
@@ -217,17 +240,17 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
   return (
     <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Section Header */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-green-800 flex items-center gap-2">
-          <ShoppingBag className="h-7 w-7" />
+      <div className="mb-3 md:mb-6">
+        <h2 className="text-lg md:text-2xl font-bold text-green-800 dark:text-green-400 flex items-center gap-2">
+          <ShoppingBag className="h-5 w-5 md:h-7 md:w-7" />
           🛒 {t[lang].header}
         </h2>
-        <p className="text-gray-500 mt-1">{t[lang].sub}</p>
+        <p className="text-xs md:text-base text-gray-500 dark:text-gray-400 mt-1">{t[lang].sub}</p>
       </div>
 
       {/* Top Rated Farmers Section */}
       {topFarmers.length > 0 && (
-        <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 p-5 rounded-2xl mb-6 border border-amber-200 shadow-sm">
+        <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 p-3 md:p-5 rounded-xl md:rounded-2xl mb-4 md:mb-6 border border-amber-200 shadow-sm">
           <h3 className="text-sm font-bold text-amber-800 mb-3 flex items-center gap-2">
             <div className="p-1.5 bg-amber-500 rounded-lg">
               <Award size={14} className="text-white" />
@@ -238,13 +261,13 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
             {topFarmers.map((farmer) => (
               <div
                 key={farmer._id}
-                className="flex-shrink-0 bg-white px-4 py-3 rounded-xl shadow-sm border border-amber-100 flex items-center gap-3 hover:shadow-md transition-shadow"
+                className="flex-shrink-0 bg-white dark:bg-gray-800 px-4 py-3 rounded-xl shadow-sm border border-amber-100 flex items-center gap-3 hover:shadow-md transition-shadow"
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-emerald-200 rounded-full flex items-center justify-center">
                   <User size={18} className="text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-gray-800">{farmer.username}</p>
+                  <p className="text-sm font-bold text-gray-800 dark:text-white">{farmer.username}</p>
                   <div className="flex items-center gap-1 mt-0.5">
                     <MiniReputationBadge score={farmer.reputation_score} />
                     {farmer.is_verified_farmer && (
@@ -260,8 +283,8 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
 
       {/* Sell Form */}
       {!isBuyer ? (
-        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 mb-8">
-          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 p-3 md:p-6 rounded-xl md:rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 mb-4 md:mb-8">
+          <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
             <div className="p-2 bg-green-100 rounded-lg">
               <PlusCircle className="h-5 w-5 text-green-600" />
             </div>
@@ -271,22 +294,22 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
             <div className="p-1.5 bg-green-500 rounded-full">
               <User size={14} className="text-white" />
             </div>
-            <span className="text-sm text-gray-600">{t[lang].postingAs}:</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">{t[lang].postingAs}:</span>
             <span className="font-bold text-green-700">{currentUser?.username}</span>
           </div>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input name="cropType" value={form.cropType} onChange={handleChange} placeholder="Crop (e.g. Rice)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
-            <input name="quantity" value={form.quantity} onChange={handleChange} placeholder="Qty (e.g. 500kg)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
-            <input name="price" value={form.price} onChange={handleChange} placeholder="Price (LKR)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
-            <input name="location" value={form.location} onChange={handleChange} placeholder="Location" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
-            <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone (e.g. 0771234567)" className="p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+            <input name="cropType" value={form.cropType} onChange={handleChange} placeholder="Crop (e.g. Paddy)" className="p-3.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+            <input name="quantity" value={form.quantity} onChange={handleChange} placeholder="Qty (e.g. 500kg)" className="p-3.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+            <input name="price" value={form.price} onChange={handleChange} placeholder="Price (LKR)" className="p-3.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+            <input name="location" value={form.location} onChange={handleChange} placeholder="Location" className="p-3.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
+            <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone (e.g. 0771234567)" className="p-3.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all" required />
             <button type="submit" className="md:col-span-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3.5 rounded-xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
               {t[lang].btn}
             </button>
           </form>
         </div>
       ) : (
-        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 mb-8">
+        <div className="bg-white dark:bg-gray-800 p-3 md:p-6 rounded-xl md:rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 mb-4 md:mb-8">
           <div className="flex items-center gap-3 text-amber-700 font-semibold">
             <PlusCircle className="h-5 w-5 text-amber-600" />
             <span>{t[lang].buyerViewOnly}</span>
@@ -294,19 +317,93 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
         </div>
       )}
 
+      {/* Filter & Sort Controls */}
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Crop Type Filter */}
+          <div className="flex-1">
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+              <Filter size={12} /> {t[lang].filterLabel}
+            </label>
+            <div className="flex gap-1.5 flex-wrap">
+              {[
+                { key: 'all', label: t[lang].filterAll, emoji: '🌱' },
+                { key: 'paddy', label: t[lang].filterPaddy, emoji: '🌾' },
+                { key: 'tea', label: t[lang].filterTea, emoji: '🍵' },
+                { key: 'chili', label: t[lang].filterChili, emoji: '🌶️' }
+              ].map(crop => (
+                <button
+                  key={crop.key}
+                  onClick={() => setFilterCrop(crop.key)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                    filterCrop === crop.key
+                      ? 'bg-green-600 text-white shadow-md scale-105'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-green-50 hover:text-green-700'
+                  }`}
+                >
+                  {crop.emoji} {crop.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Sort Dropdown */}
+          <div className="sm:w-52">
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+              <ArrowUpDown size={12} /> {t[lang].sortLabel}
+            </label>
+            <div className="relative">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full appearance-none bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none cursor-pointer pr-8"
+              >
+                <option value="latest">{t[lang].sortLatest}</option>
+                <option value="priceLow">{t[lang].sortPriceLow}</option>
+                <option value="priceHigh">{t[lang].sortPriceHigh}</option>
+              </select>
+              <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Listings Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {listings.map((item) => {
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5">
+        {listings
+          .filter(item => {
+            if (filterCrop === 'all') return true;
+            const cropName = (item.cropType || '').toLowerCase();
+            if (filterCrop === 'paddy') return cropName.includes('paddy') || cropName.includes('rice') || cropName.includes('වී') || cropName.includes('සහල්');
+            if (filterCrop === 'tea') return cropName.includes('tea') || cropName.includes('තේ');
+            if (filterCrop === 'chili') return cropName.includes('chili') || cropName.includes('chilli') || cropName.includes('මිරිස්');
+            return true;
+          })
+          .sort((a, b) => {
+            if (sortBy === 'priceLow') {
+              const priceA = parseFloat(String(a.price).replace(/[^0-9.]/g, '')) || 0;
+              const priceB = parseFloat(String(b.price).replace(/[^0-9.]/g, '')) || 0;
+              return priceA - priceB;
+            }
+            if (sortBy === 'priceHigh') {
+              const priceA = parseFloat(String(a.price).replace(/[^0-9.]/g, '')) || 0;
+              const priceB = parseFloat(String(b.price).replace(/[^0-9.]/g, '')) || 0;
+              return priceB - priceA;
+            }
+            // latest: sort by date descending (default from API)
+            return new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0);
+          })
+          .map((item) => {
           const isOwnListing =
             currentUser &&
             (item.farmerName === currentUser.username || item.farmer_id?.username === currentUser.username);
 
           return (
-            <div key={item._id} className="bg-white p-5 rounded-2xl shadow-md hover:shadow-xl transition-all border-l-4 border-green-500 flex flex-col justify-between">
+            <div key={item._id} className="bg-white dark:bg-gray-800 p-3 md:p-5 rounded-xl md:rounded-2xl shadow-md hover:shadow-xl transition-all border-l-4 border-green-500 flex flex-col justify-between">
               <div>
                 <div className="flex justify-between items-start mb-2">
-                  <h4 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <Sprout className="h-5 w-5 text-green-500" /> {item.cropType}
+                  <h4 className="text-base md:text-xl font-bold text-gray-800 dark:text-white flex items-center gap-1.5 md:gap-2">
+                    <Sprout className="h-4 w-4 md:h-5 md:w-5 text-green-500" /> {item.cropType}
                   </h4>
                   <div className="flex items-center gap-2">
                     {item.verified && (
@@ -317,9 +414,9 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
                     <span className="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded-full">{item.quantity}</span>
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-green-700 mb-3">Rs. {item.price}</p>
+                <p className="text-lg md:text-2xl font-bold text-green-700 dark:text-green-400 mb-2 md:mb-3">Rs. {item.price}</p>
 
-                <div className="space-y-1 text-sm text-gray-600 mb-4">
+                <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400 mb-4">
                   <div className="flex items-center justify-between">
                     <p className="flex items-center gap-2"><User size={14} /> {item.farmerName}</p>
                     {/* Reputation Badge */}
@@ -333,20 +430,20 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
                     )}
                   </div>
                   <p className="flex items-center gap-2"><MapPin size={14} /> {item.location}</p>
-                  <p className="flex items-center gap-2 font-bold text-gray-800"><Phone size={14} /> {item.phone}</p>
+                  <p className="flex items-center gap-2 font-bold text-gray-800 dark:text-white"><Phone size={14} /> {item.phone}</p>
                 </div>
 
                 {/* Farmer Stats */}
                 {item.farmer_id && item.farmer_id.total_sales > 0 && (
-                  <div className="bg-gray-50 rounded-lg p-2 mb-4 flex items-center justify-around text-xs">
+                  <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-2 mb-4 flex items-center justify-around text-xs">
                     <div className="text-center">
-                      <p className="font-bold text-gray-800">{item.farmer_id.total_sales}</p>
-                      <p className="text-gray-500">{lang === 'si' ? 'විකුණුම්' : 'Sales'}</p>
+                      <p className="font-bold text-gray-800 dark:text-white">{item.farmer_id.total_sales}</p>
+                      <p className="text-gray-500 dark:text-gray-400">{lang === 'si' ? 'විකුණුම්' : 'Sales'}</p>
                     </div>
-                    <div className="w-px h-8 bg-gray-200"></div>
+                    <div className="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
                     <div className="text-center">
-                      <p className="font-bold text-gray-800">{item.farmer_id.reputation_score?.toFixed(1) || '3.0'}</p>
-                      <p className="text-gray-500">{lang === 'si' ? 'ශ්‍රේණිගත' : 'Rating'}</p>
+                      <p className="font-bold text-gray-800 dark:text-white">{item.farmer_id.reputation_score?.toFixed(1) || '3.0'}</p>
+                      <p className="text-gray-500 dark:text-gray-400">{lang === 'si' ? 'ශ්‍රේණිගත' : 'Rating'}</p>
                     </div>
                   </div>
                 )}
@@ -439,6 +536,19 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
             </div>
           );
         })}
+        {listings.filter(item => {
+          if (filterCrop === 'all') return true;
+          const cropName = (item.cropType || '').toLowerCase();
+          if (filterCrop === 'paddy') return cropName.includes('paddy') || cropName.includes('rice') || cropName.includes('වී') || cropName.includes('සහල්');
+          if (filterCrop === 'tea') return cropName.includes('tea') || cropName.includes('තේ');
+          if (filterCrop === 'chili') return cropName.includes('chili') || cropName.includes('chilli') || cropName.includes('මිරිස්');
+          return true;
+        }).length === 0 && listings.length > 0 && (
+          <div className="col-span-full text-center py-12 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
+            <Filter size={32} className="mx-auto text-gray-300 mb-3" />
+            <p className="text-gray-500 dark:text-gray-400 font-medium">{t[lang].noListings}</p>
+          </div>
+        )}
       </div>
 
       {/* Feedback Form Modal */}
