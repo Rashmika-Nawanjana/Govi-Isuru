@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Report = require('../models/Report');
 const Alert = require('../models/Alert');
+const CommunityAlert = require('../models/CommunityAlert');
+const Notification = require('../models/Notification');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/authMiddleware');
 
@@ -131,7 +133,7 @@ router.get('/my-reports', authMiddleware, async (req, res) => {
 
     // Get all reports submitted by this farmer
     const reports = await Report.find({
-      farmerId: currentUser._id
+      farmerId: currentUser.id
     })
       .select('title description image_url ai_prediction confidence_score status verifiedBy verificationDate verificationNotes gnDivision createdAt')
       .sort({ createdAt: -1 });
@@ -163,7 +165,9 @@ router.get('/:id', authMiddleware, async (req, res) => {
     }
 
     // Check authorization - farmer can view own, officers can view from their division
-    if (req.user._id.toString() !== report.farmerId._id.toString() && req.user.role !== 'officer') {
+    const userId = req.user.id || req.user._id;
+    const reportOwnerId = report.farmerId?._id || report.farmerId;
+    if (userId.toString() !== reportOwnerId.toString() && req.user.role !== 'officer') {
       return res.status(403).json({ success: false, msg: 'Unauthorized' });
     }
 
@@ -201,7 +205,7 @@ router.put('/:id/verify', authMiddleware, async (req, res) => {
 
     // Update report
     report.status = status; // 'verified', 'rejected', or 'resolved'
-    report.verifiedBy = currentUser._id;
+    report.verifiedBy = currentUser.id;
     report.verifiedByName = currentUser.fullName;
     report.verificationDate = new Date();
     report.verificationNotes = verificationNotes;
@@ -212,6 +216,7 @@ router.put('/:id/verify', authMiddleware, async (req, res) => {
     // If verified, create alert for other farmers in the area
     if (status === 'verified') {
       await createFarmerAlert(report);
+      await createCommunityAlertFromReport(report);
     }
 
     res.json({
@@ -302,8 +307,8 @@ router.get('/alerts/my-area', authMiddleware, async (req, res) => {
 
     // Mark alerts as viewed by this farmer
     for (const alert of alerts) {
-      if (!alert.viewedBy.includes(currentUser._id)) {
-        alert.viewedBy.push(currentUser._id);
+      if (!alert.viewedBy.includes(currentUser.id)) {
+        alert.viewedBy.push(currentUser.id);
         await alert.save();
       }
     }
@@ -319,5 +324,95 @@ router.get('/alerts/my-area', authMiddleware, async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+/**
+ * Helper function: Create a CommunityAlert when a report is verified
+ * This bridges the Report system with the CommunityAlert system used by AlertsDashboard
+ */
+async function createCommunityAlertFromReport(report) {
+  try {
+    // Extract disease name from ai_prediction or title
+    const disease = report.ai_prediction || report.title || 'Unknown Disease';
+
+    // Skip alerts for healthy diagnoses
+    if (disease.toLowerCase().includes('healthy')) {
+      return null;
+    }
+
+    // Extract crop type from title (format: "Paddy - Disease Name") or default
+    let crop = 'Unknown';
+    if (report.title) {
+      const parts = report.title.split(' - ');
+      if (parts.length > 1) {
+        crop = parts[0].trim();
+      }
+    }
+
+    // Default recommendation
+    const recommendation = {
+      en: `Officer-verified: ${disease} detected in ${crop} in ${report.gnDivision}. Monitor your crops closely. Consult your local agricultural officer immediately.`,
+      si: `නිලධාරි සත්‍යාපිත: ${report.gnDivision} හි ${crop} බෝග වල ${disease} හඳුනාගෙන ඇත. ඔබේ බෝග සමීපව නිරීක්ෂණය කරන්න. වහාම ප්‍රදේශීය කෘෂිකර්ම නිලධාරියා හමුවන්න.`
+    };
+
+    // Check if there's already an active CommunityAlert for this disease+gnDivision
+    let existingAlert = await CommunityAlert.findOne({
+      disease: disease,
+      gnDivision: report.gnDivision,
+      status: { $in: ['active', 'monitoring'] }
+    });
+
+    if (existingAlert) {
+      // Update existing alert: bump report count and severity
+      existingAlert.reportCount += 1;
+      existingAlert.lastUpdatedAt = new Date();
+      if (existingAlert.reportCount >= 21) existingAlert.severity = 'critical';
+      else if (existingAlert.reportCount >= 11) existingAlert.severity = 'high';
+      else if (existingAlert.reportCount >= 6) existingAlert.severity = 'medium';
+      else existingAlert.severity = report.severity || 'low';
+      await existingAlert.save();
+    } else {
+      // Create new CommunityAlert
+      await CommunityAlert.create({
+        crop: crop,
+        disease: disease,
+        district: report.district,
+        dsDivision: report.dsDivision,
+        gnDivision: report.gnDivision,
+        reportCount: 1,
+        severity: report.severity || 'medium',
+        status: 'active',
+        firstReportedAt: report.createdAt || new Date(),
+        lastUpdatedAt: new Date(),
+        recommendation
+      });
+    }
+
+    // Also create a Notification for farmers in this GN division
+    const sevLabel = { en: (report.severity || 'medium').charAt(0).toUpperCase() + (report.severity || 'medium').slice(1), si: report.severity === 'critical' ? 'බරපතල' : report.severity === 'high' ? 'ඉහළ' : report.severity === 'low' ? 'අඩු' : 'මධ්‍යම' };
+    const notifSeverity = (report.severity === 'critical' || report.severity === 'high') ? 'danger' : report.severity === 'low' ? 'info' : 'warning';
+
+    await Notification.create({
+      targetDistrict: report.district,
+      targetDsDivision: report.dsDivision,
+      targetGnDivision: report.gnDivision,
+      type: 'disease_alert',
+      title: {
+        en: `⚠️ ${disease} Alert - ${sevLabel.en} Severity`,
+        si: `⚠️ ${disease} අනතුරු ඇඟවීම - ${sevLabel.si} බරපතලකම`
+      },
+      message: {
+        en: `Officer-verified: ${disease} detected in ${crop} in ${report.gnDivision}. ${recommendation.en}`,
+        si: `නිලධාරි සත්‍යාපිත: ${report.gnDivision} හි ${crop} බෝග වල ${disease} හඳුනාගෙන ඇත. ${recommendation.si}`
+      },
+      severity: notifSeverity,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+    });
+
+    console.log(`CommunityAlert + Notification created for verified report in ${report.gnDivision}`);
+
+  } catch (err) {
+    console.error('Error creating community alert from report:', err);
+  }
+}
 
 module.exports = router;
