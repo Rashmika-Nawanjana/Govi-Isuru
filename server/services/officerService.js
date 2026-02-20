@@ -1,6 +1,7 @@
 const DiseaseReport = require('../models/DiseaseReport');
 const OfficerActionLog = require('../models/OfficerActionLog');
 const CommunityAlert = require('../models/CommunityAlert');
+const Notification = require('../models/Notification');
 
 /**
  * Officer Service - Handles all officer-specific operations
@@ -80,6 +81,116 @@ async function logAction(actionData) {
   }
 }
 
+// Disease-specific recommendations for community alerts
+const diseaseRecommendations = {
+  'Bacterial Leaf Blight': {
+    en: 'Use copper-based bactericides. Ensure proper field drainage. Apply balanced NPK fertilizer avoiding excess nitrogen.',
+    si: 'තඹ පදනම් වූ බැක්ටීරිසයිඩ භාවිතා කරන්න. නිසි ජල බැහැර කිරීම සහතික කරන්න. අධික නයිට්‍රජන් වළක්වා සමබර NPK පොහොර යොදන්න.'
+  },
+  'Brown Spot': {
+    en: 'Apply fungicides like Mancozeb or Carbendazim. Ensure potassium-rich fertilization. Maintain proper water management.',
+    si: 'Mancozeb හෝ Carbendazim වැනි දිලීර නාශක යොදන්න. පොටෑසියම් බහුල පොහොර සහතික කරන්න. නිසි ජල කළමනාකරණය පවත්වන්න.'
+  },
+  'Leaf Blast': {
+    en: 'Apply Tricyclazole or Isoprothiolane fungicides. Avoid excess nitrogen fertilization. Use resistant varieties.',
+    si: 'Tricyclazole හෝ Isoprothiolane දිලීර නාශක යොදන්න. අධික නයිට්‍රජන් පොහොර වළක්වන්න. ප්‍රතිරෝධී ප්‍රභේද භාවිතා කරන්න.'
+  },
+  'Blister Blight': {
+    en: 'Apply copper-based fungicides or Hexaconazole. Maintain proper shade (30-40%). Improve drainage in affected areas.',
+    si: 'තඹ පදනම් වූ දිලීර නාශක හෝ Hexaconazole යොදන්න. නිසි සෙවන (30-40%) පවත්වන්න. බලපෑමට ලක්වූ ප්‍රදේශවල ජලාපවහනය වැඩි දියුණු කරන්න.'
+  }
+};
+
+const defaultRecommendation = {
+  en: 'Consult your local agricultural officer immediately. Isolate affected plants to prevent spread. Take photos and collect samples for proper diagnosis.',
+  si: 'වහාම ඔබගේ ප්‍රදේශීය කෘෂිකර්ම නිලධාරියා හමුවන්න. ව්‍යාප්තිය වැළැක්වීමට බලපෑමට ලක්වූ ශාක හුදකලා කරන්න. නිසි රෝග විනිශ්චය සඳහා ඡායාරූප ගෙන සාම්පල එකතු කරන්න.'
+};
+
+/**
+ * Create or update a CommunityAlert when an officer verifies a DiseaseReport.
+ * Also creates a Notification for farmers in the affected GN division.
+ */
+async function createCommunityAlertForVerifiedReport(report, officerData) {
+  try {
+    // Skip alerts for healthy diagnoses
+    if (report.disease && report.disease.toLowerCase().includes('healthy')) {
+      return null;
+    }
+
+    const recommendation = diseaseRecommendations[report.disease] || defaultRecommendation;
+
+    // Check if there's already an active CommunityAlert for this disease+gnDivision
+    let existingAlert = await CommunityAlert.findOne({
+      disease: report.disease,
+      gnDivision: report.gnDivision,
+      status: { $in: ['active', 'monitoring'] }
+    });
+
+    let alert;
+
+    if (existingAlert) {
+      // Update existing alert: bump report count and severity
+      existingAlert.reportCount += 1;
+      existingAlert.lastUpdatedAt = new Date();
+      // Recalculate severity based on count
+      if (existingAlert.reportCount >= 21) existingAlert.severity = 'critical';
+      else if (existingAlert.reportCount >= 11) existingAlert.severity = 'high';
+      else if (existingAlert.reportCount >= 6) existingAlert.severity = 'medium';
+      else existingAlert.severity = report.severity !== 'none' ? report.severity : 'low';
+      await existingAlert.save();
+      alert = existingAlert;
+    } else {
+      // Create new CommunityAlert
+      alert = await CommunityAlert.create({
+        crop: report.crop || 'Unknown',
+        disease: report.disease,
+        district: report.district,
+        dsDivision: report.dsDivision,
+        gnDivision: report.gnDivision,
+        reportCount: 1,
+        severity: report.severity !== 'none' ? report.severity : 'medium',
+        status: 'active',
+        firstReportedAt: report.createdAt || new Date(),
+        lastUpdatedAt: new Date(),
+        recommendation
+      });
+    }
+
+    // Create a Notification for farmers in this GN division
+    const severityText = {
+      low: { en: 'Low', si: 'අඩු' },
+      medium: { en: 'Medium', si: 'මධ්‍යම' },
+      high: { en: 'High', si: 'ඉහළ' },
+      critical: { en: 'Critical', si: 'බරපතල' }
+    };
+    const sevLabel = severityText[alert.severity] || severityText.medium;
+
+    await Notification.create({
+      targetDistrict: report.district,
+      targetDsDivision: report.dsDivision,
+      targetGnDivision: report.gnDivision,
+      type: 'disease_alert',
+      title: {
+        en: `⚠️ ${report.disease} Alert - ${sevLabel.en} Severity`,
+        si: `⚠️ ${report.disease} අනතුරු ඇඟවීම - ${sevLabel.si} බරපතලකම`
+      },
+      message: {
+        en: `Officer-verified: ${report.disease} detected in ${report.crop || 'crops'} in ${report.gnDivision}. ${recommendation.en}`,
+        si: `නිලධාරි සත්‍යාපිත: ${report.gnDivision} හි ${report.crop || 'බෝග'} වල ${report.disease} හඳුනාගෙන ඇත. ${recommendation.si}`
+      },
+      alertId: alert._id,
+      severity: alert.severity === 'critical' || alert.severity === 'high' ? 'danger' : 'warning'
+    });
+
+    console.log(`✅ CommunityAlert created/updated for verified report: ${report.disease} in ${report.gnDivision} (by officer: ${officerData.username})`);
+    return alert;
+  } catch (error) {
+    console.error('Error creating community alert for verified report:', error);
+    // Don't throw - alert creation should not break the verification flow
+    return null;
+  }
+}
+
 /**
  * Update report verification status with full workflow support
  */
@@ -113,6 +224,11 @@ async function updateReportStatus(reportId, newStatus, officerData, options = {}
   }
   
   await report.save();
+  
+  // If verified, create/update a CommunityAlert so farmers in the GN division get notified
+  if (newStatus === 'verified') {
+    await createCommunityAlertForVerifiedReport(report, officerData);
+  }
   
   // Log the action
   const actionTypeMap = {

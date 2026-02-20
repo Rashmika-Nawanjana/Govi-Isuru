@@ -275,14 +275,14 @@ const AlertsDashboard = ({ user, language = 'en', isOfficer = false }) => {
                 <div className="space-y-3">
                   {summary.topLocations.slice(0, 5).map((item, index) => (
                     <div 
-                      key={item.district}
+                      key={item.gnDivision || item.district || index}
                       className="flex items-center justify-between p-3 bg-gray-50 rounded-xl"
                     >
                       <div className="flex items-center gap-3">
                         <span className="w-8 h-8 bg-orange-100 text-orange-700 rounded-full flex items-center justify-center font-bold text-sm">
                           {index + 1}
                         </span>
-                        <span className="font-medium text-gray-800">{item.district}</span>
+                        <span className="font-medium text-gray-800">{item.gnDivision || item.district}</span>
                       </div>
                       <span className={`px-3 py-1 rounded-full text-sm font-bold ${getSeverityColor(item.count)}`}>
                         {item.count} {text.reports}

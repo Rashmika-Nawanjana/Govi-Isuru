@@ -485,6 +485,7 @@ router.get('/outbreak-summary', async (req, res) => {
         })),
         topLocations: locationBreakdown.map(l => ({ 
           gnDivision: l._id, 
+          district: l.district || l._id,
           count: l.count 
         }))
       }
