@@ -22,6 +22,7 @@ const authRoutes = require('./routes/auth');
 const weatherRoutes = require('./routes/weather');
 const yieldRoutes = require('./routes/yield');
 const reportRoutes = require('./routes/reports');
+const manualBookingRoutes = require('./routes/manualBookings');
 const savedListingsRoutes = require('./routes/savedListings');
 const adminRoutes = require('./routes/admin');
 const aiRoutes = require('./routes/ai');
@@ -75,6 +76,9 @@ app.use('/api/yield', yieldRoutes);
 
 // Disease/Pest Report Verification API Routes (Farmer reporting, Officer verification, Farmer alerts)
 app.use('/api/reports', reportRoutes);
+
+// Manual booking routes (farmer-instructor scheduling and paid advice)
+app.use('/api/manual-bookings', manualBookingRoutes);
 
 // Saved Listings API Routes (Buyers can save/view marketplace listings)
 app.use('/api/saved-listings', savedListingsRoutes);

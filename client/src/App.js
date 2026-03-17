@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Leaf, ShoppingBag, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X, FileText, Bookmark, Shield, Sun, Moon, Menu, Search, User, Droplets, ClipboardCheck, Globe } from 'lucide-react';
+import { Leaf, ShoppingBag, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X, FileText, Bookmark, Shield, Sun, Moon, Menu, Search, User, Droplets, ClipboardCheck, Globe, CalendarDays } from 'lucide-react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import CropSuitability from './components/CropSuitability';
 import AIDoctor from './components/AIDoctor';
@@ -25,6 +25,8 @@ import UserProfile from './components/UserProfile';
 import TraditionalRice from './components/TraditionalRice';
 import ReportVerification from './components/ReportVerification';
 import AdminDashboard from './components/AdminDashboard';
+import FarmerManualBooking from './components/FarmerManualBooking';
+import InstructorBookingManager from './components/InstructorBookingManager';
 
 import MyReports from './components/MyReports';
 import SavedListings from './components/SavedListings';
@@ -46,6 +48,7 @@ const translations = {
     footer: "Empowering Sri Lankan Farmers",
     // Officer-specific translations
     diseaseAlerts: "Disease Alerts",
+    manualBooking: "Manual Booking",
     areaReports: "Area Reports",
     outbreak: "Outbreak Management",
     areaAnalytics: "Area Reports & Analytics",
@@ -73,6 +76,7 @@ const translations = {
     footer: "ශ්‍රී ලාංකීය ගොවීන් සවිබල ගැන්වීම",
     // Officer-specific translations
     diseaseAlerts: "රෝග අනතුරු ඇඟවීම්",
+    manualBooking: "අතින් වෙන්කරවා ගැනීම",
     areaReports: "ප්‍රදේශ වාර්තා",
     outbreak: "පිපිරීම් කළමනාකරණ",
     areaAnalytics: "ප්‍රදේශ වාර්තා හා විශ්ලේෂණ",
@@ -377,6 +381,7 @@ function MainApp() {
       // Farmer tabs
       return [
         { id: 'doctor', icon: Search, label: t.doctor, emoji: '🩺' },
+        { id: 'manualBooking', icon: CalendarDays, label: t.manualBooking, emoji: '📅' },
         { id: 'myReports', icon: FileText, label: lang === 'si' ? 'මගේ වාර්තා' : 'My Reports', emoji: '📋' },
         { id: 'yield', icon: BarChart3, label: t.yieldForecast, emoji: '🌾' },
         { id: 'trends', icon: TrendingUp, label: t.trends, emoji: '📈' },
@@ -403,6 +408,7 @@ function MainApp() {
       return [
         { id: 'officerDashboard', icon: ClipboardCheck, label: 'Area Dashboard', emoji: '📊' },
         { id: 'reportVerification', icon: FileText, label: 'Verify Reports', emoji: '✅' },
+        { id: 'instructorBookings', icon: CalendarDays, label: 'Manual Bookings', emoji: '📅' },
         { id: 'alerts', icon: AlertTriangle, label: t.diseaseAlerts, emoji: '⚠️' },
         { id: 'news', icon: Newspaper, label: t.news, emoji: '📰' },
         { id: 'riceVarieties', icon: BookOpen, label: t.riceVarieties, emoji: '🌾' },
@@ -649,6 +655,7 @@ function MainApp() {
                 {(!user?.role || user?.role === 'farmer') && (
                   <>
                     {view === 'doctor' && <AIDoctor lang={lang} user={user} onInteraction={fetchCredits} />}
+                    {view === 'manualBooking' && <FarmerManualBooking lang={lang} onInteraction={fetchCredits} />}
                     {view === 'myReports' && <MyReports user={user} lang={lang} />}
                     {view === 'market' && <Marketplace lang={lang} currentUser={user} onInteraction={fetchCredits} />}
                     {view === 'weather' && <WeatherAdvisor lang={lang} lat={coords.lat} lon={coords.lon} user={user} />}
@@ -679,6 +686,7 @@ function MainApp() {
                   <>
                     {view === 'officerDashboard' && <OfficerDashboard user={user} language={lang} />}
                     {view === 'reportVerification' && <ReportVerification user={user} lang={lang} />}
+                    {view === 'instructorBookings' && <InstructorBookingManager lang={lang} onInteraction={fetchCredits} />}
                     {view === 'alerts' && <AlertsDashboard user={user} language={lang} />}
                     {view === 'news' && <AgriNews lang={lang} user={user} />}
                     {view === 'riceVarieties' && <TraditionalRice lang={lang} />}
