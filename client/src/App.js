@@ -438,6 +438,10 @@ function MainApp() {
 
   const navItems = getNavItems();
 
+  const cropCareViews = ['doctor', 'weather', 'alerts', 'suitability', 'yield'];
+  const marketViews = ['market', 'trends', 'news', 'riceVarieties'];
+  const consultationViews = ['manualBooking', 'myReports'];
+
   // Get background image based on user role
   const getBackgroundImage = () => {
     if (user?.role === 'admin') {
@@ -693,22 +697,49 @@ function MainApp() {
                   <>
                     {/* Hub Views */}
                     {view === 'farmerHub' && <FarmerHubDashboard lang={lang} user={user} onNavigate={setView} />}
-                    {view === 'cropCareHub' && <CropCareHub lang={lang} user={user} onNavigate={setView} onInteraction={fetchCredits} />}
-                    {view === 'marketHub' && <MarketHub lang={lang} user={user} onNavigate={setView} onInteraction={fetchCredits} />}
-                    {view === 'consultationHub' && <ConsultationHub lang={lang} user={user} onNavigate={setView} onInteraction={fetchCredits} />}
-                    
-                    {/* Traditional Views */}
-                    {view === 'doctor' && <AIDoctor lang={lang} user={user} onInteraction={fetchCredits} />}
-                    {view === 'manualBooking' && <FarmerManualBooking lang={lang} onInteraction={fetchCredits} />}
-                    {view === 'myReports' && <MyReports user={user} lang={lang} />}
-                    {view === 'market' && <Marketplace lang={lang} currentUser={user} onInteraction={fetchCredits} />}
-                    {view === 'weather' && <WeatherAdvisor lang={lang} lat={coords.lat} lon={coords.lon} user={user} />}
-                    {view === 'trends' && <MarketTrends lang={lang} />}
-                    {view === 'alerts' && <AlertsDashboard user={user} language={lang} />}
-                    {view === 'news' && <AgriNews lang={lang} user={user} />}
-                    {view === 'yield' && <YieldPrediction lang={lang} onInteraction={fetchCredits} />}
-                    {view === 'suitability' && <CropSuitability lang={lang} user={user} coords={coords} onInteraction={fetchCredits} />}
-                    {view === 'riceVarieties' && <TraditionalRice lang={lang} />}
+
+                    {(view === 'cropCareHub' || cropCareViews.includes(view)) && (
+                      <CropCareHub lang={lang} activeView={view} onNavigate={setView}>
+                        {(cropCareViews.includes(view) ? view : 'doctor') === 'doctor' && (
+                          <AIDoctor lang={lang} user={user} onInteraction={fetchCredits} />
+                        )}
+                        {(cropCareViews.includes(view) ? view : 'doctor') === 'weather' && (
+                          <WeatherAdvisor lang={lang} lat={coords.lat} lon={coords.lon} user={user} />
+                        )}
+                        {(cropCareViews.includes(view) ? view : 'doctor') === 'alerts' && (
+                          <AlertsDashboard user={user} language={lang} />
+                        )}
+                        {(cropCareViews.includes(view) ? view : 'doctor') === 'suitability' && (
+                          <CropSuitability lang={lang} user={user} coords={coords} onInteraction={fetchCredits} />
+                        )}
+                        {(cropCareViews.includes(view) ? view : 'doctor') === 'yield' && (
+                          <YieldPrediction lang={lang} onInteraction={fetchCredits} />
+                        )}
+                      </CropCareHub>
+                    )}
+
+                    {(view === 'marketHub' || marketViews.includes(view)) && (
+                      <MarketHub lang={lang} activeView={view} onNavigate={setView}>
+                        {(marketViews.includes(view) ? view : 'market') === 'market' && (
+                          <Marketplace lang={lang} currentUser={user} onInteraction={fetchCredits} />
+                        )}
+                        {(marketViews.includes(view) ? view : 'market') === 'trends' && <MarketTrends lang={lang} />}
+                        {(marketViews.includes(view) ? view : 'market') === 'news' && <AgriNews lang={lang} user={user} />}
+                        {(marketViews.includes(view) ? view : 'market') === 'riceVarieties' && <TraditionalRice lang={lang} />}
+                      </MarketHub>
+                    )}
+
+                    {(view === 'consultationHub' || consultationViews.includes(view)) && (
+                      <ConsultationHub lang={lang} activeView={view} onNavigate={setView}>
+                        {(consultationViews.includes(view) ? view : 'manualBooking') === 'manualBooking' && (
+                          <FarmerManualBooking lang={lang} onInteraction={fetchCredits} />
+                        )}
+                        {(consultationViews.includes(view) ? view : 'manualBooking') === 'myReports' && (
+                          <MyReports user={user} lang={lang} />
+                        )}
+                      </ConsultationHub>
+                    )}
+
                     {view === 'profile' && <UserProfile />}
                   </>
                 )}
