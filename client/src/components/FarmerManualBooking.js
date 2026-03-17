@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { CalendarDays, RefreshCw, User, Clock, MapPin, ClipboardList, XCircle } from 'lucide-react';
+import { CalendarDays, RefreshCw, User, Clock, MapPin, ClipboardList, XCircle, Bell, Check } from 'lucide-react';
 
 const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
@@ -25,6 +25,8 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
   const [selectedInstructorId, setSelectedInstructorId] = useState('');
   const [slots, setSlots] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [form, setForm] = useState({ topic: '', description: '', slotId: '' });
 
   const t = useMemo(() => ({
@@ -33,6 +35,7 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
     chooseInstructor: lang === 'si' ? 'උපදේශක තෝරන්න' : 'Choose Instructor',
     availableSlots: lang === 'si' ? 'ලබාගත හැකි කාල' : 'Available Slots',
     myBookings: lang === 'si' ? 'මගේ වෙන්කරවා ගැනීම්' : 'My Bookings',
+    notifications: lang === 'si' ? 'දැනුම්දීම්' : 'Notifications',
     createBooking: lang === 'si' ? 'වෙන්කරවා ගැනීම කරන්න' : 'Create Booking Request',
     topic: lang === 'si' ? 'විෂයය' : 'Topic',
     description: lang === 'si' ? 'විස්තර' : 'Description',
@@ -41,6 +44,8 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
     noInstructors: lang === 'si' ? 'අනුමත උපදේශකයින් නොමැත' : 'No approved instructors found',
     noSlots: lang === 'si' ? 'තෝරාගත් උපදේශකයාට විවෘත කාල නොමැත' : 'No open slots for this instructor',
     noBookings: lang === 'si' ? 'තවම වෙන්කරවා ගැනීම් නැත' : 'No bookings yet',
+    noNotifications: lang === 'si' ? 'නව දැනුම්දීම් නොමැත' : 'No booking notifications yet',
+    markRead: lang === 'si' ? 'කියවූ ලෙස ලකුණු කරන්න' : 'Mark as read',
     cancel: lang === 'si' ? 'අවලංගු කරන්න' : 'Cancel',
     pendingOnly: lang === 'si' ? 'බලාපොරොත්තු තත්වයේදී පමණක් අවලංගු කළ හැක' : 'Only pending bookings can be cancelled',
     advice: lang === 'si' ? 'උපදෙස්' : 'Advice',
@@ -73,10 +78,17 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
     setBookings(res.data?.bookings || []);
   };
 
+  const fetchNotifications = async () => {
+    const res = await axios.get(`${API_BASE}/api/manual-bookings/notifications/farmer`, { headers });
+    const list = res.data?.notifications || [];
+    setNotifications(list);
+    setUnreadCount(typeof res.data?.unreadCount === 'number' ? res.data.unreadCount : 0);
+  };
+
   const refreshAll = async () => {
     try {
       setLoading(true);
-      await Promise.all([fetchInstructors(), fetchBookings()]);
+      await Promise.all([fetchInstructors(), fetchBookings(), fetchNotifications()]);
     } catch (err) {
       console.error('Failed to refresh booking data', err);
       alert(err.response?.data?.msg || 'Failed to load booking data');
@@ -113,7 +125,7 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
         { headers }
       );
       setForm({ topic: '', description: '', slotId: '' });
-      await Promise.all([fetchBookings(), fetchSlots(selectedInstructorId)]);
+      await Promise.all([fetchBookings(), fetchSlots(selectedInstructorId), fetchNotifications()]);
       onInteraction?.();
     } catch (err) {
       console.error('Failed to create booking', err);
@@ -131,10 +143,21 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
 
     try {
       await axios.put(`${API_BASE}/api/manual-bookings/bookings/${bookingId}/cancel`, {}, { headers });
-      await Promise.all([fetchBookings(), fetchSlots(selectedInstructorId)]);
+      await Promise.all([fetchBookings(), fetchSlots(selectedInstructorId), fetchNotifications()]);
     } catch (err) {
       console.error('Failed to cancel booking', err);
       alert(err.response?.data?.msg || 'Failed to cancel booking');
+    }
+  };
+
+  const markNotificationRead = async (notificationId) => {
+    try {
+      await axios.put(`${API_BASE}/api/manual-bookings/notifications/farmer/${notificationId}/read`, {}, { headers });
+      setNotifications((prev) => prev.map((item) => (item._id === notificationId ? { ...item, read: true } : item)));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error('Failed to mark notification as read', err);
+      alert(err.response?.data?.msg || 'Failed to update notification');
     }
   };
 
@@ -252,6 +275,45 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
         </div>
 
         <div className="bg-white rounded-2xl shadow-md p-5 space-y-3">
+          <h3 className="font-bold text-gray-800 flex items-center gap-2">
+            <Bell className="w-5 h-5 text-green-700" />
+            {t.notifications}
+            {unreadCount > 0 ? (
+              <span className="ml-1 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">
+                {unreadCount}
+              </span>
+            ) : null}
+          </h3>
+
+          {notifications.length === 0 ? (
+            <p className="text-sm text-gray-500">{t.noNotifications}</p>
+          ) : (
+            <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+              {notifications.map((item) => (
+                <div
+                  key={item._id}
+                  className={`border rounded-xl p-3 ${item.read ? 'border-gray-200 bg-gray-50' : 'border-green-200 bg-green-50'}`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">{item.title?.[lang] || item.title?.en || 'Notification'}</p>
+                      <p className="text-xs text-gray-600 mt-1">{item.message?.[lang] || item.message?.en || ''}</p>
+                      <p className="text-[11px] text-gray-500 mt-1">{new Date(item.createdAt).toLocaleString()}</p>
+                    </div>
+                    {!item.read ? (
+                      <button
+                        onClick={() => markNotificationRead(item._id)}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white border border-green-300 text-green-700 text-xs font-semibold hover:bg-green-100"
+                      >
+                        <Check className="w-3.5 h-3.5" /> {t.markRead}
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           <h3 className="font-bold text-gray-800 flex items-center gap-2">
             <ClipboardList className="w-5 h-5 text-green-700" />
             {t.myBookings}

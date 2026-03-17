@@ -538,4 +538,60 @@ router.put('/bookings/:bookingId/cancel', authMiddleware, async (req, res) => {
   }
 });
 
+router.get('/notifications/farmer', authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await getCurrentUser(req.user);
+    if (!currentUser || currentUser.role !== 'farmer') {
+      return res.status(403).json({ success: false, msg: 'Only farmers can view booking notifications' });
+    }
+
+    const notifications = await Notification.find({
+      recipientUserId: currentUser._id,
+      recipientRole: 'farmer',
+      type: 'system'
+    })
+      .sort({ createdAt: -1 })
+      .limit(30)
+      .lean();
+
+    const unreadCount = notifications.filter((item) => !item.read).length;
+    res.json({ success: true, notifications, unreadCount, count: notifications.length });
+  } catch (err) {
+    console.error('Error fetching farmer booking notifications:', err);
+    res.status(500).json({ success: false, msg: 'Failed to fetch notifications' });
+  }
+});
+
+router.put('/notifications/farmer/:id/read', authMiddleware, async (req, res) => {
+  try {
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, msg: 'Invalid notification id' });
+    }
+
+    const currentUser = await getCurrentUser(req.user);
+    if (!currentUser || currentUser.role !== 'farmer') {
+      return res.status(403).json({ success: false, msg: 'Only farmers can update booking notifications' });
+    }
+
+    const notification = await Notification.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        recipientUserId: currentUser._id,
+        recipientRole: 'farmer'
+      },
+      { $set: { read: true } },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res.status(404).json({ success: false, msg: 'Notification not found' });
+    }
+
+    res.json({ success: true, notification });
+  } catch (err) {
+    console.error('Error marking farmer notification as read:', err);
+    res.status(500).json({ success: false, msg: 'Failed to update notification' });
+  }
+});
+
 module.exports = router;
