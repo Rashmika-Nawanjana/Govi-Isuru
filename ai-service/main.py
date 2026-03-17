@@ -629,6 +629,8 @@ async def predict_disease(
             }
         })
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.exception("Prediction failed")
         raise HTTPException(
