@@ -185,6 +185,18 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
         return;
       }
 
+      const detail = error.response?.data?.detail;
+      const explicitMessage =
+        (typeof detail === 'string' && detail) ||
+        (detail && typeof detail === 'object' && detail.message) ||
+        error.response?.data?.error ||
+        error.response?.data?.msg;
+
+      if (explicitMessage) {
+        alert(explicitMessage);
+        return;
+      }
+
       alert(lang === 'en'
         ? "Unable to connect to AI service. Please try again."
         : "AI සේවාවට සම්බන්ධ විය නොහැක. නැවත උත්සාහ කරන්න.");

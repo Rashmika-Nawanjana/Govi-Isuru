@@ -8,11 +8,12 @@ import os
 import io
 import json
 import base64
+import logging
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import cv2
 from fastapi import FastAPI, File, UploadFile, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -40,6 +41,17 @@ MODELS_CONFIG = {
     }
 }
 IMAGE_SIZE = (224, 224)
+MAX_IMAGE_PIXELS = 25_000_000
+MAX_IMAGE_DIMENSION = 4096
+
+# Validation and inference thresholds
+MIN_LEAF_LIKENESS = 0.34
+MIN_MODEL_CONFIDENCE_FOR_LEAF = 0.42
+CROP_MISMATCH_MARGIN = 0.12
+RICE_CONFIDENCE_TEMPERATURE = 0.82
+
+logger = logging.getLogger("govi-ai-service")
+Image.MAX_IMAGE_PIXELS = MAX_IMAGE_PIXELS
 
 # Crop type enum
 class CropType(str, Enum):
@@ -144,7 +156,20 @@ def load_all_models():
 def preprocess_image(image_bytes):
     """Preprocess image for model prediction"""
     # Open image
-    image = Image.open(io.BytesIO(image_bytes))
+    try:
+        image = Image.open(io.BytesIO(image_bytes))
+        image.verify()
+        image = Image.open(io.BytesIO(image_bytes))
+    except (UnidentifiedImageError, OSError):
+        raise HTTPException(status_code=400, detail="Invalid image file. Please upload a clear crop leaf photo.")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Image validation failed. Please upload another image.")
+
+    if image.width > MAX_IMAGE_DIMENSION or image.height > MAX_IMAGE_DIMENSION:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Image dimensions too large. Maximum allowed is {MAX_IMAGE_DIMENSION}x{MAX_IMAGE_DIMENSION}."
+        )
     
     # Convert to RGB if necessary
     if image.mode != 'RGB':
@@ -160,6 +185,97 @@ def preprocess_image(image_bytes):
     img_array = np.expand_dims(img_array, axis=0)
     
     return img_array, image
+
+def _extract_leaf_features(original_image):
+    """Extract simple visual features to reject obvious non-leaf images."""
+    img = np.array(original_image.convert('RGB'))
+    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+
+    # Broad green ranges for healthy and diseased foliage
+    lower_green_1 = np.array([20, 25, 20])
+    upper_green_1 = np.array([100, 255, 255])
+    green_mask = cv2.inRange(hsv, lower_green_1, upper_green_1)
+
+    green_ratio = float(np.mean(green_mask > 0))
+    sat_mean = float(np.mean(hsv[:, :, 1]) / 255.0)
+    edge_var = float(min(cv2.Laplacian(gray, cv2.CV_64F).var() / 1000.0, 1.0))
+
+    h, w = img.shape[:2]
+    y1, y2 = int(h * 0.2), int(h * 0.8)
+    x1, x2 = int(w * 0.2), int(w * 0.8)
+    center_green_ratio = float(np.mean(green_mask[y1:y2, x1:x2] > 0)) if y2 > y1 and x2 > x1 else green_ratio
+
+    # Weighted score: green presence + saturation + center emphasis + texture
+    leaf_likeness = (
+        0.45 * green_ratio
+        + 0.20 * sat_mean
+        + 0.25 * center_green_ratio
+        + 0.10 * edge_var
+    )
+
+    return {
+        "green_ratio": green_ratio,
+        "center_green_ratio": center_green_ratio,
+        "sat_mean": sat_mean,
+        "edge_var": edge_var,
+        "leaf_likeness": float(max(0.0, min(1.0, leaf_likeness)))
+    }
+
+def _predict_with_tta(model, img_array, crop):
+    """Use lightweight test-time augmentation for rice to improve robustness."""
+    if crop != "rice":
+        return model.predict(img_array, verbose=0)[0]
+
+    base = img_array[0]
+    variants = [
+        base,
+        np.flip(base, axis=1),  # horizontal flip
+        np.flip(base, axis=0),  # vertical flip
+        np.clip(base * 0.95, 0.0, 1.0),
+        np.clip(base * 1.05, 0.0, 1.0)
+    ]
+
+    preds = []
+    for variant in variants:
+        p = model.predict(np.expand_dims(variant, axis=0), verbose=0)[0]
+        preds.append(p)
+
+    # Keep original view dominant while averaging augmented views
+    return (0.5 * preds[0]) + (0.5 * np.mean(preds[1:], axis=0))
+
+def _temperature_sharpen(probabilities, temperature=1.0):
+    """Sharpen softmax probabilities with temperature < 1.0."""
+    if temperature >= 1.0:
+        return probabilities
+
+    probs = np.clip(np.array(probabilities, dtype=np.float64), 1e-9, 1.0)
+    logits = np.log(probs)
+    scaled = logits / max(temperature, 1e-6)
+    scaled -= np.max(scaled)
+    exp_vals = np.exp(scaled)
+    return exp_vals / np.sum(exp_vals)
+
+def _get_crop_scores(img_array):
+    """Compare how strongly each crop model matches the image."""
+    scores = {}
+    top_classes = {}
+
+    for crop_name, model in models.items():
+        preds = model.predict(img_array, verbose=0)[0]
+        top_idx = int(np.argmax(preds))
+        top_conf = float(preds[top_idx])
+
+        sorted_probs = np.sort(preds)
+        second_conf = float(sorted_probs[-2]) if len(sorted_probs) > 1 else 0.0
+        margin = max(top_conf - second_conf, 0.0)
+
+        # Combined confidence improves comparability across crops
+        score = (0.75 * top_conf) + (0.25 * margin)
+        scores[crop_name] = float(score)
+        top_classes[crop_name] = class_names[crop_name][top_idx]
+
+    return scores, top_classes
 
 def generate_gradcam(model, img_array, class_idx, layer_name=None):
     """
@@ -334,7 +450,7 @@ async def root():
     return {
         "status": "healthy",
         "service": "Govi Isuru Multi-Crop Disease Predictor",
-        "version": "3.0.0",
+        "version": "3.2.0",
         "supported_crops": list(MODELS_CONFIG.keys()),
         "models_loaded": {crop: (crop in models) for crop in MODELS_CONFIG.keys()},
         "classes": {
@@ -407,10 +523,61 @@ async def predict_disease(
         print("🔄 Prediction in process...")
         # Preprocess
         img_array, original_image = preprocess_image(image_bytes)
+
+        # Validate image is a leaf and likely belongs to the selected crop
+        leaf_features = _extract_leaf_features(original_image)
+        crop_scores, top_classes = _get_crop_scores(img_array)
+        best_crop = max(crop_scores, key=crop_scores.get)
+        best_crop_score = float(crop_scores[best_crop])
+        requested_crop_score = float(crop_scores.get(crop, 0.0))
+
+        if (
+            leaf_features["leaf_likeness"] < MIN_LEAF_LIKENESS
+            and best_crop_score < MIN_MODEL_CONFIDENCE_FOR_LEAF
+        ):
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "code": "NOT_A_LEAF",
+                    "message": "Uploaded image does not appear to be a crop leaf. Please upload a clear leaf photo.",
+                    "validation": {
+                        "is_leaf": False,
+                        "leaf_likeness": leaf_features["leaf_likeness"],
+                        "requested_crop": crop,
+                        "best_matched_crop": best_crop,
+                        "best_matched_score": best_crop_score
+                    }
+                }
+            )
+
+        if (
+            best_crop != crop
+            and (best_crop_score - requested_crop_score) > CROP_MISMATCH_MARGIN
+            and best_crop_score >= MIN_MODEL_CONFIDENCE_FOR_LEAF
+        ):
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "code": "CROP_MISMATCH",
+                    "message": f"Image appears to be {best_crop} leaf, not {crop}. Please upload a correct {crop} leaf image.",
+                    "validation": {
+                        "is_leaf": True,
+                        "requested_crop": crop,
+                        "best_matched_crop": best_crop,
+                        "best_matched_class": top_classes.get(best_crop, ""),
+                        "requested_crop_score": requested_crop_score,
+                        "best_matched_score": best_crop_score
+                    }
+                }
+            )
         
         # Predict using the correct model
         model = models[crop]
-        predictions = model.predict(img_array, verbose=0)[0]
+        predictions = _predict_with_tta(model, img_array, crop)
+
+        # Sharpen rice probabilities slightly to improve confidence calibration.
+        if crop == "rice":
+            predictions = _temperature_sharpen(predictions, RICE_CONFIDENCE_TEMPERATURE)
         
         # Get top prediction
         predicted_idx = int(np.argmax(predictions))
@@ -451,13 +618,22 @@ async def predict_disease(
             "treatment": info.get("treatment", []),
             "severity": info.get("severity", "unknown"),
             "all_predictions": all_preds,
-            "gradcam": gradcam_data
+            "gradcam": gradcam_data,
+            "validation": {
+                "is_leaf": True,
+                "leaf_likeness": leaf_features["leaf_likeness"],
+                "requested_crop": crop,
+                "requested_crop_score": requested_crop_score,
+                "best_matched_crop": best_crop,
+                "best_matched_score": best_crop_score
+            }
         })
         
     except Exception as e:
+        logger.exception("Prediction failed")
         raise HTTPException(
             status_code=500,
-            detail=f"Prediction failed: {str(e)}"
+            detail="Prediction failed due to an internal error. Please try again."
         )
 
 # Legacy endpoint for backward compatibility with rice predictions

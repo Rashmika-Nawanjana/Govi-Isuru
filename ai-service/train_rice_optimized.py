@@ -12,19 +12,20 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2
-from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau, LearningRateScheduler
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.utils.class_weight import compute_class_weight
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Optimized config - balanced speed vs accuracy
 CONFIG = {
     "image_size": (224, 224),
-    "batch_size": 32,  # Larger for faster training
-    "epochs": 60,  # Reduced but effective
-    "learning_rate": 0.003,  # Higher for faster convergence
-    "fine_tune_epochs": 30,
-    "fine_tune_lr": 0.0002,
+    "batch_size": 16,
+    "epochs": 90,
+    "learning_rate": 0.001,
+    "fine_tune_epochs": 60,
+    "fine_tune_lr": 0.00008,
     "dataset_path": os.path.abspath(os.path.join(os.path.dirname(__file__), "dataset")),
     "model_save_path": os.path.abspath(os.path.join(os.path.dirname(__file__), "models"))
 }
@@ -44,16 +45,16 @@ def create_generators(config):
     """Strong augmentation for small dataset"""
     train_datagen = ImageDataGenerator(
         rescale=1./255,
-        rotation_range=50,
-        width_shift_range=0.4,
-        height_shift_range=0.4,
-        shear_range=0.4,
-        zoom_range=[0.65, 1.5],
+        rotation_range=35,
+        width_shift_range=0.25,
+        height_shift_range=0.25,
+        shear_range=0.2,
+        zoom_range=[0.75, 1.25],
         horizontal_flip=True,
         vertical_flip=True,
         fill_mode='reflect',
-        brightness_range=[0.5, 1.6],
-        channel_shift_range=45
+        brightness_range=[0.7, 1.3],
+        channel_shift_range=25
     )
     
     val_datagen = ImageDataGenerator(rescale=1./255)
@@ -99,23 +100,41 @@ def build_model(num_classes, config):
     # Stronger classification head
     x = layers.GlobalAveragePooling2D()(x)
     x = layers.BatchNormalization()(x)
-    x = layers.Dropout(0.5)(x)
-    
-    x = layers.Dense(1024, activation='relu', kernel_regularizer=keras.regularizers.l2(0.0008))(x)
-    x = layers.BatchNormalization()(x)
     x = layers.Dropout(0.45)(x)
     
-    x = layers.Dense(512, activation='relu', kernel_regularizer=keras.regularizers.l2(0.0008))(x)
+    x = layers.Dense(768, activation='relu', kernel_regularizer=keras.regularizers.l2(0.0012))(x)
     x = layers.BatchNormalization()(x)
-    x = layers.Dropout(0.4)(x)
+    x = layers.Dropout(0.40)(x)
     
-    x = layers.Dense(256, activation='relu', kernel_regularizer=keras.regularizers.l2(0.0008))(x)
-    x = layers.Dropout(0.3)(x)
+    x = layers.Dense(384, activation='relu', kernel_regularizer=keras.regularizers.l2(0.0012))(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Dropout(0.35)(x)
+    
+    x = layers.Dense(192, activation='relu', kernel_regularizer=keras.regularizers.l2(0.001))(x)
+    x = layers.Dropout(0.30)(x)
     
     outputs = layers.Dense(num_classes, activation='softmax')(x)
     
     model = keras.Model(inputs, outputs, name='rice_disease')
     return model, base_model
+
+def create_class_weights(train_gen):
+    """Compute class weights from training distribution to reduce class imbalance effects."""
+    y = train_gen.classes
+    classes = np.unique(y)
+    weights = compute_class_weight(class_weight='balanced', classes=classes, y=y)
+    class_weight = {int(c): float(w) for c, w in zip(classes, weights)}
+    return class_weight
+
+def lr_schedule(epoch, lr):
+    """Piecewise LR schedule for stable convergence."""
+    if epoch < 20:
+        return lr
+    if epoch < 45:
+        return lr * 0.92
+    if epoch < 70:
+        return lr * 0.85
+    return lr * 0.80
 
 def train():
     """Main training function"""
@@ -136,6 +155,11 @@ def train():
     class_indices = train_gen.class_indices
     class_names = {v: k for k, v in class_indices.items()}
     num_classes = len(class_indices)
+    class_weight = create_class_weights(train_gen)
+
+    print("\n⚖️ Class weights:")
+    for idx, weight in class_weight.items():
+        print(f"   {class_names[idx]}: {weight:.3f}")
     
     # Save class indices
     with open(os.path.join(CONFIG["model_save_path"], "class_indices.json"), "w") as f:
@@ -148,7 +172,7 @@ def train():
     # Compile with strong regularization
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=CONFIG["learning_rate"]),
-        loss=keras.losses.CategoricalCrossentropy(label_smoothing=0.2),
+        loss=keras.losses.CategoricalCrossentropy(label_smoothing=0.06),
         metrics=['accuracy']
     )
     
@@ -175,7 +199,8 @@ def train():
             patience=7,
             min_lr=1e-8,
             verbose=1
-        )
+        ),
+        LearningRateScheduler(lr_schedule, verbose=0)
     ]
     
     # Phase 1: Train head (faster convergence with higher LR)
@@ -188,6 +213,7 @@ def train():
         train_gen,
         epochs=CONFIG["epochs"],
         validation_data=val_gen,
+        class_weight=class_weight,
         callbacks=callbacks,
         verbose=1
     )
@@ -198,12 +224,12 @@ def train():
     print("-" * 80)
     
     base_model.trainable = True
-    for layer in base_model.layers[:-85]:  # Unfreeze last 85 layers
+    for layer in base_model.layers[:-70]:
         layer.trainable = False
     
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=CONFIG["fine_tune_lr"]),
-        loss=keras.losses.CategoricalCrossentropy(label_smoothing=0.2),
+        loss=keras.losses.CategoricalCrossentropy(label_smoothing=0.03),
         metrics=['accuracy']
     )
     
@@ -211,6 +237,7 @@ def train():
         train_gen,
         epochs=CONFIG["fine_tune_epochs"],
         validation_data=val_gen,
+        class_weight=class_weight,
         callbacks=callbacks,
         verbose=1
     )

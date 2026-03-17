@@ -4,6 +4,7 @@ const checkCredits = require('../middleware/creditMiddleware');
 const axios = require('axios');
 const multer = require('multer');
 const FormData = require('form-data');
+const User = require('../models/User');
 
 // Multer - store uploaded file in memory so we can forward it
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -24,15 +25,30 @@ const authMiddleware = async (req, res, next) => {
 };
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+const ALLOWED_CROPS = new Set(['rice', 'tea', 'chili']);
+const AI_PREDICT_COST = 25;
+
+async function refundCreditsIfPossible(userId, amount) {
+    if (!userId || !amount || amount <= 0) return;
+    try {
+        await User.updateOne({ _id: userId }, { $inc: { credits: amount } });
+    } catch (err) {
+        console.error('Credit refund failed:', err);
+    }
+}
 
 /**
  * POST /api/ai/predict/:crop
  * AI Doctor endpoint - proxies file upload to Python AI service.
  * Cost: 25 credits.
  */
-router.post('/predict/:crop', authMiddleware, checkCredits(25), upload.single('file'), async (req, res) => {
+router.post('/predict/:crop', authMiddleware, checkCredits(AI_PREDICT_COST), upload.single('file'), async (req, res) => {
     try {
-        const { crop } = req.params;
+        const crop = String(req.params.crop || '').toLowerCase();
+
+        if (!ALLOWED_CROPS.has(crop)) {
+            return res.status(400).json({ error: 'Invalid crop type' });
+        }
 
         if (!req.file) {
             return res.status(400).json({ error: "No image file provided" });
@@ -62,29 +78,25 @@ router.post('/predict/:crop', authMiddleware, checkCredits(25), upload.single('f
             res.json(response.data);
 
         } catch (proxyError) {
-            // Fallback mock response when Python AI service is unreachable
-            console.warn(`AI Service unreachable (${AI_SERVICE_URL}): ${proxyError.message}. Returning mock result.`);
+            // Forward validation/model errors from AI service to client
+            if (proxyError.response) {
+                return res.status(proxyError.response.status).json(
+                    proxyError.response.data || { error: 'AI service rejected the request' }
+                );
+            }
 
-            const mockResponse = {
-                success: true,
-                prediction: "Brown Spot",
-                si_name: "දුඹුරු ලප රෝගය",
-                confidence: 92.5,
-                description: "Fungal disease affecting leaves.",
-                treatment: [
-                    "Apply fungicides like Mancozeb",
-                    "Improve soil drainage",
-                    "Remove infected leaves"
-                ],
-                severity: "medium",
-                crop_type: crop
-            };
-
-            res.json(mockResponse);
+            // Fail closed when AI service is unreachable (no fake diagnosis)
+            console.warn(`AI Service unreachable (${AI_SERVICE_URL}): ${proxyError.message}`);
+            await refundCreditsIfPossible(req.user?.id, AI_PREDICT_COST);
+            return res.status(503).json({
+                error: 'AI service unavailable',
+                msg: 'AI service is temporarily unavailable. Please try again shortly.'
+            });
         }
 
     } catch (err) {
         console.error("AI Route Error:", err);
+        await refundCreditsIfPossible(req.user?.id, AI_PREDICT_COST);
         res.status(500).json({ error: "AI Service Error" });
     }
 });
