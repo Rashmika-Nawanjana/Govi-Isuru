@@ -10,7 +10,9 @@ import {
   CheckCircle,
   PlayCircle,
   Send,
-  RefreshCw
+  RefreshCw,
+  Bell,
+  Check
 } from 'lucide-react';
 
 const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
@@ -18,6 +20,8 @@ const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 const ReportVerification = ({ lang, user }) => {
   const [queue, setQueue] = useState([]);
   const [myCases, setMyCases] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
   const [adviceText, setAdviceText] = useState('');
@@ -37,6 +41,10 @@ const ReportVerification = ({ lang, user }) => {
       claim: 'Claim Case',
       start: 'Start Analysis',
       submitAdvice: 'Submit Paid Advice',
+      notifications: 'Case Notifications',
+      noNotifications: 'No notifications yet',
+      openCase: 'Open Case',
+      markRead: 'Mark read',
       advicePlaceholder: 'Write practical, step-by-step advice for the farmer...',
       notesPlaceholder: 'Optional verification notes',
       refresh: 'Refresh',
@@ -56,6 +64,10 @@ const ReportVerification = ({ lang, user }) => {
       claim: 'නඩුව භාරගන්න',
       start: 'විශ්ලේෂණය ආරම්භ කරන්න',
       submitAdvice: 'ගෙවන උපදෙස් යවන්න',
+      notifications: 'නඩු දැනුම්දීම්',
+      noNotifications: 'දැනුම්දීම් නොමැත',
+      openCase: 'නඩුව විවෘත කරන්න',
+      markRead: 'කියවූ ලෙස සලකුණු කරන්න',
       advicePlaceholder: 'ගොවියාට ක්‍රියාකාරී පියවර සමඟ උපදෙස් ලියන්න...',
       notesPlaceholder: 'විකල්ප සත්‍යාපන සටහන්',
       refresh: 'නැවුම් කරන්න',
@@ -72,12 +84,15 @@ const ReportVerification = ({ lang, user }) => {
     try {
       setLoading(true);
       const headers = { Authorization: `Bearer ${token}` };
-      const [queueRes, mineRes] = await Promise.all([
+      const [queueRes, mineRes, notifRes] = await Promise.all([
         axios.get(`${API_BASE}/api/reports/pending`, { headers }),
-        axios.get(`${API_BASE}/api/reports/instructor/my-cases`, { headers })
+        axios.get(`${API_BASE}/api/reports/instructor/my-cases`, { headers }),
+        axios.get(`${API_BASE}/api/reports/instructor/notifications`, { headers })
       ]);
       setQueue(queueRes.data.reports || []);
       setMyCases(mineRes.data.reports || []);
+      setNotifications(notifRes.data.notifications || []);
+      setUnreadCount(notifRes.data.unreadCount || 0);
     } catch (err) {
       console.error('Error loading instructor cases:', err);
     } finally {
@@ -91,10 +106,33 @@ const ReportVerification = ({ lang, user }) => {
     }
   }, [user, fetchData]);
 
-  const allCases = useMemo(() => {
-    const mineIds = new Set(myCases.map((c) => c._id));
-    return [...myCases, ...queue.filter((c) => !mineIds.has(c._id))];
-  }, [queue, myCases]);
+  const openCaseFromNotification = async (reportId, notificationId) => {
+    try {
+      const res = await axios.get(`${API_BASE}/api/reports/${reportId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSelectedReport(res.data.report);
+      await axios.put(`${API_BASE}/api/reports/instructor/notifications/${notificationId}/read`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotifications((prev) => prev.map((n) => (n._id === notificationId ? { ...n, read: true } : n)));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (err) {
+      alert(err.response?.data?.msg || 'Failed to open case from notification');
+    }
+  };
+
+  const markNotificationRead = async (notificationId) => {
+    try {
+      await axios.put(`${API_BASE}/api/reports/instructor/notifications/${notificationId}/read`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotifications((prev) => prev.map((n) => (n._id === notificationId ? { ...n, read: true } : n)));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (err) {
+      alert(err.response?.data?.msg || 'Failed to update notification');
+    }
+  };
 
   const claimCase = async (id) => {
     try {
@@ -182,6 +220,53 @@ const ReportVerification = ({ lang, user }) => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 lg:col-span-2">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-bold flex items-center gap-2">
+                <Bell className="w-4 h-4" /> {text.notifications}
+              </h2>
+              <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-700 font-semibold">
+                {unreadCount} unread
+              </span>
+            </div>
+
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : notifications.length === 0 ? (
+              <p className="text-sm text-gray-500">{text.noNotifications}</p>
+            ) : (
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {notifications.map((n) => (
+                  <div
+                    key={n._id}
+                    className={`border rounded-xl p-3 ${n.read ? 'bg-gray-50 dark:bg-gray-700' : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-300'}`}
+                  >
+                    <p className="font-semibold text-sm">{n.title?.en || 'Notification'}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">{n.message?.en || ''}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      {n.reportId && (
+                        <button
+                          onClick={() => openCaseFromNotification(n.reportId, n._id)}
+                          className="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+                        >
+                          {text.openCase}
+                        </button>
+                      )}
+                      {!n.read && (
+                        <button
+                          onClick={() => markNotificationRead(n._id)}
+                          className="text-xs px-2 py-1 rounded bg-green-600 text-white hover:bg-green-700 flex items-center gap-1"
+                        >
+                          <Check className="w-3 h-3" /> {text.markRead}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
             <h2 className="font-bold mb-3">{text.queue} ({queue.length})</h2>
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : queue.length === 0 ? <p className="text-sm text-gray-500">{text.noQueue}</p> : (

@@ -339,6 +339,70 @@ router.get('/instructor/my-cases', authMiddleware, async (req, res) => {
 });
 
 /**
+ * GET /api/reports/instructor/notifications
+ * Instructor gets latest in-app notifications for case workflow
+ */
+router.get('/instructor/notifications', authMiddleware, async (req, res) => {
+  try {
+    const currentUser = req.user;
+    if (currentUser.role !== 'officer') {
+      return res.status(403).json({ success: false, msg: 'Only agricultural instructors can view notifications' });
+    }
+
+    const limit = Math.min(Number(req.query.limit || 20), 100);
+
+    const notifications = await Notification.find({
+      recipientUserId: currentUser.id,
+      recipientRole: 'officer',
+      type: { $in: ['instructor_case', 'advice_update', 'system'] },
+      expiresAt: { $gt: new Date() }
+    })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+
+    const unreadCount = notifications.filter((n) => !n.read).length;
+
+    res.json({ success: true, notifications, unreadCount, count: notifications.length });
+  } catch (err) {
+    console.error('Error fetching instructor notifications:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * PUT /api/reports/instructor/notifications/:id/read
+ * Instructor marks one notification as read
+ */
+router.put('/instructor/notifications/:id/read', authMiddleware, async (req, res) => {
+  try {
+    const currentUser = req.user;
+    if (currentUser.role !== 'officer') {
+      return res.status(403).json({ success: false, msg: 'Only agricultural instructors can update notifications' });
+    }
+
+    const notification = await Notification.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        recipientUserId: currentUser.id,
+        recipientRole: 'officer'
+      },
+      { $set: { read: true } },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res.status(404).json({ success: false, msg: 'Notification not found' });
+    }
+
+    res.json({ success: true, notification });
+  } catch (err) {
+    console.error('Error updating instructor notification:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
  * POST /api/reports/:id/claim
  * Instructor claims an unassigned low-confidence case (exclusive)
  */
