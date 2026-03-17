@@ -251,7 +251,7 @@ const MyReports = ({ user, lang }) => {
 
               {!selectedReport.verifiedBy && selectedReport.status === 'pending' && (
                 <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-                  <p className="text-sm text-yellow-800">⏳ {lang === 'en' ? 'Awaiting verification from government officers' : 'රජයේ නිලධාරීන්ගෙන් සත්‍යාපනයේ බලාපොරොත්තුවෙන්'}</p>
+                  <p className="text-sm text-yellow-800">⏳ {lang === 'en' ? 'Awaiting verification from agricultural instructors' : 'රජයේ නිලධාරීන්ගෙන් සත්‍යාපනයේ බලාපොරොත්තුවෙන්'}</p>
                 </div>
               )}
             </div>

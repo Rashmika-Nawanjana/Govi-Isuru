@@ -15,7 +15,7 @@ const AreaAlerts = ({ lang, user }) => {
   const t = {
     en: {
       title: 'Area Alerts',
-      subtitle: 'Disease and pest alerts verified by government officers in your area',
+      subtitle: 'Disease and pest alerts verified by agricultural instructors in your area',
       noAlerts: 'No active alerts in your area',
       alertsCount: 'active alerts',
       from: 'Published by',

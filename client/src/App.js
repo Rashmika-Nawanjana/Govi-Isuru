@@ -399,7 +399,7 @@ function MainApp() {
         profileTab,
       ];
     } else {
-      // Government Officer tabs
+      // Agricultural Instructor tabs
       return [
         { id: 'officerDashboard', icon: ClipboardCheck, label: 'Area Dashboard', emoji: '📊' },
         { id: 'reportVerification', icon: FileText, label: 'Verify Reports', emoji: '✅' },

@@ -19,9 +19,9 @@ const UserSchema = new mongoose.Schema({
   passwordResetToken: { type: String },
   passwordResetExpires: { type: Date },
 
-  // Role System - Farmer, Government Officer, or Buyer
+  // Role System - Farmer, Agricultural Instructor, or Buyer
   role: { type: String, enum: ['farmer', 'officer', 'buyer', 'admin', 'moderator'], default: 'farmer' },
-  officerId: { type: String, default: null }, // For government officers only
+  officerId: { type: String, default: null }, // For agricultural instructors only
   department: { type: String, default: null }, // e.g., "Department of Agriculture", "Agrarian Services"
   designation: { type: String, default: null }, // e.g., "Agricultural Instructor", "Agrarian Development Officer"
 

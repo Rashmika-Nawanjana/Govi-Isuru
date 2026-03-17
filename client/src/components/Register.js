@@ -124,7 +124,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
     en: {
       selectRole: 'I am a',
       farmer: 'Farmer',
-      officer: 'Government Officer',
+      officer: 'Agricultural Instructor',
       buyer: 'Buyer',
       fullName: 'Full Name',
       fullNamePlaceholder: 'Ex: Namal Perera',
@@ -536,7 +536,7 @@ const Register = ({ onRegisterSuccess, switchToLogin, lang }) => {
             <div className="space-y-4 p-5 bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-50 dark:from-blue-900/20 dark:via-cyan-900/20 dark:to-blue-900/20 rounded-2xl border-2 border-blue-200 dark:border-blue-700 shadow-lg shadow-blue-100/50 animate-in fade-in slide-in-from-top duration-300">
               <div className="flex items-center gap-2 text-blue-700 font-bold mb-2">
                 <Building2 size={18} className="drop-shadow" />
-                <span className="text-sm"> {lang === 'si' ? 'රජ නිලධාරී තොරතුරු' : 'Government Officer Information'}</span>
+                <span className="text-sm"> {lang === 'si' ? 'රජ නිලධාරී තොරතුරු' : 'Agricultural Instructor Information'}</span>
               </div>
 
               <div className="space-y-1.5">

@@ -109,7 +109,7 @@ async function callModelAPI(messages, options = {}, modelName = PRIMARY_MODEL) {
   - 📈 Yield Prediction
 - **Logout**: Click your username/profile button in the top-right corner, then select "Logout" from dropdown menu
 
-**Government Officer Features:**
+**Agricultural Instructor Features:**
 - Officer Dashboard for verifying disease reports
 - Field visit scheduling and management
 - Performance monitoring and leaderboards

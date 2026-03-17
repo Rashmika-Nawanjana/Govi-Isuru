@@ -97,7 +97,7 @@ uvicorn main:app --reload --port 8000
 - 📊 **10 Years** of yield prediction data (2015-2024)
 - 🗺️ **25 Districts** covered across Sri Lanka
 - 🌐 **Full Bilingual** support (English & Sinhala)
-- 👥 **3 User Roles** - Farmers, Buyers, Government Officers
+- 👥 **3 User Roles** - Farmers, Buyers, Agricultural Instructors
 - 🎯 **40+ Components** - Comprehensive feature set
 
 ---
@@ -302,7 +302,7 @@ uvicorn main:app --reload --port 8000
 
 ---
 
-## **Government Officer Features**
+## **Agricultural Instructor Features**
 
 - **Purpose:** Tools for government/agriculture officers to verify disease reports, schedule and manage field visits, audit actions, and monitor officer performance and escalations.
 - **Key UI components:** `OfficerDashboard.js`, `ReportVerificationPanel.js`, `FieldVisitScheduling.js`, `InternalOfficerNotes.js`, `OfficerActionLogs.js`, `OfficerPerformanceDashboard.js`, `ReportVerificationPanel.js`, `AdminModerationPanel.js`.
@@ -1007,7 +1007,7 @@ python test_model.py
 ### Test User Accounts
 Create test accounts with different roles to test functionality:
 - **Farmer Account**: Regular user with full feature access
-- **Officer Account**: Government officer with verification powers
+- **Officer Account**: Agricultural instructor with verification powers
 - **Buyer Account**: Buyer with marketplace focus
 
 ---

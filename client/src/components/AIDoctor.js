@@ -230,7 +230,7 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
         console.log('Disease report submitted:', response.data);
 
         alert(lang === 'en'
-          ? '✅ Report submitted to government officers for verification. You will be notified once verified.'
+          ? '✅ Report submitted to agricultural instructors for verification. You will be notified once verified.'
           : '✅ වාර්තාව සත්‍යාපනය සඳහා ඩිජිටල් අධිකරණ ක්‍ෂේත්‍ර නිලධාරීන්ට ඉදිරිපත් කරන ලද බව සිතුවිලි ලබන ඉතිරි කිරීමයි।');
       }
     } catch (error) {
@@ -437,7 +437,7 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
                 <CheckCircle className="h-5 w-5" />
                 <span className="font-medium">
                   {lang === 'en'
-                    ? '✓ Report automatically saved and sent to government officers in your area'
+                    ? '✓ Report automatically saved and sent to agricultural instructors in your area'
                     : '✓ වාර්තාව ස්වයංක්‍රීයව සුරකින ලද අතර ඔබගේ ප්‍රදේශයේ රජයේ නිලධාරීන් වෙත යවන ලදී'}
                 </span>
               </div>
@@ -605,7 +605,7 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
               >
                 <FileText size={20} />
                 {lang === 'en'
-                  ? '📋 Submit Report to Government Officers'
+                  ? '📋 Submit Report to Agricultural Instructors'
                   : '📋 රජයේ නිලධාරීන්ට වාර්තාව ඉදිරිපත් කරන්න'}
               </button>
             )}

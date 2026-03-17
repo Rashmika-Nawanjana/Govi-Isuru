@@ -82,7 +82,7 @@ router.post('/submit', authMiddleware, async (req, res) => {
       console.error('Error creating DiseaseReport entry:', diseaseReportErr);
     }
 
-    // Find all government officers in this GN Division
+    // Find all agricultural instructors in this GN Division
     const officers = await User.find({
       role: 'officer',
       gnDivision: currentUser.gnDivision
@@ -94,7 +94,7 @@ router.post('/submit', authMiddleware, async (req, res) => {
 
     res.status(201).json({
       success: true,
-      msg: 'Report submitted successfully. Government officers will review it shortly.',
+      msg: 'Report submitted successfully. Agricultural instructors will review it shortly.',
       reportId: report._id
     });
 

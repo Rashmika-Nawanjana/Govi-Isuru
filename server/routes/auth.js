@@ -170,7 +170,7 @@ router.post('/register', async (req, res) => {
     // Validate officer ID if role is officer
     if (role === 'officer') {
       if (!officerId) {
-        return res.status(400).json({ msg: "Officer ID is required for government officers" });
+        return res.status(400).json({ msg: "Officer ID is required for agricultural instructors" });
       }
       const existingOfficer = await User.findOne({ officerId });
       if (existingOfficer) {

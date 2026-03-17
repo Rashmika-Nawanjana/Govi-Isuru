@@ -55,7 +55,7 @@ app.use('/api/news', newsRoutes);
 // Cost: 20 credits per recommendation
 app.use('/api/suitability', authMiddleware, checkCredits(20), suitabilityRoutes);
 
-// Government Officer API Routes
+// Agricultural Instructor API Routes
 app.use('/api/officer', officerRoutes);
 
 // Analytics API Routes
@@ -226,7 +226,7 @@ app.post('/api/register', async (req, res) => {
     // 2. Validate officer ID if role is officer
     if (role === 'officer') {
       if (!officerId) {
-        return res.status(400).json({ msg: "Officer ID is required for government officers" });
+        return res.status(400).json({ msg: "Officer ID is required for agricultural instructors" });
       }
       const existingOfficer = await User.findOne({ officerId });
       if (existingOfficer) {

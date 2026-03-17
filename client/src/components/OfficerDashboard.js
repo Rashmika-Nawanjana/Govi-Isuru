@@ -35,7 +35,7 @@ const OfficerDashboard = ({ user, language = 'en', initialTab = 'overview' }) =>
 
   const t = {
     en: {
-      title: 'Government Officer Dashboard',
+      title: 'Agricultural Instructor Dashboard',
       subtitle: 'Monitor disease outbreaks and verify reports',
       activeAlerts: 'Active Disease Alerts',
       areaReports: 'Area Reports',
