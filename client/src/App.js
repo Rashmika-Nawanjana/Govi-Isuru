@@ -398,18 +398,6 @@ function MainApp() {
         { id: 'cropCareHub', icon: Droplets, label: t.cropCareHub, emoji: '🌱' },
         { id: 'marketHub', icon: ShoppingBag, label: t.marketHub, emoji: '📦' },
         { id: 'consultationHub', icon: Search, label: t.consultationHub, emoji: '👥', dividerAfter: true },
-        
-        { id: 'doctor', icon: Search, label: t.doctor, emoji: '🩺' },
-        { id: 'manualBooking', icon: CalendarDays, label: t.manualBooking, emoji: '📅' },
-        { id: 'myReports', icon: FileText, label: lang === 'si' ? 'මගේ වාර්තා' : 'My Reports', emoji: '📋' },
-        { id: 'yield', icon: BarChart3, label: t.yieldForecast, emoji: '🌾' },
-        { id: 'trends', icon: TrendingUp, label: t.trends, emoji: '📈' },
-        { id: 'market', icon: ShoppingBag, label: t.market, emoji: '🛒' },
-        { id: 'weather', icon: CloudSun, label: t.weather, emoji: '🌤️' },
-        { id: 'alerts', icon: AlertTriangle, label: t.alerts, emoji: '⚠️' },
-        { id: 'news', icon: Newspaper, label: t.news, emoji: '📰' },
-        { id: 'suitability', icon: Droplets, label: t.suitability, emoji: '🌱' },
-        { id: 'riceVarieties', icon: BookOpen, label: t.riceVarieties, emoji: '🌾' },
         profileTab,
       ];
     } else if (isBuyer) {
