@@ -7,7 +7,7 @@ const User = require('../models/User');
 const ALERT_CONFIG = {
   reportThreshold: 3,        // Minimum reports to trigger alert
   timeWindowDays: 7,         // Days to look back for reports
-  confidenceThreshold: 0.5,  // Minimum AI confidence for valid report
+  confidenceThreshold: 0.95, // Minimum AI confidence for auto-verification
   trustScoreThreshold: 30,   // Minimum trust score for verified reports
   severityLevels: {
     low: { min: 3, max: 5 },
@@ -273,6 +273,8 @@ async function saveDiseaseReport(reportData) {
     // Determine severity based on disease info
     const severity = determineSeverity(reportData.disease, reportData.confidence);
     
+    const verificationStatus = reportData.verificationStatus || (aiConfidenceValid ? 'verified' : 'pending');
+
     // Create the disease report with enhanced data
     const report = await DiseaseReport.create({
       ...reportData,
@@ -280,21 +282,14 @@ async function saveDiseaseReport(reportData) {
       coordinates,
       aiConfidenceValid,
       severity,
-      verificationStatus: aiConfidenceValid && trustScore >= 50 ? 'pending' : 'flagged'
+      verificationStatus
     });
 
     // Check for community confirmations (similar reports nearby)
     await checkCommunityConfirmations(report);
 
-    // Check if this triggers any alerts (only for valid reports)
-    let alerts = [];
-    if (report.trustScore >= ALERT_CONFIG.trustScoreThreshold) {
-      alerts = await checkDiseaseAlerts(
-        reportData.gnDivision,
-        reportData.dsDivision,
-        reportData.district
-      );
-    }
+    // Alert triggering is controlled by report workflow routes to avoid premature broadcasts.
+    const alerts = [];
 
     return { report, alerts };
   } catch (error) {
@@ -405,12 +400,9 @@ async function checkCommunityConfirmations(report) {
       // Update confirmation count
       report.communityConfirmations = similarReports.length;
       
-      // If multiple confirmations, increase trust and verify
+      // If multiple confirmations, increase trust only.
       if (similarReports.length >= 2) {
         report.trustScore = Math.min(100, report.trustScore + 15);
-        if (report.verificationStatus === 'pending') {
-          report.verificationStatus = 'verified';
-        }
       }
       
       // Add references
@@ -438,7 +430,8 @@ async function getHeatmapData(filters = {}) {
     // First try DiseaseReport with coordinates
     const query = {
       'coordinates.lat': { $exists: true, $ne: null },
-      'coordinates.lng': { $exists: true, $ne: null }
+      'coordinates.lng': { $exists: true, $ne: null },
+      verificationStatus: 'verified'
     };
     
     // Apply filters

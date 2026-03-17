@@ -14,8 +14,26 @@ const NotificationSchema = new mongoose.Schema({
   
   type: {
     type: String,
-    enum: ['disease_alert', 'weather_warning', 'market_update', 'system'],
+    enum: ['disease_alert', 'weather_warning', 'market_update', 'system', 'instructor_case', 'advice_update'],
     default: 'disease_alert'
+  },
+
+  recipientUserId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false
+  },
+
+  recipientRole: {
+    type: String,
+    enum: ['farmer', 'officer', 'admin', 'buyer'],
+    required: false
+  },
+
+  reportId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Report',
+    required: false
   },
   
   title: {
@@ -59,5 +77,6 @@ const NotificationSchema = new mongoose.Schema({
 // Index for fetching user notifications
 NotificationSchema.index({ targetGnDivision: 1, createdAt: -1 });
 NotificationSchema.index({ farmerId: 1, read: 1, createdAt: -1 });
+NotificationSchema.index({ recipientUserId: 1, read: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Notification', NotificationSchema);

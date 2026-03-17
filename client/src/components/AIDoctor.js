@@ -16,6 +16,7 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
   const [showGradCam, setShowGradCam] = useState(false);
   const [cropType, setCropType] = useState('rice'); // 'rice', 'tea', or 'chili'
   const [reportSaved, setReportSaved] = useState(false);
+  const [reportWorkflow, setReportWorkflow] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -227,10 +228,11 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
 
       if (response.data.success) {
         setReportSaved(true);
+        setReportWorkflow(response.data.workflow || null);
         console.log('Disease report submitted:', response.data);
 
         alert(lang === 'en'
-          ? '✅ Report submitted to agricultural instructors for verification. You will be notified once verified.'
+          ? (response.data.msg || '✅ Report submitted successfully.')
           : '✅ වාර්තාව සත්‍යාපනය සඳහා ඩිජිටල් අධිකරණ ක්‍ෂේත්‍ර නිලධාරීන්ට ඉදිරිපත් කරන ලද බව සිතුවිලි ලබන ඉතිරි කිරීමයි।');
       }
     } catch (error) {
@@ -437,7 +439,9 @@ const AIDoctor = ({ lang, user, onInteraction }) => {
                 <CheckCircle className="h-5 w-5" />
                 <span className="font-medium">
                   {lang === 'en'
-                    ? '✓ Report automatically saved and sent to agricultural instructors in your area'
+                    ? (reportWorkflow === 'auto_verified'
+                      ? '✓ Report auto-verified by AI and alert sent to farmers in your GN division'
+                      : '✓ Report saved and sent to all agricultural instructors for paid analysis')
                     : '✓ වාර්තාව ස්වයංක්‍රීයව සුරකින ලද අතර ඔබගේ ප්‍රදේශයේ රජයේ නිලධාරීන් වෙත යවන ලදී'}
                 </span>
               </div>

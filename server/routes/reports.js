@@ -8,6 +8,43 @@ const User = require('../models/User');
 const authMiddleware = require('../middleware/authMiddleware');
 const alertService = require('../services/alertService');
 
+const AUTO_VERIFY_THRESHOLD = 0.95;
+const ADVICE_FEE_CREDITS = Number(process.env.ADVICE_FEE_CREDITS || 40);
+
+async function createInstructorCaseNotifications(report) {
+  const instructors = await User.find({ role: 'officer', isApproved: true }).select('_id');
+  if (!instructors.length) return 0;
+
+  const docs = instructors.map((officer) => ({
+    recipientUserId: officer._id,
+    recipientRole: 'officer',
+    type: 'instructor_case',
+    reportId: report._id,
+    title: {
+      en: 'New Case Available for Analysis',
+      si: 'විශ්ලේෂණය සඳහා නව නඩුවක් ඇත'
+    },
+    message: {
+      en: `${report.ai_prediction || report.title} (${Math.round((report.confidence_score || 0) * 100)}% confidence) needs instructor analysis.`,
+      si: `${report.ai_prediction || report.title} (${Math.round((report.confidence_score || 0) * 100)}% විශ්වාසය) සඳහා නිලධාරී විශ්ලේෂණය අවශ්‍යයි.`
+    },
+    severity: 'warning'
+  }));
+
+  await Notification.insertMany(docs);
+  return docs.length;
+}
+
+async function syncDiseaseReportVerification(report, reviewerName, notes) {
+  if (!report.diseaseReportId) return;
+
+  await alertService.reviewReport(report.diseaseReportId, {
+    status: 'verified',
+    reviewedBy: reviewerName,
+    flaggedReason: notes || undefined
+  });
+}
+
 /**
  * POST /api/reports/submit
  * Farmer submits a disease/pest report from AI Doctor
@@ -45,6 +82,9 @@ router.post('/submit', authMiddleware, async (req, res) => {
       });
     }
 
+    const confidence = Number(confidence_score || 0);
+    const isAutoVerified = confidence >= AUTO_VERIFY_THRESHOLD;
+
     // Create report
     const report = new Report({
       report_type: report_type || 'disease',
@@ -58,44 +98,69 @@ router.post('/submit', authMiddleware, async (req, res) => {
       description,
       image_url,
       ai_prediction,
-      confidence_score,
-      status: 'pending'
+      confidence_score: confidence,
+      autoVerifiedByAI: isAutoVerified,
+      status: isAutoVerified ? 'verified' : 'instructor_pending',
+      verificationDate: isAutoVerified ? new Date() : undefined,
+      verificationNotes: isAutoVerified
+        ? `Auto-verified by AI (>= ${Math.round(AUTO_VERIFY_THRESHOLD * 100)}% confidence).`
+        : undefined,
+      assignmentStatus: isAutoVerified ? 'closed' : 'unassigned',
+      adviceFeeCredits: ADVICE_FEE_CREDITS,
+      paymentStatus: isAutoVerified ? 'not_required' : 'pending'
     });
 
     await report.save();
 
     // Also create a DiseaseReport entry so the officer dashboard picks it up
     try {
-      await alertService.saveDiseaseReport({
+      const diseaseSaveResult = await alertService.saveDiseaseReport({
         farmerId: currentUser.id || currentUser._id,
         farmerUsername: currentUser.fullName || currentUser.username || 'Farmer',
         crop: (title || '').split(' - ')[0]?.toLowerCase() || 'rice',
         disease: ai_prediction || title || 'Unknown',
-        confidence: confidence_score || 0,
+        confidence,
         district: currentUser.district,
         dsDivision: currentUser.dsDivision,
         gnDivision: currentUser.gnDivision,
-        treatment: ''
+        treatment: '',
+        verificationStatus: isAutoVerified ? 'verified' : 'pending'
       });
+
+      if (diseaseSaveResult?.report?._id) {
+        report.diseaseReportId = diseaseSaveResult.report._id;
+      }
     } catch (diseaseReportErr) {
       // Log but don't fail the main report submission
       console.error('Error creating DiseaseReport entry:', diseaseReportErr);
     }
 
-    // Find all agricultural instructors in this GN Division
-    const officers = await User.find({
-      role: 'officer',
-      gnDivision: currentUser.gnDivision
-    }).select('_id email fullName');
+    if (isAutoVerified) {
+      await createFarmerAlert(report);
+      await createCommunityAlertFromReport(report, { source: 'ai_auto' });
+      report.alertSentToFarmers = true;
+      report.alertSentDate = new Date();
+      await report.save();
 
-    // TODO: Send email notifications to officers
-    // const notificationService = require('../services/notificationService');
-    // notificationService.notifyOfficersOfReport(report, officers);
+      return res.status(201).json({
+        success: true,
+        workflow: 'auto_verified',
+        msg: 'Report auto-verified and disease alert sent to farmers in your GN division.',
+        reportId: report._id,
+        confidence
+      });
+    }
+
+    const notifiedCount = await createInstructorCaseNotifications(report);
+    await report.save();
 
     res.status(201).json({
       success: true,
-      msg: 'Report submitted successfully. Agricultural instructors will review it shortly.',
-      reportId: report._id
+      workflow: 'instructor_required',
+      msg: 'Report submitted. All registered agricultural instructors have been notified for paid analysis.',
+      reportId: report._id,
+      confidence,
+      notifiedInstructors: notifiedCount
     });
 
   } catch (err) {
@@ -106,7 +171,7 @@ router.post('/submit', authMiddleware, async (req, res) => {
 
 /**
  * GET /api/reports/pending
- * Officer gets pending reports for their GN Division
+ * Instructor gets unassigned low-confidence cases (countrywide)
  */
 router.get('/pending', authMiddleware, async (req, res) => {
   try {
@@ -117,10 +182,11 @@ router.get('/pending', authMiddleware, async (req, res) => {
       return res.status(403).json({ success: false, msg: 'Only officers can view pending reports' });
     }
 
-    // Get reports pending verification in officer's GN Division
+    // Countrywide instructor queue for low-confidence cases
     const reports = await Report.find({
-      gnDivision: currentUser.gnDivision,
-      status: 'pending'
+      status: 'instructor_pending',
+      assignmentStatus: 'unassigned',
+      confidence_score: { $lt: AUTO_VERIFY_THRESHOLD }
     })
       .populate('farmerId', 'fullName email')
       .sort({ createdAt: -1 });
@@ -154,7 +220,7 @@ router.get('/my-reports', authMiddleware, async (req, res) => {
     const reports = await Report.find({
       farmerId: currentUser.id
     })
-      .select('title description image_url ai_prediction confidence_score status verifiedBy verificationDate verificationNotes gnDivision createdAt')
+      .select('title description image_url ai_prediction confidence_score status verificationDate verificationNotes gnDivision createdAt autoVerifiedByAI assignedInstructorName assignmentStatus adviceText adviceFeeCredits paymentStatus adviceSubmittedAt')
       .sort({ createdAt: -1 });
 
     res.json({
@@ -217,11 +283,6 @@ router.put('/:id/verify', authMiddleware, async (req, res) => {
       return res.status(404).json({ success: false, msg: 'Report not found' });
     }
 
-    // Check if officer is from same GN Division
-    if (currentUser.gnDivision !== report.gnDivision) {
-      return res.status(403).json({ success: false, msg: 'Can only verify reports from your GN Division' });
-    }
-
     // Update report
     report.status = status; // 'verified', 'rejected', or 'resolved'
     report.verifiedBy = currentUser.id;
@@ -232,10 +293,14 @@ router.put('/:id/verify', authMiddleware, async (req, res) => {
 
     await report.save();
 
-    // If verified, create alert for other farmers in the area
+    // For manual flow, verification should update heatmap eligibility only.
+    // GN alerts are only auto-sent for AI auto-verified high-confidence cases.
     if (status === 'verified') {
-      await createFarmerAlert(report);
-      await createCommunityAlertFromReport(report);
+      await syncDiseaseReportVerification(
+        report,
+        currentUser.fullName || currentUser.username || 'Agricultural Instructor',
+        verificationNotes
+      );
     }
 
     res.json({
@@ -246,6 +311,213 @@ router.put('/:id/verify', authMiddleware, async (req, res) => {
 
   } catch (err) {
     console.error('Error verifying report:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * GET /api/reports/instructor/my-cases
+ * Instructor gets cases claimed by themselves
+ */
+router.get('/instructor/my-cases', authMiddleware, async (req, res) => {
+  try {
+    const currentUser = req.user;
+    if (currentUser.role !== 'officer') {
+      return res.status(403).json({ success: false, msg: 'Only agricultural instructors can view cases' });
+    }
+
+    const reports = await Report.find({
+      assignedInstructorId: currentUser.id,
+      assignmentStatus: { $in: ['claimed', 'analysing', 'advice_submitted'] }
+    }).sort({ claimedAt: -1, createdAt: -1 });
+
+    res.json({ success: true, reports, count: reports.length });
+  } catch (err) {
+    console.error('Error fetching instructor cases:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * POST /api/reports/:id/claim
+ * Instructor claims an unassigned low-confidence case (exclusive)
+ */
+router.post('/:id/claim', authMiddleware, async (req, res) => {
+  try {
+    const currentUser = req.user;
+    if (currentUser.role !== 'officer') {
+      return res.status(403).json({ success: false, msg: 'Only agricultural instructors can claim cases' });
+    }
+
+    const report = await Report.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        status: 'instructor_pending',
+        assignmentStatus: 'unassigned',
+        confidence_score: { $lt: AUTO_VERIFY_THRESHOLD }
+      },
+      {
+        $set: {
+          assignedInstructorId: currentUser.id,
+          assignedInstructorName: currentUser.fullName || currentUser.username,
+          assignmentStatus: 'claimed',
+          claimedAt: new Date(),
+          status: 'claimed'
+        }
+      },
+      { new: true }
+    );
+
+    if (!report) {
+      return res.status(409).json({ success: false, msg: 'Case already claimed by another instructor or unavailable.' });
+    }
+
+    await Notification.create({
+      recipientUserId: report.farmerId,
+      recipientRole: 'farmer',
+      type: 'advice_update',
+      reportId: report._id,
+      title: {
+        en: 'Your Case Was Claimed',
+        si: 'ඔබේ නඩුව භාරගෙන ඇත'
+      },
+      message: {
+        en: `${report.assignedInstructorName} accepted your case and will start analysis soon.`,
+        si: `${report.assignedInstructorName} ඔබගේ නඩුව භාරගෙන ඇත.`
+      },
+      severity: 'info'
+    });
+
+    res.json({ success: true, msg: 'Case claimed successfully', report });
+  } catch (err) {
+    console.error('Error claiming case:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * POST /api/reports/:id/start-analysis
+ * Instructor marks a claimed case as analysing
+ */
+router.post('/:id/start-analysis', authMiddleware, async (req, res) => {
+  try {
+    const currentUser = req.user;
+    if (currentUser.role !== 'officer') {
+      return res.status(403).json({ success: false, msg: 'Only agricultural instructors can start analysis' });
+    }
+
+    const report = await Report.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        assignedInstructorId: currentUser.id,
+        assignmentStatus: { $in: ['claimed', 'analysing'] }
+      },
+      {
+        $set: {
+          assignmentStatus: 'analysing',
+          status: 'under_review',
+          analysisStartedAt: new Date()
+        }
+      },
+      { new: true }
+    );
+
+    if (!report) {
+      return res.status(404).json({ success: false, msg: 'Case not found or not assigned to you' });
+    }
+
+    res.json({ success: true, msg: 'Analysis started', report });
+  } catch (err) {
+    console.error('Error starting analysis:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * POST /api/reports/:id/submit-advice
+ * Instructor submits paid advice and transfers farmer credits to instructor
+ */
+router.post('/:id/submit-advice', authMiddleware, async (req, res) => {
+  try {
+    const currentUser = req.user;
+    if (currentUser.role !== 'officer') {
+      return res.status(403).json({ success: false, msg: 'Only agricultural instructors can submit paid advice' });
+    }
+
+    const { adviceText, verificationNotes } = req.body;
+    if (!adviceText || !adviceText.trim()) {
+      return res.status(400).json({ success: false, msg: 'Advice text is required' });
+    }
+
+    const report = await Report.findOne({
+      _id: req.params.id,
+      assignedInstructorId: currentUser.id,
+      assignmentStatus: { $in: ['claimed', 'analysing'] }
+    });
+
+    if (!report) {
+      return res.status(404).json({ success: false, msg: 'Case not found or not assigned to you' });
+    }
+
+    const fee = Number(report.adviceFeeCredits || ADVICE_FEE_CREDITS);
+    const farmer = await User.findById(report.farmerId);
+    const instructor = await User.findById(currentUser.id);
+
+    if (!farmer || !instructor) {
+      return res.status(404).json({ success: false, msg: 'Farmer or instructor not found' });
+    }
+
+    if ((farmer.credits || 0) < fee) {
+      return res.status(403).json({
+        success: false,
+        msg: `Farmer has insufficient credits for paid advice (${fee} required).`,
+        requiredCredits: fee,
+        farmerCredits: farmer.credits || 0
+      });
+    }
+
+    farmer.credits = (farmer.credits || 0) - fee;
+    instructor.credits = (instructor.credits || 0) + fee;
+    await farmer.save();
+    await instructor.save();
+
+    report.adviceText = adviceText.trim();
+    report.adviceSubmittedAt = new Date();
+    report.assignmentStatus = 'advice_submitted';
+    report.status = 'advice_submitted';
+    report.paymentStatus = 'completed';
+    report.paymentCompletedAt = new Date();
+    report.verifiedBy = currentUser.id;
+    report.verifiedByName = currentUser.fullName || currentUser.username;
+    report.verificationDate = new Date();
+    report.verificationNotes = verificationNotes || 'Verified through instructor paid analysis.';
+    await report.save();
+
+    await syncDiseaseReportVerification(
+      report,
+      report.verifiedByName,
+      report.verificationNotes
+    );
+
+    await Notification.create({
+      recipientUserId: report.farmerId,
+      recipientRole: 'farmer',
+      type: 'advice_update',
+      reportId: report._id,
+      title: {
+        en: 'Paid Advice Delivered',
+        si: 'ගෙවන උපදෙස් ලබාදී ඇත'
+      },
+      message: {
+        en: `Your case was completed by ${report.verifiedByName}. ${fee} credits were deducted and advice is ready.`,
+        si: `${report.verifiedByName} විසින් ඔබගේ නඩුව සම්පූර්ණ කර ඇත. ${fee} credits අඩු කර ඇත.`
+      },
+      severity: 'info'
+    });
+
+    res.json({ success: true, msg: 'Advice submitted and credits transferred successfully', report });
+  } catch (err) {
+    console.error('Error submitting advice:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -348,7 +620,7 @@ router.get('/alerts/my-area', authMiddleware, async (req, res) => {
  * Helper function: Create a CommunityAlert when a report is verified
  * This bridges the Report system with the CommunityAlert system used by AlertsDashboard
  */
-async function createCommunityAlertFromReport(report) {
+async function createCommunityAlertFromReport(report, options = {}) {
   try {
     // Extract disease name from ai_prediction or title
     const disease = report.ai_prediction || report.title || 'Unknown Disease';
@@ -367,9 +639,11 @@ async function createCommunityAlertFromReport(report) {
       }
     }
 
+    const source = options.source === 'ai_auto' ? 'AI auto-verified' : 'Instructor-verified';
+
     // Default recommendation
     const recommendation = {
-      en: `Officer-verified: ${disease} detected in ${crop} in ${report.gnDivision}. Monitor your crops closely. Consult your local agricultural officer immediately.`,
+      en: `Monitor your crops closely. Consult your local agricultural officer immediately.`,
       si: `නිලධාරි සත්‍යාපිත: ${report.gnDivision} හි ${crop} බෝග වල ${disease} හඳුනාගෙන ඇත. ඔබේ බෝග සමීපව නිරීක්ෂණය කරන්න. වහාම ප්‍රදේශීය කෘෂිකර්ම නිලධාරියා හමුවන්න.`
     };
 
@@ -420,7 +694,7 @@ async function createCommunityAlertFromReport(report) {
         si: `⚠️ ${disease} අනතුරු ඇඟවීම - ${sevLabel.si} බරපතලකම`
       },
       message: {
-        en: `Officer-verified: ${disease} detected in ${crop} in ${report.gnDivision}. ${recommendation.en}`,
+        en: `${source}: ${disease} detected in ${crop} in ${report.gnDivision}. ${recommendation.en}`,
         si: `නිලධාරි සත්‍යාපිත: ${report.gnDivision} හි ${crop} බෝග වල ${disease} හඳුනාගෙන ඇත. ${recommendation.si}`
       },
       severity: notifSeverity,

@@ -15,6 +15,10 @@ const MyReports = ({ user, lang }) => {
       loading: 'Loading reports...',
       submitted: 'Submitted',
       pending: 'Pending Review',
+      instructor_pending: 'Waiting for Instructor',
+      claimed: 'Claimed by Instructor',
+      under_review: 'Analysis in Progress',
+      advice_submitted: 'Advice Submitted',
       verified: 'Verified',
       rejected: 'Rejected',
       status: 'Status',
@@ -24,6 +28,9 @@ const MyReports = ({ user, lang }) => {
       location: 'Location',
       verifiedBy: 'Verified By',
       notes: 'Officer Notes',
+      instructor: 'Instructor',
+      advice: 'Paid Advice',
+      payment: 'Payment',
       close: 'Close',
       noNotes: 'No additional notes'
     },
@@ -33,6 +40,10 @@ const MyReports = ({ user, lang }) => {
       loading: 'වාර්තා පූරණය කරමින්...',
       submitted: 'ඉදිරිපත් කරන ලද',
       pending: 'සමීක්ෂණයට බලාපොරොත්තුවෙන්',
+      instructor_pending: 'උපදේශකයා සඳහා බලාපොරොත්තු වෙමින්',
+      claimed: 'උපදේශකයෙකු භාරගෙන ඇත',
+      under_review: 'විශ්ලේෂණය සිදුවෙමින්',
+      advice_submitted: 'උපදෙස් ඉදිරිපත් කර ඇත',
       verified: 'සත්‍යාපිත',
       rejected: 'ප්‍රතික්ෂේප',
       status: 'තත්ත්වය',
@@ -42,6 +53,9 @@ const MyReports = ({ user, lang }) => {
       location: 'ස්ථානය',
       verifiedBy: 'සත්‍යාපිත කරමින්',
       notes: 'නිලධාරී සටහන්',
+      instructor: 'උපදේශකයා',
+      advice: 'ගෙවන උපදෙස්',
+      payment: 'ගෙවීම',
       close: 'වසන්න',
       noNotes: 'අතිරේක සටහන් නොමាතර'
     }
@@ -168,6 +182,13 @@ const MyReports = ({ user, lang }) => {
                   </div>
                 </div>
 
+                {report.assignedInstructorName && (
+                  <div className="mt-3 text-sm">
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-semibold">{text.instructor}</p>
+                    <p className="text-gray-700 dark:text-gray-300">{report.assignedInstructorName}</p>
+                  </div>
+                )}
+
                 {report.description && (
                   <div className="mt-3">
                     <p className="text-sm text-gray-600 dark:text-gray-400">{report.description}</p>
@@ -245,6 +266,23 @@ const MyReports = ({ user, lang }) => {
                   <p className="font-semibold text-gray-800 dark:text-white">{selectedReport.verifiedBy}</p>
                   {selectedReport.verificationNotes && (
                     <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">{selectedReport.verificationNotes}</p>
+                  )}
+                </div>
+              )}
+
+              {selectedReport.assignmentStatus && (
+                <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold mb-1">{text.payment}</p>
+                  <p className="font-semibold text-gray-800 dark:text-white">
+                    {selectedReport.paymentStatus === 'completed'
+                      ? `${selectedReport.adviceFeeCredits || 0} credits paid`
+                      : 'Pending'}
+                  </p>
+                  {selectedReport.adviceText && (
+                    <>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold mt-2 mb-1">{text.advice}</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300">{selectedReport.adviceText}</p>
+                    </>
                   )}
                 </div>
               )}
