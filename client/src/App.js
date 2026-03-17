@@ -258,7 +258,7 @@ function MainApp() {
   useEffect(() => {
     // If user exists and view hasn't been set to a dashboard yet, set it based on role
     if (user && (view === 'home' || view === 'login' || view === 'register')) {
-      let initialView = 'doctor';
+      let initialView = 'farmerHub';
       if (user?.role === 'admin') initialView = 'adminDashboard';
       else if (user?.role === 'officer') initialView = 'officerDashboard';
       else if (user?.role === 'buyer') initialView = 'buyerDashboard';
@@ -271,7 +271,7 @@ function MainApp() {
   const handleRegisterSuccess = (userData) => {
     setUser(userData);
     // Set initial view based on role
-    let initialView = 'doctor';
+    let initialView = 'farmerHub';
     if (userData?.role === 'admin') initialView = 'adminDashboard';
     else if (userData?.role === 'officer') initialView = 'officerDashboard';
     else if (userData?.role === 'buyer') initialView = 'buyerDashboard';
