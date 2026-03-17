@@ -1,4 +1,18 @@
 {
-  "test_accuracy": 0.5243902206420898,
-  "test_loss": 2.6580278873443604
+  "test_accuracy": 0.4268292784690857,
+  "test_loss": 3.3648602962493896,
+  "total_epochs": 150,
+  "config": {
+    "image_size": [
+      224,
+      224
+    ],
+    "batch_size": 16,
+    "epochs": 90,
+    "learning_rate": 0.001,
+    "fine_tune_epochs": 60,
+    "fine_tune_lr": 8e-05,
+    "dataset_path": "c:\\Users\\ADMIN\\Videos\\test\\Govi-Isuru\\ai-service\\dataset",
+    "model_save_path": "c:\\Users\\ADMIN\\Videos\\test\\Govi-Isuru\\ai-service\\models"
+  }
 }
