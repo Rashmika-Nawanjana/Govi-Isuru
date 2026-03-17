@@ -30,6 +30,10 @@ import InstructorBookingManager from './components/InstructorBookingManager';
 
 import MyReports from './components/MyReports';
 import SavedListings from './components/SavedListings';
+import FarmerHubDashboard from './components/hubs/FarmerHubDashboard';
+import CropCareHub from './components/hubs/CropCareHub';
+import MarketHub from './components/hubs/MarketHub';
+import ConsultationHub from './components/hubs/ConsultationHub';
 import { districtCoordinates } from './data/sriLankaCoordinates';
 
 const translations = {
@@ -59,7 +63,12 @@ const translations = {
     // Admin-specific translations
     adminDashboard: "Admin Dashboard",
     userManagement: "User Management",
-    officerApprovals: "Officer Approvals"
+    officerApprovals: "Officer Approvals",
+    // Hub translations
+    farmerHub: "Farmer Hub",
+    cropCareHub: "Crop Care Hub",
+    marketHub: "Market Hub",
+    consultationHub: "Consultation Hub"
   },
   si: {
     title: "ගොවි ඉසුරු",
@@ -87,7 +96,12 @@ const translations = {
     // Admin-specific translations
     adminDashboard: "පරිපාලක උපකරණ පුවරුව",
     userManagement: "පරිශීලක කළමනාකරණය",
-    officerApprovals: "නිලධාරී අනුමැතිය"
+    officerApprovals: "නිලධාරී අනුමැතිය",
+    // Hub translations
+    farmerHub: "ගොවි හබ්",
+    cropCareHub: "බෝග 관리 හබ්",
+    marketHub: "වෙළඳ හබ්",
+    consultationHub: "උපදෙස් හබ්"
   }
 };
 
@@ -378,8 +392,13 @@ function MainApp() {
         profileTab,
       ];
     } else if (isFarmer) {
-      // Farmer tabs
+      // Farmer tabs - include hubs prominently
       return [
+        { id: 'farmerHub', icon: Leaf, label: t.farmerHub, emoji: '🏘️', divider: true },
+        { id: 'cropCareHub', icon: Droplets, label: t.cropCareHub, emoji: '🌱' },
+        { id: 'marketHub', icon: ShoppingBag, label: t.marketHub, emoji: '📦' },
+        { id: 'consultationHub', icon: Search, label: t.consultationHub, emoji: '👥', dividerAfter: true },
+        
         { id: 'doctor', icon: Search, label: t.doctor, emoji: '🩺' },
         { id: 'manualBooking', icon: CalendarDays, label: t.manualBooking, emoji: '📅' },
         { id: 'myReports', icon: FileText, label: lang === 'si' ? 'මගේ වාර්තා' : 'My Reports', emoji: '📋' },
@@ -485,29 +504,47 @@ function MainApp() {
           {navItems.map((item, idx) => {
             const Icon = item.icon;
             const isActive = view === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setView(item.id);
-                  setIsSidebarOpen(false);
-                }}
-                className={`group flex items-center gap-2 md:gap-3 w-full px-3 md:px-4 py-2.5 md:py-2.5 rounded-lg md:rounded-xl font-semibold text-sm transition-all duration-200 active:scale-[0.97] shimmer-hover ${isActive
-                  ? 'bg-white/95 text-green-800 shadow-lg shadow-green-900/20'
-                  : 'text-green-100/90 hover:bg-white/10 hover:text-white'
-                  }`}
-                style={{ animationDelay: `${idx * 30}ms` }}
-              >
-                <div className={`p-1 md:p-1.5 rounded-lg transition-all flex-shrink-0 ${isActive ? 'bg-gradient-to-br from-green-100 to-emerald-100 shadow-sm' : 'bg-white/10'}`}>
-                  <Icon size={16} className={`md:w-[18px] md:h-[18px] ${isActive ? 'text-green-700' : 'text-green-300'}`} />
+            
+            // Handle dividers
+            if (item.divider) {
+              return (
+                <div key={`divider-${idx}`} className="my-1 px-2 py-1">
+                  <div className="h-px bg-green-600/30 w-full"></div>
+                  <p className="text-[10px] font-semibold text-green-300/60 mt-1.5 uppercase tracking-widest">{item.label}</p>
                 </div>
-                <span className="flex-grow text-left truncate">{item.label}</span>
-                {isActive && (
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+              );
+            }
+            
+            return (
+              <>
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setView(item.id);
+                    setIsSidebarOpen(false);
+                  }}
+                  className={`group flex items-center gap-2 md:gap-3 w-full px-3 md:px-4 py-2.5 md:py-2.5 rounded-lg md:rounded-xl font-semibold text-sm transition-all duration-200 active:scale-[0.97] shimmer-hover ${isActive
+                    ? 'bg-white/95 text-green-800 shadow-lg shadow-green-900/20'
+                    : 'text-green-100/90 hover:bg-white/10 hover:text-white'
+                    }`}
+                  style={{ animationDelay: `${idx * 30}ms` }}
+                >
+                  <div className={`p-1 md:p-1.5 rounded-lg transition-all flex-shrink-0 ${isActive ? 'bg-gradient-to-br from-green-100 to-emerald-100 shadow-sm' : 'bg-white/10'}`}>
+                    <Icon size={16} className={`md:w-[18px] md:h-[18px] ${isActive ? 'text-green-700' : 'text-green-300'}`} />
+                  </div>
+                  <span className="flex-grow text-left truncate">{item.label}</span>
+                  {isActive && (
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                    </div>
+                  )}
+                </button>
+                {item.dividerAfter && (
+                  <div key={`divider-after-${idx}`} className="my-1 px-2 py-1">
+                    <div className="h-px bg-green-600/30 w-full"></div>
                   </div>
                 )}
-              </button>
+              </>
             );
           })}
         </div>
@@ -654,6 +691,13 @@ function MainApp() {
                 {/* Farmer Views */}
                 {(!user?.role || user?.role === 'farmer') && (
                   <>
+                    {/* Hub Views */}
+                    {view === 'farmerHub' && <FarmerHubDashboard lang={lang} user={user} onNavigate={setView} />}
+                    {view === 'cropCareHub' && <CropCareHub lang={lang} user={user} onNavigate={setView} onInteraction={fetchCredits} />}
+                    {view === 'marketHub' && <MarketHub lang={lang} user={user} onNavigate={setView} onInteraction={fetchCredits} />}
+                    {view === 'consultationHub' && <ConsultationHub lang={lang} user={user} onNavigate={setView} onInteraction={fetchCredits} />}
+                    
+                    {/* Traditional Views */}
                     {view === 'doctor' && <AIDoctor lang={lang} user={user} onInteraction={fetchCredits} />}
                     {view === 'manualBooking' && <FarmerManualBooking lang={lang} onInteraction={fetchCredits} />}
                     {view === 'myReports' && <MyReports user={user} lang={lang} />}
