@@ -8,8 +8,51 @@ import {
 import ReputationBadge, { MiniReputationBadge } from './ReputationBadge';
 import FeedbackForm from './FeedbackForm';
 import FeedbackList from './FeedbackList';
+import { districtCoordinates } from '../data/sriLankaCoordinates';
 
 const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
+
+// ── Location utilities ─────────────────────────────────────────────
+const normStr = s => (s || '').toLowerCase().trim();
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function getDistrictCoords(locationStr) {
+  if (!locationStr) return null;
+  const key = Object.keys(districtCoordinates).find(d => normStr(locationStr).includes(normStr(d)));
+  if (!key) return null;
+  const c = districtCoordinates[key].center;
+  return c ? { lat: c.lat, lon: c.lng } : null;
+}
+
+function getUserCoords(user) {
+  if (!user?.district) return null;
+  const key = Object.keys(districtCoordinates).find(d => normStr(d) === normStr(user.district));
+  if (!key) return null;
+  const district = districtCoordinates[key];
+  if (user.gnDivision && district.gnDivisions) {
+    const gnKey = Object.keys(district.gnDivisions).find(g => normStr(g) === normStr(user.gnDivision));
+    if (gnKey) {
+      const gn = district.gnDivisions[gnKey];
+      return { lat: gn.lat, lon: gn.lng };
+    }
+  }
+  return district.center ? { lat: district.center.lat, lon: district.center.lng } : null;
+}
+
+function getListingDistance(item, userCoords) {
+  if (!userCoords) return null;
+  const coords = getDistrictCoords(item.district || item.location || '');
+  if (!coords) return null;
+  return haversineKm(userCoords.lat, userCoords.lon, coords.lat, coords.lon);
+}
 
 // Image carousel for listing cards
 const ImageGallery = ({ images }) => {
@@ -68,7 +111,7 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
   const [topFarmers, setTopFarmers] = useState([]);
   const [savedListingIds, setSavedListingIds] = useState([]);
   const [filterCrop, setFilterCrop] = useState('all');
-  const [sortBy, setSortBy] = useState('latest');
+  const [sortBy, setSortBy] = useState('nearest');
 
   const t = {
     en: {
@@ -93,6 +136,7 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
       filterPaddy: "Paddy",
       filterTea: "Tea",
       filterChili: "Chili",
+      sortNearest: "📍 Nearest First",
       sortLatest: "Latest First",
       sortPriceLow: "Price: Low to High",
       sortPriceHigh: "Price: High to Low",
@@ -122,6 +166,7 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
       filterPaddy: "වී",
       filterTea: "තේ",
       filterChili: "මිරිස්",
+      sortNearest: "📍 ළඟම පළමුව",
       sortLatest: "අවසන් පළමුව",
       sortPriceLow: "මිල: අඩුවේ සිට ඉහළට",
       sortPriceHigh: "මිල: ඉහළේ සිට අඩුවට",
@@ -452,6 +497,7 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
                 onChange={(e) => setSortBy(e.target.value)}
                 className="w-full appearance-none bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none cursor-pointer pr-8"
               >
+                <option value="nearest">{t[lang].sortNearest}</option>
                 <option value="latest">{t[lang].sortLatest}</option>
                 <option value="priceLow">{t[lang].sortPriceLow}</option>
                 <option value="priceHigh">{t[lang].sortPriceHigh}</option>
@@ -474,6 +520,15 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
             return true;
           })
           .sort((a, b) => {
+            if (sortBy === 'nearest') {
+              const userCoords = getUserCoords(currentUser);
+              const distA = getListingDistance(a, userCoords);
+              const distB = getListingDistance(b, userCoords);
+              if (distA === null && distB === null) return 0;
+              if (distA === null) return 1;
+              if (distB === null) return -1;
+              return distA - distB;
+            }
             if (sortBy === 'priceLow') {
               const priceA = parseFloat(String(a.price).replace(/[^0-9.]/g, '')) || 0;
               const priceB = parseFloat(String(b.price).replace(/[^0-9.]/g, '')) || 0;
@@ -484,7 +539,6 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
               const priceB = parseFloat(String(b.price).replace(/[^0-9.]/g, '')) || 0;
               return priceB - priceA;
             }
-            // latest: sort by date descending (default from API)
             return new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0);
           })
           .map((item) => {
@@ -527,7 +581,18 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
                       />
                     )}
                   </div>
-                  <p className="flex items-center gap-2"><MapPin size={14} /> {item.location}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="flex items-center gap-2"><MapPin size={14} /> {item.location}</p>
+                    {(() => {
+                      const d = getListingDistance(item, getUserCoords(currentUser));
+                      if (d === null) return null;
+                      return (
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${d < 50 ? 'bg-green-100 text-green-700' : d < 150 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'}`}>
+                          📍 {d < 1 ? '<1' : Math.round(d)} km
+                        </span>
+                      );
+                    })()}
+                  </div>
                   <p className="flex items-center gap-2 font-bold text-gray-800 dark:text-white"><Phone size={14} /> {item.phone}</p>
                 </div>
 
