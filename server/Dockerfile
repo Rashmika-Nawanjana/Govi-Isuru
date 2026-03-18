@@ -13,8 +13,10 @@ WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY . .
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+# Create non-root user for security and pre-create uploads directory with correct ownership
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001 \
+  && mkdir -p /usr/src/app/uploads/listings \
+  && chown -R nodejs:nodejs /usr/src/app/uploads
 USER nodejs
 
 EXPOSE 5000

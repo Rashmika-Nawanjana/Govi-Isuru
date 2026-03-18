@@ -38,7 +38,11 @@ const app = express();
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads', 'listings');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+try {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+} catch (e) {
+  console.warn('Could not create uploads dir:', e.message);
+}
 
 // Multer setup for listing images (disk storage, max 5 images, 5MB each)
 const listingStorage = multer.diskStorage({
@@ -153,12 +157,8 @@ app.post('/api/listings', authMiddleware, checkCredits(50), (req, res) => {
       if (!user) return res.status(401).json({ error: "User not found" });
       if (user.role === 'buyer') return res.status(403).json({ error: "Buyers cannot create listings" });
 
-      const API_BASE = process.env.FRONTEND_URL
-        ? process.env.FRONTEND_URL.replace(/\/$/, '')
-        : `http://localhost:5000`;
-
       const imageUrls = (req.files || []).map(
-        file => `${API_BASE}/uploads/listings/${file.filename}`
+        file => `/uploads/listings/${file.filename}`
       );
 
       const newItem = new Listing({

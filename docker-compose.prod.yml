@@ -46,6 +46,8 @@ services:
       - FRONTEND_URL=${FRONTEND_URL}
       - HUGGINGFACE_API_TOKEN=${HUGGINGFACE_API_TOKEN}
       - TZ=Asia/Colombo
+    volumes:
+      - uploads_data:/usr/src/app/uploads
     depends_on:
       - ai-service
     healthcheck:
@@ -94,3 +96,6 @@ services:
 networks:
   govi-network:
     driver: bridge
+
+volumes:
+  uploads_data:
