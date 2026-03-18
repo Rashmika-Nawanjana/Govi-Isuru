@@ -269,12 +269,13 @@ function MainApp() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, view]);
 
-  // Intercept marketHub navigation — always open as a new tab
+  // Intercept market navigation — always open as a new tab
   useEffect(() => {
-    if (view === 'marketHub') {
+    if (view === 'marketHub' || view === 'marketplace') {
       window.open('/market-hub', '_blank');
-      setView('farmerHub');
+      setView(user?.role === 'buyer' ? 'buyerDashboard' : 'farmerHub');
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view]);
 
   // 2. HELPER FUNCTIONS
