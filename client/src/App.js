@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Leaf, ShoppingBag, CloudSun, TrendingUp, LogOut, AlertTriangle, Newspaper, BarChart3, BookOpen, X, FileText, Bookmark, Shield, Sun, Moon, Menu, Search, User, Droplets, ClipboardCheck, Globe, CalendarDays } from 'lucide-react';
+import { Leaf, ShoppingBag, LogOut, AlertTriangle, Newspaper, BookOpen, X, FileText, Bookmark, Shield, Sun, Moon, Menu, Search, User, Droplets, ClipboardCheck, Globe, CalendarDays } from 'lucide-react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import CropSuitability from './components/CropSuitability';
 import AIDoctor from './components/AIDoctor';
@@ -217,6 +217,7 @@ function MainApp() {
       window.removeEventListener('open-credit-purchase', handleOpenCreditModal);
       window.removeEventListener('session-expired', handleSessionExpired);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.username]); // Depend on username to avoid infinite loop with user object update
 
   // Map logged-in user's GN division or district to coordinates for weather (case-insensitive)

@@ -4,8 +4,8 @@ import {
   Leaf, ShoppingBag, TrendingUp, Newspaper, BookOpen,
   MapPin, Phone, User, PlusCircle, Sprout, MessageCircle,
   Star, CheckCircle, Award, ThumbsUp, MessageSquare, Trash2,
-  Bookmark, Filter, ArrowUpDown, ChevronDown, Search, X,
-  Shield, BarChart3
+  Bookmark, Filter, ArrowUpDown, ChevronDown, Search,
+  Shield
 } from 'lucide-react';
 import ReputationBadge, { MiniReputationBadge } from '../components/ReputationBadge';
 import FeedbackForm from '../components/FeedbackForm';
