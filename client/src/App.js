@@ -268,6 +268,14 @@ function MainApp() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, view]);
 
+  // Intercept marketHub navigation — always open as a new tab
+  useEffect(() => {
+    if (view === 'marketHub') {
+      window.open('/market-hub', '_blank');
+      setView('farmerHub');
+    }
+  }, [view]);
+
   // 2. HELPER FUNCTIONS
   const handleRegisterSuccess = (userData) => {
     setUser(userData);
