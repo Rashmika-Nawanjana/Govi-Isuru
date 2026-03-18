@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {
   Leaf, ShoppingBag, TrendingUp, Newspaper, BookOpen,
   MapPin, Phone, User, PlusCircle, Sprout, MessageCircle,
   Star, CheckCircle, Award, ThumbsUp, MessageSquare, Trash2,
   Bookmark, Filter, ArrowUpDown, ChevronDown, Search,
-  Shield
+  Shield, Camera, X, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import ReputationBadge, { MiniReputationBadge } from '../components/ReputationBadge';
 import FeedbackForm from '../components/FeedbackForm';
@@ -15,6 +15,39 @@ import AgriNews from '../components/AgriNews';
 import TraditionalRice from '../components/TraditionalRice';
 
 const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
+
+// Image carousel for listing cards
+const ImageGallery = ({ images }) => {
+  const [idx, setIdx] = useState(0);
+  if (!images || images.length === 0) return null;
+  return (
+    <div className="relative w-full h-48 bg-gray-100 overflow-hidden rounded-t-2xl">
+      <img src={images[idx]} alt="harvest" className="w-full h-full object-cover"
+        onError={e => { e.target.style.display = 'none'; }} />
+      {images.length > 1 && (
+        <>
+          <button onClick={() => setIdx(i => (i - 1 + images.length) % images.length)}
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 transition">
+            <ChevronLeft size={16} />
+          </button>
+          <button onClick={() => setIdx(i => (i + 1) % images.length)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 transition">
+            <ChevronRight size={16} />
+          </button>
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            {images.map((_, i) => (
+              <button key={i} onClick={() => setIdx(i)}
+                className={`w-1.5 h-1.5 rounded-full transition-all ${i === idx ? 'bg-white scale-125' : 'bg-white/50'}`} />
+            ))}
+          </div>
+        </>
+      )}
+      <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
+        {idx + 1}/{images.length}
+      </div>
+    </div>
+  );
+};
 
 const tabs = [
   { id: 'market', label: 'Marketplace', icon: ShoppingBag, emoji: '🛒' },
@@ -27,6 +60,9 @@ const tabs = [
 function MarketplacePanel({ currentUser, lang }) {
   const [listings, setListings] = useState([]);
   const [form, setForm] = useState({ cropType: '', quantity: '', price: '', location: '', phone: '' });
+  const [images, setImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const fileInputRef = useRef(null);
   const [feedbackListing, setFeedbackListing] = useState(null);
   const [viewFeedbackListing, setViewFeedbackListing] = useState(null);
   const [topFarmers, setTopFarmers] = useState([]);
@@ -109,17 +145,34 @@ function MarketplacePanel({ currentUser, lang }) {
     } catch (err) { console.error(err); }
   };
 
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files).slice(0, 5);
+    setImages(files);
+    setImagePreviews(files.map(f => URL.createObjectURL(f)));
+  };
+
+  const removeImage = (idx) => {
+    setImages(prev => prev.filter((_, i) => i !== idx));
+    setImagePreviews(prev => prev.filter((_, i) => i !== idx));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
     if (!token) { alert('Please log in as a farmer to post listings.'); return; }
     try {
-      await axios.post(`${API_BASE}/api/listings`,
-        { ...form, farmerName: currentUser?.username || 'Anonymous' },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const formData = new FormData();
+      Object.entries(form).forEach(([k, v]) => formData.append(k, v));
+      formData.append('farmerName', currentUser?.username || 'Anonymous');
+      images.forEach(img => formData.append('images', img));
+
+      await axios.post(`${API_BASE}/api/listings`, formData, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+      });
       fetchListings();
       setForm({ cropType: '', quantity: '', price: '', location: '', phone: '' });
+      setImages([]);
+      setImagePreviews([]);
       alert('Success! Your crop is listed.');
     } catch (err) {
       if (err.response?.status === 403) {
@@ -271,6 +324,29 @@ function MarketplacePanel({ currentUser, lang }) {
                 required
               />
             ))}
+            {/* Image Upload */}
+            <div className="md:col-span-2">
+              <label htmlFor="hub-listing-images"
+                className="border-2 border-dashed border-green-300 rounded-xl p-4 cursor-pointer hover:border-green-500 transition-colors text-center bg-green-50 block">
+                <Camera size={22} className="mx-auto text-green-400 mb-1" />
+                <p className="text-sm text-gray-500">Click to add harvest photos (up to 5)</p>
+                <input id="hub-listing-images" ref={fileInputRef} type="file" accept="image/*"
+                  multiple className="hidden" onChange={handleImageChange} />
+              </label>
+              {imagePreviews.length > 0 && (
+                <div className="flex gap-2 mt-3 flex-wrap">
+                  {imagePreviews.map((src, idx) => (
+                    <div key={src} className="relative">
+                      <img src={src} alt="" className="w-20 h-20 object-cover rounded-lg border border-gray-200" />
+                      <button type="button" onClick={() => removeImage(idx)}
+                        className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600">
+                        <X size={10} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <button type="submit"
               className="md:col-span-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3.5 rounded-xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg">
               Post Listing (50 Credits)
@@ -338,8 +414,11 @@ function MarketplacePanel({ currentUser, lang }) {
             return (
               <div key={item._id}
                 className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-200 flex flex-col overflow-hidden group">
-                {/* Card Top Accent */}
-                <div className="h-1.5 w-full" style={{ background: 'linear-gradient(90deg, #16a34a, #059669)' }} />
+                {/* Image Gallery or accent bar */}
+                {item.images && item.images.length > 0
+                  ? <ImageGallery images={item.images} />
+                  : <div className="h-1.5 w-full" style={{ background: 'linear-gradient(90deg, #16a34a, #059669)' }} />
+                }
 
                 <div className="p-5 flex flex-col flex-1">
                   {/* Header */}

@@ -4,6 +4,9 @@ dotenv.config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 const User = require('./models/User');
 const Listing = require('./models/Listing');
@@ -33,9 +36,33 @@ const checkCredits = require('./middleware/creditMiddleware');
 
 const app = express();
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads', 'listings');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+// Multer setup for listing images (disk storage, max 5 images, 5MB each)
+const listingStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadsDir),
+  filename: (req, file, cb) => {
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `listing-${unique}${path.extname(file.originalname)}`);
+  }
+});
+const uploadListingImages = multer({
+  storage: listingStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Only image files are allowed'));
+  }
+}).array('images', 5);
+
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Serve uploaded listing images as static files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Chatbot API Routes
 app.use('/api/chatbot', chatbotRoutes);
@@ -117,32 +144,37 @@ app.get('/api/listings', async (req, res) => {
 });
 
 // POST: Add new item with farmer association
-// POST: Add new item with farmer association
 // Cost: 50 credits
-app.post('/api/listings', authMiddleware, checkCredits(50), async (req, res) => {
-  try {
-    // Auth handled by middleware
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(401).json({ error: "User not found" });
-    }
+app.post('/api/listings', authMiddleware, checkCredits(50), (req, res) => {
+  uploadListingImages(req, res, async (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    try {
+      const user = await User.findById(req.user.id);
+      if (!user) return res.status(401).json({ error: "User not found" });
+      if (user.role === 'buyer') return res.status(403).json({ error: "Buyers cannot create listings" });
 
-    if (user.role === 'buyer') {
-      return res.status(403).json({ error: "Buyers cannot create listings" });
-    }
+      const API_BASE = process.env.FRONTEND_URL
+        ? process.env.FRONTEND_URL.replace(/\/$/, '')
+        : `http://localhost:5000`;
 
-    const newItem = new Listing({
-      ...req.body,
-      farmer_id: user._id,
-      farmerName: user.username,
-      status: 'active'
-    });
-    const savedItem = await newItem.save();
-    res.status(201).json(savedItem);
-  } catch (err) {
-    console.error("Failed to create listing", err);
-    res.status(400).json({ error: "Validation failed. Check your data." });
-  }
+      const imageUrls = (req.files || []).map(
+        file => `${API_BASE}/uploads/listings/${file.filename}`
+      );
+
+      const newItem = new Listing({
+        ...req.body,
+        images: imageUrls,
+        farmer_id: user._id,
+        farmerName: user.username,
+        status: 'active'
+      });
+      const savedItem = await newItem.save();
+      res.status(201).json(savedItem);
+    } catch (e) {
+      console.error("Failed to create listing", e);
+      res.status(400).json({ error: "Validation failed. Check your data." });
+    }
+  });
 });
 
 // DELETE: Remove a listing (only by the owner)
