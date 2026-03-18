@@ -34,6 +34,7 @@ import FarmerHubDashboard from './components/hubs/FarmerHubDashboard';
 import CropCareHub from './components/hubs/CropCareHub';
 import MarketHub from './components/hubs/MarketHub';
 import ConsultationHub from './components/hubs/ConsultationHub';
+import MarketHubPage from './pages/MarketHubPage';
 import { districtCoordinates } from './data/sriLankaCoordinates';
 
 const translations = {
@@ -512,6 +513,11 @@ function MainApp() {
                 <button
                   key={item.id}
                   onClick={() => {
+                    if (item.id === 'marketHub') {
+                      window.open('/market-hub', '_blank');
+                      setIsSidebarOpen(false);
+                      return;
+                    }
                     setView(item.id);
                     setIsSidebarOpen(false);
                   }}
@@ -800,6 +806,8 @@ export default function App() {
         {/* Special auth routes that need URL parameters */}
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        {/* Standalone Market Hub page */}
+        <Route path="/market-hub" element={<MarketHubPage />} />
         {/* Main app route */}
         <Route path="/*" element={<MainApp />} />
       </Routes>
