@@ -1,16 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { 
-  Leaf, 
-  ArrowRight, 
-  Shield, 
-  TrendingUp, 
-  CloudSun, 
-  AlertTriangle, 
-  ShoppingBag, 
-  MessageSquare, 
-  BarChart3,
-  Users,
+import {
+  Leaf,
+  ArrowRight,
   Globe,
   CheckCircle,
   Newspaper,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
-    Users, Shield, UserCheck, UserX, Search,
+    Users, Shield, UserCheck, Search,
     ChevronLeft, ChevronRight, AlertTriangle, CheckCircle,
     XCircle, Trash2, Flag, Eye, BarChart3, MapPin,
     Clock, RefreshCw, User, Briefcase, Leaf
@@ -158,6 +158,7 @@ const AdminDashboard = ({ user, language = 'en' }) => {
         } catch (err) {
             console.error('Stats error:', err);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Fetch users
@@ -177,6 +178,7 @@ const AdminDashboard = ({ user, language = 'en' }) => {
         } finally {
             setLoading(false);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchTerm, roleFilter, districtFilter]);
 
     // Fetch pending officers
@@ -190,6 +192,7 @@ const AdminDashboard = ({ user, language = 'en' }) => {
         } finally {
             setLoading(false);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Fetch flagged users
@@ -203,6 +206,7 @@ const AdminDashboard = ({ user, language = 'en' }) => {
         } finally {
             setLoading(false);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Fetch districts
@@ -213,17 +217,20 @@ const AdminDashboard = ({ user, language = 'en' }) => {
         } catch (err) {
             console.error('Districts error:', err);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         fetchStats();
         fetchDistricts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         if (activeTab === 'users') fetchUsers(1);
         else if (activeTab === 'approvals') fetchPendingOfficers();
         else if (activeTab === 'flagged') fetchFlaggedUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeTab]);
 
     useEffect(() => {
@@ -231,6 +238,7 @@ const AdminDashboard = ({ user, language = 'en' }) => {
             const timer = setTimeout(() => fetchUsers(1), 300);
             return () => clearTimeout(timer);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchTerm, roleFilter, districtFilter]);
 
     // Actions
