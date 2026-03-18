@@ -631,7 +631,6 @@ const Marketplace = ({ lang, currentUser, onInteraction }) => {
                   </div>
                 )}
               </div>
-              </div>
             </div>
           );
         })}
