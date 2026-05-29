@@ -41,12 +41,34 @@ jobs:
             ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
             set -e
             cd /home/${{ secrets.EC2_USERNAME }}/govi-isuru
+            DOMAIN="govi-isuru.rashmika.dev"
 
             # stop host nginx to avoid port conflicts (non-fatal)
             sudo systemctl stop nginx || true
 
             # Ensure a clean recreate to avoid port-flapping and orphaned containers
             sudo docker compose -f docker-compose.prod.yml down --remove-orphans || true
+
+            # Keep the backend URLs aligned with the public HTTPS domain
+            sudo sed -i "s|^APP_URL=.*|APP_URL=https://${DOMAIN}|" .env || true
+            sudo sed -i "s|^FRONTEND_URL=.*|FRONTEND_URL=https://${DOMAIN}|" .env || true
+
+            # Install or renew the TLS certificate before the frontend starts
+            if ! command -v certbot >/dev/null 2>&1; then
+              sudo apt-get update
+              sudo apt-get install -y certbot
+            fi
+
+            if [ ! -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]; then
+              sudo certbot certonly --standalone \
+                -d "${DOMAIN}" \
+                --register-unsafely-without-email \
+                --agree-tos \
+                --non-interactive
+            else
+              sudo certbot renew --non-interactive || true
+            fi
+
             sudo docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
 
             # Cleanup old images
@@ -65,13 +87,13 @@ jobs:
 
       - name: Health check
         run: |
-          echo "Waiting 45s for services to start..."
-          sleep 45
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.EC2_HOST }}:80 || echo "000")
+          echo "Waiting 60s for services to start..."
+          sleep 60
+          HTTP_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" https://${{ secrets.EC2_HOST }} || echo "000")
           if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "301" ] || [ "$HTTP_STATUS" = "302" ]; then
-            echo "✅ Health check passed (HTTP $HTTP_STATUS)"
+            echo "✅ Health check passed (HTTPS $HTTP_STATUS)"
           else
-            echo "⚠️ Health check returned HTTP $HTTP_STATUS - services may still be starting or port 80 is not open"
+            echo "⚠️ Health check returned HTTPS $HTTP_STATUS - services may still be starting or port 443 is not open"
             echo "Check server state: ssh -i ~/.ssh/ec2_key ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'sudo docker compose -f /home/${{ secrets.EC2_USERNAME }}/govi-isuru/docker-compose.prod.yml ps && sudo ss -lntu'"
           fi
 
