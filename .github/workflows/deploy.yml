@@ -35,18 +35,25 @@ jobs:
             -e "ssh -i ~/.ssh/ec2_key -o StrictHostKeyChecking=no" \
             ./ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/govi-isuru/
 
-      - name: Deploy with Docker Compose
+      - name: Deploy with Docker Compose (safe)
         run: |
           ssh -i ~/.ssh/ec2_key -o StrictHostKeyChecking=no \
             ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
+            set -e
             cd /home/${{ secrets.EC2_USERNAME }}/govi-isuru
 
-            # Build and restart containers
-            sudo docker compose -f docker-compose.prod.yml build --no-cache
-            sudo docker compose -f docker-compose.prod.yml up -d
+            # stop host nginx to avoid port conflicts (non-fatal)
+            sudo systemctl stop nginx || true
+
+            # Ensure a clean recreate to avoid port-flapping and orphaned containers
+            sudo docker compose -f docker-compose.prod.yml down --remove-orphans || true
+            sudo docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
 
             # Cleanup old images
             sudo docker image prune -f
+
+            # Give containers a moment to initialize
+            sleep 10
 
             # Show status
             echo "=== Container Status ==="
@@ -58,14 +65,14 @@ jobs:
 
       - name: Health check
         run: |
-          echo "Waiting 30s for services to start..."
-          sleep 30
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.EC2_HOST }} || echo "000")
+          echo "Waiting 45s for services to start..."
+          sleep 45
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.EC2_HOST }}:80 || echo "000")
           if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "301" ] || [ "$HTTP_STATUS" = "302" ]; then
             echo "✅ Health check passed (HTTP $HTTP_STATUS)"
           else
-            echo "⚠️ Health check returned HTTP $HTTP_STATUS - services may still be starting"
-            echo "Check logs: ssh ubuntu@${{ secrets.EC2_HOST }} 'sudo docker compose -f /home/ubuntu/govi-isuru/docker-compose.prod.yml logs'"
+            echo "⚠️ Health check returned HTTP $HTTP_STATUS - services may still be starting or port 80 is not open"
+            echo "Check server state: ssh -i ~/.ssh/ec2_key ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'sudo docker compose -f /home/${{ secrets.EC2_USERNAME }}/govi-isuru/docker-compose.prod.yml ps && sudo ss -lntu'"
           fi
 
       - name: Cleanup SSH key
