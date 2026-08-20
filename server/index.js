@@ -30,11 +30,13 @@ const savedListingsRoutes = require('./routes/savedListings');
 const adminRoutes = require('./routes/admin');
 const aiRoutes = require('./routes/ai');
 const creditRoutes = require('./routes/credits');
+const { registerBookingEventHandlers } = require('./events/registerBookingEventHandlers');
 
 const authMiddleware = require('./middleware/authMiddleware');
 const checkCredits = require('./middleware/creditMiddleware');
 
 const app = express();
+registerBookingEventHandlers();
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads', 'listings');

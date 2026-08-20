@@ -6,6 +6,10 @@ const User = require('../models/User');
 const Notification = require('../models/Notification');
 const InstructorSlot = require('../models/InstructorSlot');
 const ManualBooking = require('../models/ManualBooking');
+const eventBus = require('../core/EventBus');
+const BookingWorkflow = require('../domain/booking/BookingWorkflow');
+const { BookingDomainError } = require('../domain/booking/BookingState');
+const { BOOKING_EVENTS } = require('../events/registerBookingEventHandlers');
 
 const MANUAL_BOOKING_FEE_CREDITS = parseInt(
   process.env.MANUAL_BOOKING_FEE_CREDITS || process.env.ADVICE_FEE_CREDITS || '40',
@@ -18,15 +22,13 @@ async function getCurrentUser(decoded) {
   return User.findById(decoded.id || decoded.userId || decoded._id);
 }
 
-async function createNotification(recipientUserId, recipientRole, titleEn, titleSi, messageEn, messageSi) {
-  await Notification.create({
-    recipientUserId,
-    recipientRole,
-    type: 'system',
-    severity: 'info',
-    title: { en: titleEn, si: titleSi },
-    message: { en: messageEn, si: messageSi }
-  });
+function sendBookingError(res, error, fallbackMessage) {
+  if (error instanceof BookingDomainError) {
+    return res.status(error.statusCode).json({ success: false, msg: error.message });
+  }
+
+  console.error(fallbackMessage, error);
+  return res.status(500).json({ success: false, msg: fallbackMessage });
 }
 
 router.get('/instructors', authMiddleware, async (req, res) => {
@@ -291,19 +293,11 @@ router.post('/bookings', authMiddleware, async (req, res) => {
     slot.reservedByBookingId = booking._id;
     await slot.save();
 
-    await createNotification(
-      booking.instructorId,
-      'officer',
-      'New manual booking request',
-      'නව අතින් වෙන්කරවා ගැනීමක්',
-      `${booking.farmerName} requested your slot for ${booking.topic}.`,
-      `${booking.farmerName} ඔබගේ කාලය ${booking.topic} සඳහා වෙන් කර ඇත.`
-    );
+    await eventBus.publish(BOOKING_EVENTS.REQUESTED, { booking });
 
     res.status(201).json({ success: true, booking });
   } catch (err) {
-    console.error('Error creating manual booking:', err);
-    res.status(500).json({ success: false, msg: 'Failed to create booking' });
+    return sendBookingError(res, err, 'Failed to create booking');
   }
 });
 
@@ -374,47 +368,30 @@ router.put('/bookings/:bookingId/respond', authMiddleware, async (req, res) => {
       return res.status(404).json({ success: false, msg: 'Booking not found' });
     }
 
-    if (booking.status !== 'pending') {
-      return res.status(409).json({ success: false, msg: 'Only pending bookings can be responded to' });
-    }
-
     const slot = await InstructorSlot.findById(booking.slotId);
     if (!slot) {
       return res.status(404).json({ success: false, msg: 'Related slot not found' });
     }
 
-    booking.instructorResponseNote = note || '';
+    const workflow = new BookingWorkflow(booking);
 
     if (action === 'accept') {
-      booking.status = 'accepted';
-      booking.acceptedAt = new Date();
-      slot.status = 'closed';
+      workflow.accept({ slot, note: note || '' });
     } else {
-      booking.status = 'rejected';
-      slot.status = 'open';
-      slot.reservedByBookingId = null;
+      workflow.reject({ slot, note: note || '' });
     }
 
     await booking.save();
     await slot.save();
 
-    await createNotification(
-      booking.farmerId,
-      'farmer',
-      action === 'accept' ? 'Booking accepted' : 'Booking rejected',
-      action === 'accept' ? 'වෙන්කරවා ගැනීම අනුමත විය' : 'වෙන්කරවා ගැනීම ප්‍රතික්ෂේප විය',
-      action === 'accept'
-        ? `${booking.instructorName} accepted your booking for ${booking.topic}.`
-        : `${booking.instructorName} rejected your booking for ${booking.topic}.`,
-      action === 'accept'
-        ? `${booking.instructorName} විසින් ${booking.topic} සඳහා ඔබේ වෙන්කරවා ගැනීම අනුමත කරන ලදි.`
-        : `${booking.instructorName} විසින් ${booking.topic} සඳහා ඔබේ වෙන්කරවා ගැනීම ප්‍රතික්ෂේප කරන ලදි.`
-    );
+    const eventName = action === 'accept'
+      ? BOOKING_EVENTS.ACCEPTED
+      : BOOKING_EVENTS.REJECTED;
+    await eventBus.publish(eventName, { booking });
 
     res.json({ success: true, booking });
   } catch (err) {
-    console.error('Error responding to booking:', err);
-    res.status(500).json({ success: false, msg: 'Failed to respond booking' });
+    return sendBookingError(res, err, 'Failed to respond booking');
   }
 });
 
@@ -430,9 +407,6 @@ router.put('/bookings/:bookingId/complete', authMiddleware, async (req, res) => 
     }
 
     const { adviceText } = req.body;
-    if (!adviceText || !adviceText.trim()) {
-      return res.status(400).json({ success: false, msg: 'adviceText is required' });
-    }
 
     const booking = await ManualBooking.findOne({
       _id: req.params.bookingId,
@@ -443,47 +417,29 @@ router.put('/bookings/:bookingId/complete', authMiddleware, async (req, res) => 
       return res.status(404).json({ success: false, msg: 'Booking not found' });
     }
 
-    if (booking.status !== 'accepted') {
-      return res.status(409).json({ success: false, msg: 'Only accepted bookings can be completed' });
-    }
-
     const farmer = await User.findById(booking.farmerId);
     const instructor = await User.findById(booking.instructorId);
-    if (!farmer || !instructor) {
-      return res.status(404).json({ success: false, msg: 'Farmer or instructor not found' });
-    }
-
     const fee = Math.max(0, parseInt(booking.feeCredits || MANUAL_BOOKING_FEE_CREDITS, 10));
-    if ((farmer.credits || 0) < fee) {
-      return res.status(400).json({ success: false, msg: `Farmer does not have enough credits. Required: ${fee}` });
-    }
-
-    farmer.credits = (farmer.credits || 0) - fee;
-    instructor.credits = (instructor.credits || 0) + fee;
+    const workflow = new BookingWorkflow(booking);
+    const { chargedCredits } = workflow.complete({
+      adviceText,
+      farmer,
+      instructor,
+      fee
+    });
 
     await farmer.save();
     await instructor.save();
-
-    booking.status = 'completed';
-    booking.adviceText = adviceText.trim();
-    booking.paymentStatus = 'charged';
-    booking.chargedAt = new Date();
-    booking.completedAt = new Date();
     await booking.save();
 
-    await createNotification(
-      booking.farmerId,
-      'farmer',
-      'Instructor advice is ready',
-      'උපදේශනය සූදානම්',
-      `${booking.instructorName} completed your booking and submitted advice. ${fee} credits charged.`,
-      `${booking.instructorName} ඔබේ වෙන්කරවා ගැනීම සම්පූර්ණ කර උපදෙස් යවා ඇත. ක්‍රෙඩිට් ${fee} අය කර ඇත.`
-    );
+    await eventBus.publish(BOOKING_EVENTS.COMPLETED, {
+      booking,
+      chargedCredits
+    });
 
-    res.json({ success: true, booking, chargedCredits: fee });
+    res.json({ success: true, booking, chargedCredits });
   } catch (err) {
-    console.error('Error completing booking:', err);
-    res.status(500).json({ success: false, msg: 'Failed to complete booking' });
+    return sendBookingError(res, err, 'Failed to complete booking');
   }
 });
 
@@ -507,34 +463,20 @@ router.put('/bookings/:bookingId/cancel', authMiddleware, async (req, res) => {
       return res.status(404).json({ success: false, msg: 'Booking not found' });
     }
 
-    if (booking.status !== 'pending') {
-      return res.status(409).json({ success: false, msg: 'Bookings cannot be cancelled after instructor acceptance' });
-    }
-
-    booking.status = 'cancelled';
-    booking.cancelledAt = new Date();
-    await booking.save();
-
     const slot = await InstructorSlot.findById(booking.slotId);
-    if (slot && slot.status === 'reserved') {
-      slot.status = 'open';
-      slot.reservedByBookingId = null;
+    const workflow = new BookingWorkflow(booking);
+    workflow.cancel({ slot });
+
+    await booking.save();
+    if (slot && slot.isModified()) {
       await slot.save();
     }
 
-    await createNotification(
-      booking.instructorId,
-      'officer',
-      'Booking cancelled by farmer',
-      'ගොවියා විසින් වෙන්කරවා ගැනීම අවලංගු කළා',
-      `${booking.farmerName} cancelled the booking request for ${booking.topic}.`,
-      `${booking.farmerName} විසින් ${booking.topic} සඳහා වෙන්කරවා ගැනීම අවලංගු කර ඇත.`
-    );
+    await eventBus.publish(BOOKING_EVENTS.CANCELLED, { booking });
 
     res.json({ success: true, booking });
   } catch (err) {
-    console.error('Error cancelling booking:', err);
-    res.status(500).json({ success: false, msg: 'Failed to cancel booking' });
+    return sendBookingError(res, err, 'Failed to cancel booking');
   }
 });
 
