@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Leaf, ShoppingBag, LogOut, AlertTriangle, Newspaper, BookOpen, X, FileText, Bookmark, Shield, Sun, Moon, Menu, Search, User, Droplets, ClipboardCheck, Globe, CalendarDays } from 'lucide-react';
+import { Leaf, ShoppingBag, LogOut, AlertTriangle, Newspaper, BookOpen, X, FileText, Bookmark, Shield, Sun, Moon, Menu, Search, User, Droplets, ClipboardCheck, Globe, CalendarDays, ArrowLeft, Home } from 'lucide-react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import MobileBottomNav from './components/layout/MobileBottomNav';
+import {
+  cropCareViews,
+  marketViews,
+  consultationViews,
+  getHomeView,
+  getParentView,
+  canGoBack,
+  getViewTitle,
+  isNavItemActive,
+} from './utils/navigation';
 import CropSuitability from './components/CropSuitability';
 import AIDoctor from './components/AIDoctor';
 import Marketplace from './components/Marketplace';
@@ -269,15 +280,6 @@ function MainApp() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, view]);
 
-  // Intercept market navigation — always open as a new tab
-  useEffect(() => {
-    if (view === 'marketHub' || view === 'marketplace') {
-      window.open('/market-hub', '_blank');
-      setView(user?.role === 'buyer' ? 'buyerDashboard' : 'farmerHub');
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view]);
-
   // 2. HELPER FUNCTIONS
   const handleRegisterSuccess = (userData) => {
     setUser(userData);
@@ -403,9 +405,9 @@ function MainApp() {
         profileTab,
       ];
     } else if (isFarmer) {
-      // Farmer tabs - include hubs prominently
+      // Farmer tabs - include hubs prominently (farmerHub must be clickable so users can return home)
       return [
-        { id: 'farmerHub', icon: Leaf, label: t.farmerHub, emoji: '🏘️', divider: true },
+        { id: 'farmerHub', icon: Leaf, label: t.farmerHub, emoji: '🏘️' },
         { id: 'cropCareHub', icon: Droplets, label: t.cropCareHub, emoji: '🌱' },
         { id: 'marketHub', icon: ShoppingBag, label: t.marketHub, emoji: '📦' },
         { id: 'consultationHub', icon: Search, label: t.consultationHub, emoji: '👥', dividerAfter: true },
@@ -437,9 +439,49 @@ function MainApp() {
 
   const navItems = getNavItems();
 
-  const cropCareViews = ['doctor', 'weather', 'alerts', 'suitability', 'yield'];
-  const marketViews = ['market', 'trends', 'news', 'riceVarieties'];
-  const consultationViews = ['manualBooking', 'myReports'];
+  const getBottomNavItems = () => {
+    if (user?.role === 'admin') {
+      return [
+        { id: 'adminDashboard', icon: Home, label: t.adminDashboard, shortLabel: lang === 'si' ? 'මුල' : 'Home', activeWhen: ['adminDashboard'] },
+        { id: 'news', icon: Newspaper, label: t.news, shortLabel: lang === 'si' ? 'පුවත්' : 'News', activeWhen: ['news'] },
+        { id: 'profile', icon: User, label: 'Profile', shortLabel: lang === 'si' ? 'පැතිකඩ' : 'Profile', activeWhen: ['profile'] },
+      ];
+    }
+    if (!user?.role || user?.role === 'farmer') {
+      return [
+        { id: 'farmerHub', icon: Home, label: t.farmerHub, shortLabel: lang === 'si' ? 'මුල' : 'Home', activeWhen: ['farmerHub'] },
+        { id: 'cropCareHub', icon: Droplets, label: t.cropCareHub, shortLabel: lang === 'si' ? 'බෝග' : 'Crop', activeWhen: ['cropCareHub', ...cropCareViews] },
+        { id: 'marketHub', icon: ShoppingBag, label: t.marketHub, shortLabel: lang === 'si' ? 'වෙළඳ' : 'Market', activeWhen: ['marketHub', ...marketViews] },
+        { id: 'consultationHub', icon: Search, label: t.consultationHub, shortLabel: lang === 'si' ? 'උපදෙස්' : 'Consult', activeWhen: ['consultationHub', ...consultationViews] },
+        { id: 'profile', icon: User, label: 'Profile', shortLabel: lang === 'si' ? 'පැතිකඩ' : 'You', activeWhen: ['profile'] },
+      ];
+    }
+    if (user?.role === 'buyer') {
+      return [
+        { id: 'buyerDashboard', icon: Home, label: t.buyerDashboard, shortLabel: lang === 'si' ? 'මුල' : 'Home', activeWhen: ['buyerDashboard'] },
+        { id: 'marketplace', icon: ShoppingBag, label: t.marketplace, shortLabel: lang === 'si' ? 'වෙළඳ' : 'Market', activeWhen: ['marketplace'] },
+        { id: 'savedListings', icon: Bookmark, label: t.savedListings, shortLabel: lang === 'si' ? 'සුරකින' : 'Saved', activeWhen: ['savedListings'] },
+        { id: 'profile', icon: User, label: 'Profile', shortLabel: lang === 'si' ? 'පැතිකඩ' : 'You', activeWhen: ['profile'] },
+      ];
+    }
+    return [
+      { id: 'officerDashboard', icon: Home, label: 'Dashboard', shortLabel: lang === 'si' ? 'මුල' : 'Home', activeWhen: ['officerDashboard'] },
+      { id: 'instructorBookings', icon: CalendarDays, label: 'Bookings', shortLabel: lang === 'si' ? 'වෙන්' : 'Book', activeWhen: ['instructorBookings'] },
+      { id: 'alerts', icon: AlertTriangle, label: t.diseaseAlerts, shortLabel: lang === 'si' ? 'අනතුරු' : 'Alerts', activeWhen: ['alerts'] },
+      { id: 'profile', icon: User, label: 'Profile', shortLabel: lang === 'si' ? 'පැතිකඩ' : 'You', activeWhen: ['profile'] },
+    ];
+  };
+
+  const bottomNavItems = getBottomNavItems();
+  const homeView = getHomeView(user?.role);
+  const showBack = canGoBack(view, user?.role);
+  const pageTitle = getViewTitle(view, lang);
+
+  const goHome = () => setView(homeView);
+  const goBack = () => {
+    const parent = getParentView(view, user?.role);
+    if (parent) setView(parent);
+  };
 
   // Get background image based on user role
   const getBackgroundImage = () => {
@@ -506,7 +548,7 @@ function MainApp() {
         <div className="flex-1 overflow-y-auto p-2 md:p-3 flex flex-col gap-0.5">
           {navItems.map((item, idx) => {
             const Icon = item.icon;
-            const isActive = view === item.id;
+            const isActive = isNavItemActive(item.id, view);
             
             // Handle dividers
             if (item.divider) {
@@ -519,15 +561,10 @@ function MainApp() {
             }
             
             return (
-              <>
+              <React.Fragment key={item.id}>
                 <button
-                  key={item.id}
+                  type="button"
                   onClick={() => {
-                    if (item.id === 'marketHub') {
-                      window.open('/market-hub', '_blank');
-                      setIsSidebarOpen(false);
-                      return;
-                    }
                     setView(item.id);
                     setIsSidebarOpen(false);
                   }}
@@ -548,11 +585,11 @@ function MainApp() {
                   )}
                 </button>
                 {item.dividerAfter && (
-                  <div key={`divider-after-${idx}`} className="my-1 px-2 py-1">
+                  <div className="my-1 px-2 py-1">
                     <div className="h-px bg-green-600/30 w-full"></div>
                   </div>
                 )}
-              </>
+              </React.Fragment>
             );
           })}
         </div>
@@ -613,35 +650,52 @@ function MainApp() {
       </nav>
 
       {/* Main Content Area - Clean Mobile Layout */}
-      <main className="flex-1 overflow-y-auto bg-white dark:bg-gray-900" style={{ position: 'relative', zIndex: 1 }}>
+      <main className="flex-1 overflow-y-auto bg-white dark:bg-gray-900 pb-16 md:pb-0" style={{ position: 'relative', zIndex: 1 }}>
         <div className="w-full h-full flex flex-col">
           {/* Mobile Top Bar - Hamburger Menu */}
           <div className="md:hidden sticky top-0 z-20 bg-gradient-to-r from-green-600 to-emerald-600 shadow-lg">
-            <div className="flex items-center justify-between px-4 py-3">
-              {/* Hamburger Button */}
-              <button
-                className="p-2 rounded-xl bg-white/15 hover:bg-white/25 transition-colors active:scale-95"
-                onClick={() => setIsSidebarOpen(true)}
-                aria-label="Open menu"
-              >
-                <Menu size={22} className="text-white" />
-              </button>
+            <div className="flex items-center justify-between px-3 py-2.5 gap-1">
+              <div className="flex items-center gap-1">
+                <button
+                  className="p-2 rounded-xl bg-white/15 hover:bg-white/25 transition-colors active:scale-95"
+                  onClick={() => setIsSidebarOpen(true)}
+                  aria-label="Open menu"
+                >
+                  <Menu size={22} className="text-white" />
+                </button>
+                {showBack && (
+                  <button
+                    className="p-2 rounded-xl bg-white/15 hover:bg-white/25 transition-colors active:scale-95"
+                    onClick={goBack}
+                    aria-label="Go back"
+                  >
+                    <ArrowLeft size={20} className="text-white" />
+                  </button>
+                )}
+                {view !== homeView && (
+                  <button
+                    className="p-2 rounded-xl bg-white/15 hover:bg-white/25 transition-colors active:scale-95"
+                    onClick={goHome}
+                    aria-label="Go home"
+                  >
+                    <Home size={20} className="text-white" />
+                  </button>
+                )}
+              </div>
 
-              {/* Center - App Title & Current View */}
-              <div className="flex items-center gap-2">
-                <div className="p-1 bg-white/20 rounded-lg">
+              <div className="flex items-center gap-2 min-w-0 flex-1 justify-center">
+                <div className="p-1 bg-white/20 rounded-lg flex-shrink-0">
                   <Leaf className="h-4 w-4 text-white" />
                 </div>
-                <div className="text-center">
-                  <p className="text-sm font-bold text-white leading-tight">{t.title}</p>
-                  <p className="text-[9px] text-green-100 font-medium">
-                    {navItems.find(n => n.id === view)?.label || 'Dashboard'}
+                <div className="text-center min-w-0">
+                  <p className="text-sm font-bold text-white leading-tight truncate">{t.title}</p>
+                  <p className="text-[9px] text-green-100 font-medium truncate">
+                    {pageTitle}
                   </p>
                 </div>
               </div>
 
-              {/* Right - Credits & Language */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-shrink-0">
                 <button
                   onClick={() => setShowCreditModal(true)}
                   className="flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow-500/20 text-yellow-100 text-xs font-bold active:scale-95"
@@ -661,6 +715,31 @@ function MainApp() {
           {/* Content Wrapper - Direct Content Access */}
           <div className="flex-1 overflow-y-auto relative z-10 bg-white/25 dark:bg-gray-900/90">
             <div className="w-full mx-auto">
+              {/* Desktop back / home when not on role home */}
+              {view !== homeView && (
+                <div className="hidden md:flex items-center gap-2 mx-4 mt-4">
+                  {showBack && (
+                    <button
+                      type="button"
+                      onClick={goBack}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-green-800 dark:text-green-200 bg-white/80 dark:bg-gray-800/80 border border-green-200 dark:border-green-800 hover:bg-green-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <ArrowLeft size={16} />
+                      {lang === 'si' ? 'ආපසු' : 'Back'}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={goHome}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-green-800 dark:text-green-200 bg-white/80 dark:bg-gray-800/80 border border-green-200 dark:border-green-800 hover:bg-green-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <Home size={16} />
+                    {lang === 'si' ? 'මුල් පිටුව' : 'Home'}
+                  </button>
+                  <span className="text-sm font-bold text-slate-600 dark:text-gray-300 ml-1">{pageTitle}</span>
+                </div>
+              )}
+
               {/* Desktop Welcome Header */}
               <div className="hidden md:block md:m-4 md:rounded-2xl overflow-hidden">
                 <div className="relative p-5" style={{ background: darkMode ? 'linear-gradient(135deg, rgba(22,101,52,0.3) 0%, rgba(6,78,59,0.2) 100%)' : 'linear-gradient(135deg, rgba(240,253,244,0.9) 0%, rgba(220,252,231,0.7) 100%)' }}>
@@ -791,6 +870,12 @@ function MainApp() {
           </div>
         </div>
       </main>
+
+      <MobileBottomNav
+        items={bottomNavItems}
+        view={view}
+        onNavigate={setView}
+      />
 
       {/* Llama 3.1 AI Chatbot - Available on all pages */}
       <LlamaChatbot lang={lang} />

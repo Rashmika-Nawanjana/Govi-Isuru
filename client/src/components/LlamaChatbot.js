@@ -301,7 +301,7 @@ export default function LlamaChatbot({ lang = 'en' }) {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 bg-gradient-to-br from-emerald-500 via-green-500 to-emerald-600 text-white p-4 rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 z-50 group border border-emerald-400/20"
+          className="fixed bottom-20 md:bottom-6 right-4 md:right-6 bg-gradient-to-br from-emerald-500 via-green-500 to-emerald-600 text-white p-4 rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 z-50 group border border-emerald-400/20"
           aria-label="Open AI Chat"
         >
           <div className="relative">
