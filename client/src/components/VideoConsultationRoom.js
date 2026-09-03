@@ -5,6 +5,9 @@ import { PhoneOff, Video, Loader2 } from 'lucide-react';
 /**
  * In-app Daily.co video consultation room.
  * Expects session: { roomUrl, token, topic, userName }
+ *
+ * Daily Prebuilt shows its own lobby ("Are you ready to join?").
+ * We must not keep a blocking overlay after the iframe loads, or the Join button is unclickable.
  */
 export default function VideoConsultationRoom({ session, onLeave, lang = 'en' }) {
   const containerRef = useRef(null);
@@ -15,13 +18,15 @@ export default function VideoConsultationRoom({ session, onLeave, lang = 'en' })
   const labels = {
     en: {
       title: 'Video consultation',
-      connecting: 'Connecting to Daily.co…',
+      connecting: 'Loading video room…',
+      lobbyHint: 'Click Join in the video panel when you are ready',
       leave: 'Leave call',
       failed: 'Could not start the video call'
     },
     si: {
       title: 'වීඩියෝ උපදේශනය',
-      connecting: 'Daily.co වෙත සම්බන්ධ වෙමින්…',
+      connecting: 'වීඩියෝ කාමරය පූරණය වෙමින්…',
+      lobbyHint: 'සූදානම් වූ පසු වීඩියෝ පැනලයේ Join ඔබන්න',
       leave: 'ඇමතුමෙන් ඉවත් වන්න',
       failed: 'වීඩියෝ ඇමතුම අරඹිය නොහැකි විය'
     }
@@ -37,7 +42,6 @@ export default function VideoConsultationRoom({ session, onLeave, lang = 'en' })
 
     const start = async () => {
       try {
-        // Avoid duplicate frames if React Strict Mode remounts
         if (DailyIframe.getCallInstance()) {
           try {
             DailyIframe.getCallInstance().destroy();
@@ -53,12 +57,19 @@ export default function VideoConsultationRoom({ session, onLeave, lang = 'en' })
             border: '0',
             borderRadius: '12px'
           },
-          showLeaveButton: false,
+          showLeaveButton: true,
           showFullscreenButton: true
         });
 
         callRef.current = call;
 
+        // Prebuilt lobby is interactive as soon as the iframe loads
+        call.on('loaded', () => {
+          if (!cancelled) setStatus('lobby');
+        });
+        call.on('joining-meeting', () => {
+          if (!cancelled) setStatus('lobby');
+        });
         call.on('joined-meeting', () => {
           if (!cancelled) setStatus('joined');
         });
@@ -75,11 +86,18 @@ export default function VideoConsultationRoom({ session, onLeave, lang = 'en' })
           }
         });
 
+        // Clear blocking overlay before join — join() may wait until user clicks Daily's Join
+        if (!cancelled) setStatus('lobby');
+
         await call.join({
           url: session.roomUrl,
           token: session.token,
           userName: session.userName
         });
+
+        if (!cancelled && status !== 'error') {
+          setStatus((prev) => (prev === 'connecting' ? 'joined' : prev));
+        }
       } catch (err) {
         if (!cancelled) {
           console.error('Daily join failed', err);
@@ -126,6 +144,8 @@ export default function VideoConsultationRoom({ session, onLeave, lang = 'en' })
     onLeave?.();
   };
 
+  const showBlockingOverlay = status === 'connecting' || status === 'error';
+
   return (
     <div className="fixed inset-0 z-[80] bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 md:p-6">
       <div className="w-full max-w-5xl h-[85vh] bg-gray-950 rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-gray-800">
@@ -134,7 +154,10 @@ export default function VideoConsultationRoom({ session, onLeave, lang = 'en' })
             <Video className="w-5 h-5 text-emerald-400 shrink-0" />
             <div className="min-w-0">
               <p className="font-semibold text-sm truncate">{t.title}</p>
-              <p className="text-xs text-gray-400 truncate">{session?.topic || ''}</p>
+              <p className="text-xs text-gray-400 truncate">
+                {session?.topic || ''}
+                {status === 'lobby' ? ` · ${t.lobbyHint}` : ''}
+              </p>
             </div>
           </div>
           <button
@@ -148,7 +171,7 @@ export default function VideoConsultationRoom({ session, onLeave, lang = 'en' })
         </div>
 
         <div className="relative flex-1 bg-black">
-          {(status === 'connecting' || status === 'error') && (
+          {showBlockingOverlay && (
             <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-white bg-black/80">
               {status === 'connecting' ? (
                 <>
