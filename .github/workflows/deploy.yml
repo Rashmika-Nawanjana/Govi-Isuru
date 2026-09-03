@@ -71,6 +71,13 @@ jobs:
             echo "Google service account env detected in .env"
           fi
 
+          if ! grep -q '^DAILY_API_KEY=' .env; then
+            echo "WARNING: DAILY_API_KEY is missing from /home/ubuntu/govi-isuru/.env"
+            echo "Video consultations will stay disabled until that env var is added on the server."
+          else
+            echo "Daily.co API key detected in .env"
+          fi
+
           if ! command -v certbot >/dev/null 2>&1; then
             sudo apt-get update
             sudo apt-get install -y certbot
@@ -92,14 +99,18 @@ jobs:
       - name: Health check
         run: |
           set -e
-          echo "Waiting 60s for services to start..."
-          sleep 60
-
-          FRONTEND_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" https://govi-isuru.rashmika.dev/ || echo "000")
-          BACKEND_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" https://govi-isuru.rashmika.dev/health || echo "000")
-
-          echo "Frontend HTTPS status: ${FRONTEND_STATUS}"
-          echo "Backend health status: ${BACKEND_STATUS}"
+          echo "Waiting for HTTPS health checks..."
+          FRONTEND_STATUS="000"
+          BACKEND_STATUS="000"
+          for i in $(seq 1 12); do
+            FRONTEND_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" https://govi-isuru.rashmika.dev/ || echo "000")
+            BACKEND_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" https://govi-isuru.rashmika.dev/health || echo "000")
+            echo "Attempt ${i}: frontend=${FRONTEND_STATUS} backend=${BACKEND_STATUS}"
+            if [ "$FRONTEND_STATUS" = "200" ] && [ "$BACKEND_STATUS" = "200" ]; then
+              break
+            fi
+            sleep 10
+          done
 
           if [ "$FRONTEND_STATUS" != "200" ]; then
             echo "Frontend health check failed"
