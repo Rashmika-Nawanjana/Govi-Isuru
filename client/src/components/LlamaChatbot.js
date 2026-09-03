@@ -58,6 +58,99 @@ function ChatOrb({ pulsing = false }) {
   );
 }
 
+function VoiceSessionView({ voiceState = 'listening', lang = 'en' }) {
+  const labels = {
+    en: {
+      listening: 'Listening… speak freely',
+      processing: 'Thinking…',
+      speaking: 'Speaking… tap mic to stop',
+      idle: 'Starting voice chat…',
+      tip: 'Voice-only mode — chat history is hidden',
+    },
+    si: {
+      listening: 'සවන් දෙමින්… කතා කරන්න',
+      processing: 'සිතමින්…',
+      speaking: 'කතා කරමින්… නැවැත්වීමට mic',
+      idle: 'හඬ සංවාදය ආරම්භ වෙමින්…',
+      tip: 'හඬ පමණි — පෙළ ඉතිහාසය සඟවා ඇත',
+    },
+    ta: {
+      listening: 'கேட்கிறேன்… பேசுங்கள்',
+      processing: 'யோசிக்கிறேன்…',
+      speaking: 'பேசுகிறேன்… நிறுத்த mic',
+      idle: 'குரல் அரட்டை தொடங்குகிறது…',
+      tip: 'குரல் மட்டும் — உரையாடல் மறைக்கப்பட்டது',
+    },
+  };
+  const t = labels[lang] || labels.en;
+  const status = t[voiceState] || t.idle;
+  const isListening = voiceState === 'listening';
+  const isSpeaking = voiceState === 'speaking';
+  const isProcessing = voiceState === 'processing';
+
+  return (
+    <div className="h-full flex flex-col items-center justify-center text-center px-4">
+      <div className="relative w-48 h-48 md:w-56 md:h-56 flex items-center justify-center">
+        {/* Outer reactive rings */}
+        <div
+          className={`absolute inset-0 rounded-full border-2 border-emerald-300/40 ${
+            isListening || isSpeaking ? 'animate-ping' : ''
+          }`}
+          style={{ animationDuration: isSpeaking ? '1.4s' : '2.2s' }}
+        />
+        <div
+          className={`absolute inset-4 rounded-full border border-lime-400/50 ${
+            isListening || isSpeaking ? 'animate-pulse' : ''
+          }`}
+        />
+        <div
+          className={`absolute inset-8 rounded-full bg-gradient-to-br from-lime-200/50 via-emerald-400/30 to-green-600/20 blur-xl ${
+            isSpeaking ? 'scale-110' : isListening ? 'scale-105' : 'scale-100'
+          } transition-transform duration-500`}
+        />
+        {/* Core bubble */}
+        <div
+          className={`relative z-10 w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(34,197,94,0.45)] transition-all duration-300 ${
+            isSpeaking
+              ? 'bg-gradient-to-br from-emerald-400 via-green-500 to-teal-700 scale-110'
+              : isProcessing
+                ? 'bg-gradient-to-br from-lime-300 via-emerald-400 to-green-600'
+                : 'bg-gradient-to-br from-lime-200 via-emerald-400 to-green-600'
+          }`}
+        >
+          <div className="absolute inset-3 rounded-full bg-gradient-to-tr from-white/40 to-transparent" />
+          {isSpeaking ? (
+            <div className="relative z-10 flex items-end gap-1 h-8">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <span
+                  key={i}
+                  className="w-1.5 rounded-full bg-white/90 animate-pulse"
+                  style={{
+                    height: `${10 + (i % 3) * 8}px`,
+                    animationDelay: `${i * 0.12}s`,
+                    animationDuration: '0.7s',
+                  }}
+                />
+              ))}
+            </div>
+          ) : isProcessing ? (
+            <Loader2 size={28} className="relative z-10 text-white animate-spin" />
+          ) : (
+            <Mic size={28} className="relative z-10 text-white" />
+          )}
+        </div>
+      </div>
+
+      <p className="mt-8 text-base md:text-lg font-bold text-slate-800 dark:text-white tracking-tight">
+        {status}
+      </p>
+      <p className="mt-2 text-xs text-slate-500 dark:text-gray-400 max-w-[16rem]">
+        {t.tip}
+      </p>
+    </div>
+  );
+}
+
 export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = null }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -176,42 +269,14 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
     homeView,
     getHistory: () =>
       messagesRef.current.map((m) => ({ role: m.role, content: m.content })),
-    onUserTranscript: (transcript) => {
-      stickToBottomRef.current = true;
-      setMessages((prev) => [
-        ...prev,
-        { id: `u-${Date.now()}`, role: 'user', content: transcript, timestamp: new Date(), fromVoice: true },
-      ]);
-      requestAnimationFrame(() => smoothScrollToBottom());
-    },
+    // Keep text chat clean — don't append live voice transcripts to the message list
+    onUserTranscript: () => {},
     onAssistantStart: () => {
-      const id = `a-${Date.now()}`;
-      voiceAssistantIdRef.current = id;
       setIsLoading(true);
-      setMessages((prev) => [
-        ...prev,
-        { id, role: 'assistant', content: '', timestamp: new Date(), streaming: true, fromVoice: true },
-      ]);
     },
-    onAssistantToken: (full) => {
-      const id = voiceAssistantIdRef.current;
-      if (!id) return;
-      setMessages((prev) =>
-        prev.map((m) => (m.id === id ? { ...m, content: full, streaming: true } : m))
-      );
-      smoothScrollToBottom();
-    },
-    onAssistantDone: (full, model) => {
-      const id = voiceAssistantIdRef.current;
+    onAssistantToken: () => {},
+    onAssistantDone: () => {
       setIsLoading(false);
-      if (!id) return;
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === id ? { ...m, content: full, streaming: false, model: model || 'Assistant' } : m
-        )
-      );
-      voiceAssistantIdRef.current = null;
-      smoothScrollToBottom();
     },
     onError: (msg) => {
       setError(msg);
@@ -461,9 +526,11 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
             }}
             className="flex-1 overflow-y-auto px-4 md:px-5 pb-3 scroll-smooth"
           >
-            {!hasConversation ? (
+            {voiceMode ? (
+              <VoiceSessionView voiceState={voiceState} lang={chatLang} />
+            ) : !hasConversation ? (
               <div className="h-full flex flex-col items-center justify-center text-center pt-4 pb-8">
-                <ChatOrb pulsing={voiceMode && voiceState === 'listening'} />
+                <ChatOrb pulsing={false} />
                 <h2 className="mt-6 text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight max-w-[16rem]">
                   {emptyTitle}
                 </h2>
@@ -482,8 +549,7 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
                         key={item.label}
                         type="button"
                         onClick={() => sendMessage(item.prompt)}
-                        disabled={voiceMode}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/90 dark:bg-gray-800 border border-green-100 dark:border-gray-700 text-[12px] font-semibold text-slate-700 dark:text-gray-200 shadow-sm hover:border-green-400 active:scale-95 transition disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/90 dark:bg-gray-800 border border-green-100 dark:border-gray-700 text-[12px] font-semibold text-slate-700 dark:text-gray-200 shadow-sm hover:border-green-400 active:scale-95 transition"
                       >
                         <Icon size={13} className="text-green-600" />
                         {item.label}
@@ -511,7 +577,6 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
                       <div className={`max-w-[82%] ${isUser ? '' : 'flex-1'}`}>
                         {isUser ? (
                           <div className="bg-white dark:bg-gray-800 text-slate-800 dark:text-gray-100 px-4 py-2.5 rounded-2xl rounded-br-md shadow-sm border border-green-50 dark:border-gray-700 text-sm leading-relaxed">
-                            {message.fromVoice && <span className="mr-1 opacity-60">🎤</span>}
                             {message.content}
                           </div>
                         ) : (
