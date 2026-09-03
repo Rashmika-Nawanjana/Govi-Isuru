@@ -63,16 +63,22 @@ async function transcribeAudio(audioBuffer, mimeType = 'audio/webm', language = 
   const client = getSpeechClient();
   const encoding = resolveEncoding(mimeType);
 
+  // latest_long / enhanced only available for major languages; fall back to default for si/ta
+  const useEnhanced = language === 'en';
+  const config = {
+    encoding,
+    languageCode: lang.stt[0],
+    alternativeLanguageCodes: lang.stt.slice(1),
+    enableAutomaticPunctuation: true,
+  };
+  if (useEnhanced) {
+    config.model = 'latest_long';
+    config.useEnhanced = true;
+  }
+
   const [response] = await client.recognize({
     audio: { content: audioBuffer.toString('base64') },
-    config: {
-      encoding,
-      languageCode: lang.stt[0],
-      alternativeLanguageCodes: lang.stt.slice(1),
-      enableAutomaticPunctuation: true,
-      model: 'latest_long',
-      useEnhanced: true,
-    },
+    config,
   });
 
   const results = response.results || [];
