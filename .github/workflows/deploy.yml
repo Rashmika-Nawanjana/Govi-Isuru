@@ -64,6 +64,13 @@ jobs:
             echo "Added REFRESH_TOKEN_SECRET to .env"
           fi
 
+          if ! grep -qE '^GOOGLE_SERVICE_ACCOUNT_JSON=|^GOOGLE_SERVICE_ACCOUNT_JSON_B64=' .env; then
+            echo "WARNING: GOOGLE_SERVICE_ACCOUNT_JSON is missing from /home/ubuntu/govi-isuru/.env"
+            echo "Voice chatbot will stay disabled until that env var is added on the server."
+          else
+            echo "Google service account env detected in .env"
+          fi
+
           if ! command -v certbot >/dev/null 2>&1; then
             sudo apt-get update
             sudo apt-get install -y certbot
@@ -105,5 +112,8 @@ jobs:
           fi
 
           curl -k -s https://govi-isuru.rashmika.dev/health
+          echo ""
+          echo "Voice status:"
+          curl -k -s https://govi-isuru.rashmika.dev/api/llama-chatbot/voice/status || true
           echo ""
           sudo docker compose -f /home/ubuntu/govi-isuru/docker-compose.prod.yml ps
