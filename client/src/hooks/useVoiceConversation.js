@@ -102,7 +102,7 @@ export default function useVoiceConversation({
     setVoiceState('idle');
   }, [cleanupMic, stopPlayback]);
 
-  const playTts = useCallback(async (text, bargeInStream = null) => {
+  const playTts = useCallback(async (text) => {
     const res = await fetch(`${API_BASE}/api/llama-chatbot/voice/tts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -112,65 +112,28 @@ export default function useVoiceConversation({
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
 
-    let bargeRaf = null;
-    let localCtx = null;
-
-    const stopBargeMonitor = () => {
-      if (bargeRaf) cancelAnimationFrame(bargeRaf);
-      bargeRaf = null;
-      if (localCtx) {
-        try {
-          localCtx.close();
-        } catch (_) {
-          /* ignore */
-        }
-        localCtx = null;
-      }
-    };
-
-    if (bargeInStream) {
-      try {
-        localCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const source = localCtx.createMediaStreamSource(bargeInStream);
-        const analyser = localCtx.createAnalyser();
-        analyser.fftSize = 2048;
-        source.connect(analyser);
-        const data = new Uint8Array(analyser.fftSize);
-        const tick = () => {
-          analyser.getByteTimeDomainData(data);
-          let sum = 0;
-          for (let i = 0; i < data.length; i += 1) {
-            const v = (data[i] - 128) / 128;
-            sum += v * v;
-          }
-          const rms = Math.sqrt(sum / data.length);
-          if (rms > 0.05 && audioElRef.current && !audioElRef.current.paused) {
-            stopPlayback();
-            stopBargeMonitor();
-            return;
-          }
-          bargeRaf = requestAnimationFrame(tick);
-        };
-        bargeRaf = requestAnimationFrame(tick);
-      } catch (_) {
-        /* barge-in optional */
-      }
-    }
-
     try {
       await new Promise((resolve, reject) => {
         const audio = new Audio(url);
         audioElRef.current = audio;
         audio.onended = () => resolve();
         audio.onerror = () => reject(new Error('Audio playback failed'));
-        audio.play().catch(reject);
+        audio.play().then(() => {
+          // Successfully started — do nothing
+        }).catch((e) => {
+          // Ignore AbortError from pause() race; treat as completed
+          if (e.name === 'AbortError') {
+            resolve();
+          } else {
+            reject(e);
+          }
+        });
       });
     } finally {
-      stopBargeMonitor();
       URL.revokeObjectURL(url);
       audioElRef.current = null;
     }
-  }, [stopPlayback]);
+  }, []);
 
   const streamAssistant = useCallback(
     async (message) => {
@@ -298,20 +261,28 @@ export default function useVoiceConversation({
       }
 
       onUserTranscript?.(transcript);
+
+      // Stop mic before TTS so it doesn't hear its own playback
+      cleanupMic();
+
       const answer = await streamAssistant(transcript);
       if (!activeRef.current) return;
 
       if (answer) {
         setVoiceState('speaking');
         try {
-          await playTts(answer, liveStream);
+          await playTts(answer);
         } catch (err) {
           console.warn('TTS play failed', err);
-          onError?.(err.message || 'Could not play spoken reply');
         }
       }
+
+      // Brief pause before re-listening so the speaker settles
+      if (activeRef.current) {
+        await new Promise((r) => setTimeout(r, 400));
+      }
     },
-    [onError, onUserTranscript, playTts, streamAssistant]
+    [cleanupMic, onUserTranscript, playTts, streamAssistant]
   );
 
   const startListeningPass = useCallback(async () => {
@@ -364,14 +335,6 @@ export default function useVoiceConversation({
         }
         const rms = Math.sqrt(sum / data.length);
         const now = Date.now();
-
-        // Barge-in while AI audio is playing
-        if (audioElRef.current && !audioElRef.current.paused) {
-          if (rms > 0.045) {
-            stopPlayback();
-            setVoiceState('listening');
-          }
-        }
 
         if (recorder.state === 'recording') {
           if (rms > 0.025) {
