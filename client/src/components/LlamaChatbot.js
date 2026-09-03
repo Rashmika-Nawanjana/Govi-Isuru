@@ -65,21 +65,18 @@ function VoiceSessionView({ voiceState = 'listening', lang = 'en' }) {
       processing: 'Thinking…',
       speaking: 'Speaking… tap mic to stop',
       idle: 'Starting voice chat…',
-      tip: 'Voice-only mode — chat history is hidden',
     },
     si: {
       listening: 'සවන් දෙමින්… කතා කරන්න',
       processing: 'සිතමින්…',
       speaking: 'කතා කරමින්… නැවැත්වීමට mic',
       idle: 'හඬ සංවාදය ආරම්භ වෙමින්…',
-      tip: 'හඬ පමණි — පෙළ ඉතිහාසය සඟවා ඇත',
     },
     ta: {
       listening: 'கேட்கிறேன்… பேசுங்கள்',
       processing: 'யோசிக்கிறேன்…',
       speaking: 'பேசுகிறேன்… நிறுத்த mic',
       idle: 'குரல் அரட்டை தொடங்குகிறது…',
-      tip: 'குரல் மட்டும் — உரையாடல் மறைக்கப்பட்டது',
     },
   };
   const t = labels[lang] || labels.en;
@@ -143,9 +140,6 @@ function VoiceSessionView({ voiceState = 'listening', lang = 'en' }) {
 
       <p className="mt-8 text-base md:text-lg font-bold text-slate-800 dark:text-white tracking-tight">
         {status}
-      </p>
-      <p className="mt-2 text-xs text-slate-500 dark:text-gray-400 max-w-[16rem]">
-        {t.tip}
       </p>
     </div>
   );
