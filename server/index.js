@@ -1,7 +1,8 @@
 const dotenv = require('dotenv');
 const path = require('path');
-// Prefer repo-root .env (docker/local), then server/.env if present
+// Root .env (Docker/prod + shared secrets), then server/.env (local Daily.co etc.)
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
+dotenv.config({ path: path.join(__dirname, '.env') });
 dotenv.config();
 // 1. Load variables from .env file
 const express = require('express');
