@@ -104,6 +104,7 @@ router.get('/instructors', authMiddleware, async (req, res) => {
       .select('_id fullName username district dsDivision gnDivision designation officerId')
       .sort({ fullName: 1, username: 1 });
 
+    res.set('Cache-Control', 'no-store');
     res.json({ success: true, instructors });
   } catch (err) {
     console.error('Error fetching instructors:', err);
@@ -118,13 +119,16 @@ router.get('/instructors/:instructorId/slots', authMiddleware, async (req, res) 
     }
 
     const now = new Date();
+    // Bookable until the slot ends (not only before it starts). Short slots were
+    // disappearing for farmers as soon as startAt passed.
     const slots = await InstructorSlot.find({
       instructorId: req.params.instructorId,
       status: 'open',
-      startAt: { $gt: now }
+      endAt: { $gt: now }
     }).sort({ startAt: 1 });
 
-    res.json({ success: true, slots });
+    res.set('Cache-Control', 'no-store');
+    res.json({ success: true, slots, serverTime: now.toISOString() });
   } catch (err) {
     console.error('Error fetching instructor slots:', err);
     res.status(500).json({ success: false, msg: 'Failed to fetch slots' });

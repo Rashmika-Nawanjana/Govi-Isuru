@@ -57,6 +57,7 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
     refresh: lang === 'si' ? 'යාවත්කාල' : 'Refresh',
     noInstructors: lang === 'si' ? 'අනුමත උපදේශකයින් නොමැත' : 'No approved instructors found',
     noSlots: lang === 'si' ? 'තෝරාගත් උපදේශකයාට විවෘත කාල නොමැත' : 'No open slots for this instructor',
+    sameDistrictOnly: lang === 'si' ? 'ඔබේ දිස්ත්‍රික්කයේ අනුමත උපදේශකයින් පමණක් පෙනේ' : 'Only approved instructors in your district are listed',
     noBookings: lang === 'si' ? 'තවම වෙන්කරවා ගැනීම් නැත' : 'No bookings yet',
     noNotifications: lang === 'si' ? 'නව දැනුම්දීම් නොමැත' : 'No booking notifications yet',
     markRead: lang === 'si' ? 'කියවූ ලෙස ලකුණු කරන්න' : 'Mark as read',
@@ -85,7 +86,14 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
       setSlots([]);
       return;
     }
-    const res = await axios.get(`${API_BASE}/api/manual-bookings/instructors/${instructorId}/slots`, { headers });
+    const res = await axios.get(`${API_BASE}/api/manual-bookings/instructors/${instructorId}/slots`, {
+      headers: {
+        ...headers,
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache'
+      },
+      params: { _t: Date.now() }
+    });
     setSlots(res.data?.slots || []);
   };
 
@@ -221,6 +229,7 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
             </h2>
             <p className="text-emerald-100 mt-1 text-sm">{t.subtitle}</p>
             <p className="text-emerald-50/90 mt-2 text-xs">{t.videoHint}</p>
+            <p className="text-emerald-50/90 mt-1 text-xs">{t.sameDistrictOnly}</p>
           </div>
           <button
             onClick={refreshAll}
