@@ -397,7 +397,7 @@ export default function useVoiceConversation({
       onError?.(err.message || 'Microphone permission denied');
       stopVoice();
     }
-  }, [cleanupMic, onError, processUtterance, stopPlayback, stopVoice]);
+  }, [cleanupMic, onError, processUtterance, stopVoice]);
 
   const startVoice = useCallback(async () => {
     if (!googleReady) {
