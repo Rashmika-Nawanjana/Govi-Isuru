@@ -215,8 +215,19 @@ async function* streamResponse(userMessage, history = [], options = {}) {
       const gemini = getGemini();
       let gotToken = false;
       for await (const event of gemini.streamGeminiResponse(userMessage, history, options)) {
-        if (event.type === 'token' && event.content) gotToken = true;
-        yield event;
+        if (event.type === 'token' && event.content) {
+          gotToken = true;
+          yield event;
+        } else if (event.type === 'done') {
+          if (gotToken) {
+            yield event;
+            return;
+          }
+        } else if (event.type === 'error') {
+          console.warn('Gemini stream error event:', event.content);
+        } else {
+          yield event;
+        }
       }
       if (gotToken) return;
     } catch (err) {

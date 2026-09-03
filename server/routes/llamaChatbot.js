@@ -110,7 +110,11 @@ router.post('/voice/stt', upload.single('audio'), async (req, res) => {
     });
   } catch (error) {
     console.error('Voice STT error:', error);
-    return res.status(500).json({ error: 'Speech recognition failed', message: error.message });
+    const raw = error.message || '';
+    const message = /PERMISSION_DENIED|has not been used|is disabled/i.test(raw)
+      ? 'Cloud Speech-to-Text API is disabled on the Google Cloud project. Enable speech.googleapis.com (and texttospeech.googleapis.com for replies), wait a few minutes, then try again.'
+      : raw || 'Speech recognition failed';
+    return res.status(500).json({ error: 'Speech recognition failed', message });
   }
 });
 

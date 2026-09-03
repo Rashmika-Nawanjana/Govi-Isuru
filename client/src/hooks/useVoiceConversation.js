@@ -176,7 +176,76 @@ export default function useVoiceConversation({
     async (message) => {
       onAssistantStart?.();
       const history = getHistory?.() || [];
-      const res = await fetch(`${API_BASE}/api/llama-chatbot/chat/stream`, {
+
+      const finishWithAnswer = (full, model = 'Assistant') => {
+        if (full) onAssistantToken?.(full);
+        onAssistantDone?.(full || '', model);
+        return full || '';
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/llama-chatbot/chat/stream`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message,
+            history,
+            options: {
+              language: languageRef.current,
+              role,
+              homeView,
+              temperature: 0.6,
+            },
+          }),
+        });
+
+        if (res.ok && res.body) {
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          let full = '';
+          let model = 'Assistant';
+          const deadline = Date.now() + 25000;
+
+          while (Date.now() < deadline) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const parts = buffer.split('\n');
+            buffer = parts.pop() || '';
+            for (const raw of parts) {
+              const line = raw.trim();
+              if (!line.startsWith('data:')) continue;
+              const data = line.slice(5).trim();
+              if (!data || data === '[DONE]') continue;
+              try {
+                const event = JSON.parse(data);
+                if (event.type === 'token' && event.content) {
+                  full += event.content;
+                  onAssistantToken?.(full);
+                } else if (event.type === 'done') {
+                  model = event.model || model;
+                }
+              } catch (_) {
+                /* ignore */
+              }
+            }
+          }
+
+          try {
+            reader.cancel();
+          } catch (_) {
+            /* ignore */
+          }
+
+          if (full.trim()) return finishWithAnswer(full.trim(), model);
+        }
+      } catch (err) {
+        console.warn('Voice stream failed, trying non-stream chat', err);
+      }
+
+      // Reliable fallback so voice mode can still speak a reply
+      const res = await fetch(`${API_BASE}/api/llama-chatbot/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -190,41 +259,9 @@ export default function useVoiceConversation({
           },
         }),
       });
-      if (!res.ok) throw new Error('Chat stream failed');
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let full = '';
-      let model = 'Assistant';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const parts = buffer.split('\n');
-        buffer = parts.pop() || '';
-        for (const raw of parts) {
-          const line = raw.trim();
-          if (!line.startsWith('data:')) continue;
-          const data = line.slice(5).trim();
-          if (!data || data === '[DONE]') continue;
-          try {
-            const event = JSON.parse(data);
-            if (event.type === 'token' && event.content) {
-              full += event.content;
-              onAssistantToken?.(full);
-            } else if (event.type === 'done') {
-              model = event.model || model;
-            }
-          } catch (_) {
-            /* ignore */
-          }
-        }
-      }
-
-      onAssistantDone?.(full, model);
-      return full;
+      if (!res.ok) throw new Error('Chat reply failed');
+      const data = await res.json();
+      return finishWithAnswer((data.answer || '').trim(), data.model || 'Assistant');
     },
     [getHistory, homeView, onAssistantDone, onAssistantStart, onAssistantToken, role]
   );
@@ -242,7 +279,17 @@ export default function useVoiceConversation({
         method: 'POST',
         body: form,
       });
-      if (!sttRes.ok) throw new Error('Speech recognition failed');
+      if (!sttRes.ok) {
+        let detail = 'Speech recognition failed';
+        try {
+          const errBody = await sttRes.json();
+          if (errBody?.message) detail = errBody.message;
+          else if (errBody?.error) detail = errBody.error;
+        } catch (_) {
+          /* keep default */
+        }
+        throw new Error(detail);
+      }
       const stt = await sttRes.json();
       const transcript = (stt.transcript || '').trim();
       if (!transcript) {
@@ -260,10 +307,11 @@ export default function useVoiceConversation({
           await playTts(answer, liveStream);
         } catch (err) {
           console.warn('TTS play failed', err);
+          onError?.(err.message || 'Could not play spoken reply');
         }
       }
     },
-    [onUserTranscript, playTts, streamAssistant]
+    [onError, onUserTranscript, playTts, streamAssistant]
   );
 
   const startListeningPass = useCallback(async () => {
