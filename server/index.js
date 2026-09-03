@@ -5,6 +5,7 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') });
 dotenv.config({ path: path.join(__dirname, '.env') });
 dotenv.config();
 // 1. Load variables from .env file
+const http = require('http');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -34,6 +35,7 @@ const adminRoutes = require('./routes/admin');
 const aiRoutes = require('./routes/ai');
 const creditRoutes = require('./routes/credits');
 const { registerBookingEventHandlers } = require('./events/registerBookingEventHandlers');
+const { attachVoiceLiveProxy } = require('./ws/voiceLiveProxy');
 
 const authMiddleware = require('./middleware/authMiddleware');
 const checkCredits = require('./middleware/creditMiddleware');
@@ -449,6 +451,8 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// 5. Start Server using dynamic port for deployment
+// 5. Start HTTP + WebSocket server (Live voice needs WS upgrade)
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Market Server running on Port ${PORT}`));
+const server = http.createServer(app);
+attachVoiceLiveProxy(server);
+server.listen(PORT, () => console.log(`🚀 Market Server running on Port ${PORT}`));

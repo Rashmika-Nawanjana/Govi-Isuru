@@ -51,6 +51,8 @@ services:
       # Google JSON comes from env_file (.env) — do not interpolate here (breaks JSON)
       - GOOGLE_VERTEX_LOCATION=${GOOGLE_VERTEX_LOCATION:-us-central1}
       - GOOGLE_GEMINI_MODEL=${GOOGLE_GEMINI_MODEL:-gemini-2.5-flash}
+      - GOOGLE_GEMINI_LIVE_MODEL=${GOOGLE_GEMINI_LIVE_MODEL:-gemini-live-2.5-flash-native-audio}
+      - GOOGLE_VERTEX_LOCATION=${GOOGLE_VERTEX_LOCATION:-us-central1}
       - TZ=Asia/Colombo
     volumes:
       - uploads_data:/usr/src/app/uploads
