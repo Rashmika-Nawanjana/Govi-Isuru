@@ -214,7 +214,19 @@ async function* streamResponse(userMessage, history = [], options = {}) {
     try {
       const gemini = getGemini();
       let gotToken = false;
-      for await (const event of gemini.streamGeminiResponse(userMessage, history, options)) {
+      // Overall budget so voice mode never freezes on Vertex
+      const resultPromise = (async function* () {
+        for await (const event of gemini.streamGeminiResponse(userMessage, history, options)) {
+          yield event;
+        }
+      })();
+
+      const deadline = Date.now() + 16000;
+      for await (const event of resultPromise) {
+        if (Date.now() > deadline) {
+          console.warn('Gemini stream budget exceeded, falling back');
+          break;
+        }
         if (event.type === 'token' && event.content) {
           gotToken = true;
           yield event;

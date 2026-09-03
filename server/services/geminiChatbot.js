@@ -7,14 +7,11 @@ const {
 } = require('./chatbotKnowledge');
 
 const LOCATION = process.env.GOOGLE_VERTEX_LOCATION || 'us-central1';
-const DEFAULT_MODEL = process.env.GOOGLE_GEMINI_MODEL || 'gemini-2.0-flash-001';
-const GEMINI_TIMEOUT_MS = parseInt(process.env.GOOGLE_GEMINI_TIMEOUT_MS || '12000', 10);
+const DEFAULT_MODEL = process.env.GOOGLE_GEMINI_MODEL || 'gemini-2.0-flash';
+const GEMINI_TIMEOUT_MS = parseInt(process.env.GOOGLE_GEMINI_TIMEOUT_MS || '5000', 10);
 
 const MODEL_CANDIDATES = [
   DEFAULT_MODEL,
-  'gemini-2.0-flash',
-  'gemini-2.5-flash',
-  'gemini-2.0-flash-lite-001',
   'gemini-1.5-flash-002',
 ].filter((m, i, arr) => m && arr.indexOf(m) === i);
 
@@ -95,8 +92,10 @@ async function generateWithFallback(userMessage, history = [], options = {}) {
     },
   };
 
+  // Fail fast: one short attempt, then optional second model — don't block voice chat
+  const models = MODEL_CANDIDATES.slice(0, 2);
   let lastError = null;
-  for (const model of MODEL_CANDIDATES) {
+  for (const model of models) {
     try {
       const answer = await generateWithModel(token, model, body);
       return { answer, model };
