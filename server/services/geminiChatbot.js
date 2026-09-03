@@ -6,14 +6,18 @@ const {
   generateMockResponse,
 } = require('./chatbotKnowledge');
 
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const LOCATION = process.env.GOOGLE_VERTEX_LOCATION || 'us-central1';
 const DEFAULT_MODEL = process.env.GOOGLE_GEMINI_MODEL || 'gemini-2.0-flash';
-const GEMINI_TIMEOUT_MS = parseInt(process.env.GOOGLE_GEMINI_TIMEOUT_MS || '5000', 10);
+const GEMINI_TIMEOUT_MS = parseInt(process.env.GOOGLE_GEMINI_TIMEOUT_MS || '10000', 10);
 
-const MODEL_CANDIDATES = [
-  DEFAULT_MODEL,
-  'gemini-1.5-flash-002',
-].filter((m, i, arr) => m && arr.indexOf(m) === i);
+function useGeminiApiKey() {
+  return Boolean(GEMINI_API_KEY);
+}
+
+function isGeminiAvailable() {
+  return useGeminiApiKey() || isGoogleConfigured();
+}
 
 function toGeminiContents(history = [], userMessage = '') {
   const contents = [];
@@ -36,12 +40,14 @@ async function getAccessToken() {
   return typeof token === 'string' ? token : token?.token;
 }
 
-function endpointFor(model, stream = false) {
+function endpointForApiKey(model) {
+  return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+}
+
+function endpointForVertex(model) {
   const project = getGoogleProjectId();
   if (!project) throw new Error('Google project id missing');
-  const action = stream ? 'streamGenerateContent' : 'generateContent';
-  const qs = stream ? '?alt=sse' : '';
-  return `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${project}/locations/${LOCATION}/publishers/google/models/${model}:${action}${qs}`;
+  return `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${project}/locations/${LOCATION}/publishers/google/models/${model}:generateContent`;
 }
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = GEMINI_TIMEOUT_MS) {
@@ -59,19 +65,27 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = GEMINI_TIMEOUT_MS
   }
 }
 
-async function generateWithModel(token, model, body) {
-  const res = await fetchWithTimeout(endpointFor(model, false), {
+async function callGemini(model, body) {
+  let url, headers;
+
+  if (useGeminiApiKey()) {
+    url = endpointForApiKey(model);
+    headers = { 'Content-Type': 'application/json' };
+  } else {
+    const token = await getAccessToken();
+    url = endpointForVertex(model);
+    headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+  }
+
+  const res = await fetchWithTimeout(url, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify(body),
   });
 
   if (!res.ok) {
     const errText = await res.text();
-    throw new Error(`Gemini error ${res.status} (${model}): ${errText}`);
+    throw new Error(`Gemini error ${res.status} (${model}): ${errText.slice(0, 300)}`);
   }
 
   const data = await res.json();
@@ -82,7 +96,6 @@ async function generateWithModel(token, model, body) {
 }
 
 async function generateWithFallback(userMessage, history = [], options = {}) {
-  const token = await getAccessToken();
   const body = {
     systemInstruction: { parts: [{ text: buildSystemPrompt(options) }] },
     contents: toGeminiContents(history, userMessage),
@@ -92,19 +105,14 @@ async function generateWithFallback(userMessage, history = [], options = {}) {
     },
   };
 
-  // Fail fast: one short attempt, then optional second model — don't block voice chat
-  const models = MODEL_CANDIDATES.slice(0, 2);
-  let lastError = null;
-  for (const model of models) {
-    try {
-      const answer = await generateWithModel(token, model, body);
-      return { answer, model };
-    } catch (err) {
-      lastError = err;
-      console.warn(`Gemini model ${model} failed:`, err.message.slice(0, 240));
-    }
+  const model = DEFAULT_MODEL;
+  try {
+    const answer = await callGemini(model, body);
+    return { answer, model };
+  } catch (err) {
+    console.warn(`Gemini model ${model} failed:`, err.message.slice(0, 240));
+    throw err;
   }
-  throw lastError || new Error('All Gemini models failed');
 }
 
 async function* chunkText(text, size = 24) {
@@ -128,8 +136,8 @@ async function generateGeminiResponse(userMessage, history = [], options = {}) {
     };
   }
 
-  if (!isGoogleConfigured()) {
-    return { success: false, error: 'Google service account not configured' };
+  if (!isGeminiAvailable()) {
+    return { success: false, error: 'Gemini is not configured (set GEMINI_API_KEY or Google service account)' };
   }
 
   try {
@@ -138,7 +146,7 @@ async function generateGeminiResponse(userMessage, history = [], options = {}) {
       success: true,
       answer,
       model,
-      source: 'Google Vertex Gemini',
+      source: useGeminiApiKey() ? 'Google Gemini API' : 'Google Vertex Gemini',
     };
   } catch (err) {
     console.error('Gemini generate error:', err.message);
@@ -152,10 +160,6 @@ async function generateGeminiResponse(userMessage, history = [], options = {}) {
   }
 }
 
-/**
- * Prefer timed non-stream generate + chunked yield.
- * Vertex SSE was hanging on unavailable models and freezing voice chat.
- */
 async function* streamGeminiResponse(userMessage, history = [], options = {}) {
   const language = options.language || 'en';
   const homeView = options.homeView || 'farmerHub';
@@ -169,8 +173,8 @@ async function* streamGeminiResponse(userMessage, history = [], options = {}) {
     return;
   }
 
-  if (!isGoogleConfigured()) {
-    yield { type: 'error', content: 'Google service account not configured' };
+  if (!isGeminiAvailable()) {
+    yield { type: 'error', content: 'Gemini is not configured' };
     return;
   }
 
@@ -179,7 +183,7 @@ async function* streamGeminiResponse(userMessage, history = [], options = {}) {
     for await (const part of chunkText(answer)) {
       yield { type: 'token', content: part };
     }
-    yield { type: 'done', model, source: 'Google Vertex Gemini' };
+    yield { type: 'done', model, source: useGeminiApiKey() ? 'Google Gemini API' : 'Google Vertex Gemini' };
   } catch (err) {
     console.error('Gemini stream error:', err.message);
     const mock = generateMockResponse(userMessage, language, options);
@@ -193,7 +197,6 @@ async function* streamGeminiResponse(userMessage, history = [], options = {}) {
 module.exports = {
   generateGeminiResponse,
   streamGeminiResponse,
-  isGoogleConfigured,
+  isGoogleConfigured: isGeminiAvailable,
   MODEL: DEFAULT_MODEL,
-  MODEL_CANDIDATES,
 };
