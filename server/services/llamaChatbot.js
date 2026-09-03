@@ -1,257 +1,426 @@
-const axios = require('axios');
-
-/**
- * Llama 3.3 70B Chatbot Service using Hugging Face Router API (OpenAI-compatible)
- * No local GPU required - uses cloud inference
- * Automatic fallback to Llama 3.1 8B on cold starts (503 errors)
- * Falls back to mock responses when external service is unavailable
- */
-
 const HUGGINGFACE_API_URL = 'https://router.huggingface.co/v1/chat/completions';
 const PRIMARY_MODEL = 'meta-llama/Llama-3.3-70B-Instruct';
 const FALLBACK_MODEL = 'meta-llama/Llama-3.1-8B-Instruct';
 const HF_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN || '';
 
 /**
- * Generate mock response when external services are unavailable
+ * Build system prompt with platform KB + markdown + in-app navigation links
  */
-function generateMockResponse(userMessage, language = 'en') {
-  const lowerMessage = userMessage.toLowerCase();
-  
-  const responses = {
-    en: {
-      default: "Thank you for your question! While I'm temporarily unavailable, here are some tips:\n\n• For disease identification: Use the AI Crop Doctor feature with a clear leaf photo\n• For market prices: Check Market Trends for the latest rates\n• For weather info: Visit Weather Advisory for your district\n• For yield predictions: Go to Yield Prediction section with your location details\n\nPlease try again in a moment!",
-      rice: "Rice is one of Sri Lanka's most important crops. For cultivation advice, check the AI Doctor feature or browse Agricultural News. Key tips:\n• Best season: Maha (main monsoon)\n• Common diseases: Bacterial Leaf Blight, Brown Spot, Leaf Blast\n• Treatment: Use recommended fungicides and maintain proper water management\n• Yield: Typical yield 4-5 metric tons per hectare in good conditions",
-      tea: "Tea cultivation requires elevation (above 600m) and good rainfall. For personalized advice:\n• Use AI Crop Doctor to identify leaf diseases\n• Check Weather Advisory for rainfall patterns\n• Monitor for Blister Blight, Brown Blight during monsoon\n• Consult Agricultural News for latest market trends",
-      chili: "Chili grows well in low elevations with warm temperatures:\n• Ideal temperature: 20-30°C\n• Common issues: Thrips, Leaf Spot, Yellow Virus\n• Prevention: Use proper spacing and pest management\n• Market demand: High in Sri Lanka, check Marketplace for prices",
-      weather: "Weather is crucial for farming! Use our Weather Advisory feature to:\n• Get real-time conditions and 5-day forecasts\n• Receive humidity warnings for fungal disease risk\n• Plan irrigation and fertilizer application timing\n• Track monsoon patterns for your district",
-      price: "Check Market Trends for live price updates on Rice, Tea, and Chili across Sri Lankan districts. Use AgroLink Marketplace for direct farmer-to-buyer trading.",
-      marketplace: "Use AgroLink Marketplace to:\n• Post your crop listings\n• Browse other farmers' offerings\n• Rate and review sellers\n• Contact buyers/sellers via WhatsApp or phone"
-    },
-    si: {
-      default: "ඔබගේ ප්‍රශ්නයට ස්තුතියි! AI සේවාව තාවකාලිකව නොමැති අතර, සමහර ඉඟි:\n\n• රෝග හඳුනා ගැනීම: AI ගස් වෛද්‍යවරයා එක්කෙනි\n• වෙළඳ මිල: වෙළඳ ප්‍රවණතා පරීක්ෂා කරන්න\n• කාලගුණ: කාලගුණ උපදෙස් බලන්න\n• අස්වැන්න: අස්වැන්න අනාවැකිය උපදෙස් දෙන්න",
-      rice: "සහල් ශ්‍රී ලංකාවේ වැදගත්ම බෝගයි. වගා උපදෙස් සඳහා:\n• හොඳම season: මහ (ප්‍රධාන සමෝ)\n• සामාන්‍ය රෝග: බෛක්ටීරිය잎 ගිඹුල්, බ්‍රවුන් ස්පෝට්, පත්‍ර ස්ફීතකතා\n• ගුණ: සාමාන්‍ය අස්වැන්න 4-5 metric ton/hectare",
-      tea: "තේ වගාව උසස් ස්ථානවලින් (600m ඉහලින්) සහ හොඳ වර්ෂාපතනයෙන් අවශ්‍යය:\n• AI වෛද්‍යවරයා කඩුවිතින්",
-      chili: "කුරුඹුරු උණුසුම් පෙදෙසින් හොඳින් වැඩි වෙයි:\n• ඉතා සුවපත් තාපමාන: 20-30°C\n• සාමාන්‍ය ගැටලුව: Thrips, Leaf Spot, Yellow Virus",
-      weather: "කාලගුණය ගොවිතැනට අත්‍යවශ්‍යය!",
-      price: "වෙළඳ ප්‍රවණතා පරීක්ෂා කරන්න සහල, තේ, කුරුඹුරු සඳහා",
-      marketplace: "AgroLink වෙළඳ සෙල්ලම භාවිතා කරන්න ඔබගේ බෝගවල ලැයිස්තුව දැමීමට"
-    }
-  };
-  
-  const langResponses = responses[language] || responses.en;
-  
-  // Check keywords and return relevant response
-  if (lowerMessage.includes('rice') || lowerMessage.includes('සහල')) return langResponses.rice;
-  if (lowerMessage.includes('tea') || lowerMessage.includes('තේ')) return langResponses.tea;
-  if (lowerMessage.includes('chili') || lowerMessage.includes('කුරුඹුරු')) return langResponses.chili;
-  if (lowerMessage.includes('weather') || lowerMessage.includes('කාලගුණ')) return langResponses.weather;
-  if (lowerMessage.includes('price') || lowerMessage.includes('මිල')) return langResponses.price;
-  if (lowerMessage.includes('marketplace') || lowerMessage.includes('වෙළඳ')) return langResponses.marketplace;
-  
-  return langResponses.default;
+function buildSystemPrompt(options = {}) {
+  const language = options.language || 'en';
+  const role = options.role || 'farmer';
+  const homeView = options.homeView || 'farmerHub';
+
+  const languageInstruction =
+    language === 'si'
+      ? '\n\n**IMPORTANT**: Respond in Sinhala (සිංහල). Still use the exact govi-nav:// links unchanged.'
+      : '\n\n**IMPORTANT**: Respond in English.';
+
+  return `You are the Govi Isuru (ගොවි ඉසුරු) AI farming assistant for Sri Lanka.
+
+## HARD GUARDRAILS (must follow)
+You ONLY answer questions about:
+1. Agriculture / farming in Sri Lanka (crops, diseases, pests, fertilizer, weather for farming, yield, soil, irrigation, markets for produce)
+2. The Govi Isuru platform (features, navigation, credits, hubs, AI Doctor, marketplace, bookings, profile, language, mobile UI)
+
+You MUST REFUSE unrelated topics, including but not limited to:
+- Programming, coding, algorithms, data structures (e.g. linked lists), software engineering
+- General school/homework, math, science unrelated to farming
+- Politics, entertainment, sports, medical advice for humans, legal advice
+- Any topic that is not farming or Govi Isuru
+
+When refusing:
+- Do NOT answer the off-topic question at all (no code, no tutorials, no partial answers)
+- Briefly say you can only help with farming and Govi Isuru
+- Offer 2–3 on-topic alternatives with govi-nav links when useful
+- Example refusal: "I can only help with **agriculture** and the **Govi Isuru** app. Try [AI Crop Doctor](govi-nav://doctor) or ask about rice, tea, chili, weather, or market prices."
+
+Greetings like "hi" / "hello" are allowed — greet briefly and invite a farming or app question.
+
+## Response format (required)
+- Use Markdown: **bold** for key terms, short paragraphs, and bullet lists with \`-\` or numbered lists.
+- When guiding users inside the app, ALWAYS include clickable navigation links using EXACTLY this format:
+  [Label](govi-nav://VIEW_ID)
+- Never invent fake https URLs for in-app pages. External news/websites may use normal https links.
+- Keep answers practical and concise (usually under 180 words unless the user asks for detail).
+
+## Current user
+- Role: ${role}
+- Home screen view id: ${homeView}
+
+## In-app navigation map (VIEW_ID values)
+Use these exact ids in govi-nav links:
+
+### Farmer (most common)
+- [Home](govi-nav://farmerHub) — dashboard (credits, alerts, activity)
+- [Crop Care Hub](govi-nav://cropCareHub)
+- [AI Crop Doctor](govi-nav://doctor) — upload leaf photo for disease detection
+- [Weather Advisory](govi-nav://weather)
+- [Disease Alerts](govi-nav://alerts)
+- [Crop Suitability](govi-nav://suitability)
+- [Yield Forecast](govi-nav://yield)
+- [Market Hub](govi-nav://marketHub)
+- [Marketplace](govi-nav://market)
+- [Market Trends](govi-nav://trends)
+- [Agri News](govi-nav://news)
+- [Rice Varieties](govi-nav://riceVarieties)
+- [Consultation Hub](govi-nav://consultationHub)
+- [Book Officer](govi-nav://manualBooking)
+- [My Reports](govi-nav://myReports)
+- [Profile](govi-nav://profile)
+
+### Buyer
+- [Buyer Home](govi-nav://buyerDashboard)
+- [Marketplace](govi-nav://marketplace)
+- [Saved Listings](govi-nav://savedListings)
+
+### Agricultural Instructor / Officer
+- [Officer Dashboard](govi-nav://officerDashboard)
+- [Verify Reports](govi-nav://reportVerification)
+- [Manual Bookings](govi-nav://instructorBookings)
+
+### Admin
+- [Admin Dashboard](govi-nav://adminDashboard)
+
+### Mobile UI tips to mention when helpful
+- Bottom tab bar: Home, Crop, Market, Consult, You
+- Top bar: Back and Home buttons when inside nested pages
+- Menu (☰): language, dark mode, logout, credits
+
+## Agricultural knowledge (Sri Lanka focus)
+### Rice (paddy)
+- Seasons: Maha (main), Yala
+- Common diseases: Bacterial Leaf Blight, Brown Spot, Leaf Blast, Sheath Blight, Tungro
+- Water: maintain proper water management; avoid prolonged flooding of infected fields
+- Typical good yield range: ~4–5 t/ha depending on variety and district
+
+### Tea
+- Best above ~600m with good rainfall
+- Watch Blister Blight and Brown Blight in wet periods
+- Use AI Crop Doctor for leaf symptoms; check Weather for humidity risk
+
+### Chili
+- Prefers warm low/mid elevations (~20–30°C)
+- Common issues: Thrips, Leaf Spot, Yellow Virus
+- Spacing, drainage, and pest monitoring matter
+
+### Platform tools to recommend
+- Disease ID → [AI Crop Doctor](govi-nav://doctor)
+- Weather / fertilizer timing → [Weather Advisory](govi-nav://weather)
+- Prices → [Market Trends](govi-nav://trends) or [Marketplace](govi-nav://market)
+- Yield / profit → [Yield Forecast](govi-nav://yield)
+- Local outbreaks → [Disease Alerts](govi-nav://alerts)
+- Expert help → [Book Officer](govi-nav://manualBooking)
+
+Example navigation answer:
+"Open **AI Crop Doctor**, then upload a clear leaf photo. Tap here: [AI Crop Doctor](govi-nav://doctor)."
+${languageInstruction}`;
 }
 
-/**
- * Call AI model via Hugging Face Router API (OpenAI-compatible format)
- * @param {Array} messages - Chat messages in format [{role: 'user', content: 'text'}]
- * @param {Object} options - Additional options (temperature, max_tokens, etc.)
- * @param {string} modelName - Model to use (PRIMARY_MODEL or FALLBACK_MODEL)
- * @returns {Promise<string>} - AI response
- */
+const ON_TOPIC_RE =
+  /\b(agri|agricultur|farm|farmer|crop|paddy|rice|tea|chili|chilli|pepper|soil|fertiliz|pest|disease|blight|leaf|harvest|yield|irrigat|weather|rain|monsoon|maha|yala|market|price|marketplace|listing|govi|isuru|doctor|dashboard|credit|booking|officer|instructor|gn\s*division|district|sinhala|navigate|navigation|app|hub|profile|alert|suitability|variety|seed|plant|cultivat|organic|fung|insect|thrip|whatsapp|buyer|seller)\b|වී|සහල්|තේ|මිරිස්|ගොවි|ඉසුරු|රෝග|කාලගුණ|පොහොර|වෙළඳ|අස්වැන්න|වගා|කෘෂි|මිල|උපදෙස්|හබ්|වෛද්/;
+
+const OFF_TOPIC_RE =
+  /\b(linked\s*list|algorithm|data\s*structure|leetcode|javascript|typescript|python\s*code|java\s*code|c\+\+|programming|coding|software\s*engineer|react\s*hook|binary\s*tree|sort\s*array|write\s*(a\s*)?(function|class|program)|homework\s*math|calculus|bitcoin|crypto\s*trading|movie|football|cricket\s*score|recipe\s*cake|how\s*to\s*hack)\b|ලින්ක්ඩ්\s*ලිස්ට්|ප්‍රෝග්‍රෑම්|කේතය|ඇල්ගොරිතම/;
+
+const GREETING_RE =
+  /^(hi|hello|hey|ayubowan|ආයුබෝවන්|හලෝ|හායි)[\s!.?]*$/i;
+
+function isOnTopicQuery(userMessage = '') {
+  const text = String(userMessage).trim();
+  if (!text) return false;
+  if (GREETING_RE.test(text)) return true;
+  if (OFF_TOPIC_RE.test(text) && !ON_TOPIC_RE.test(text)) return false;
+  if (ON_TOPIC_RE.test(text)) return true;
+  // Short vague questions may still be farming follow-ups; allow model to decide
+  // but hard-block clear off-topic patterns already handled above.
+  // For longer messages with no agri/platform signal, treat as off-topic.
+  if (text.length > 40 && !ON_TOPIC_RE.test(text)) return false;
+  return true;
+}
+
+function offTopicRefusal(language = 'en', homeView = 'farmerHub') {
+  if (language === 'si') {
+    return `මට උදව් කළ හැක්කේ **කෘෂිකර්මය** සහ **ගොවි ඉසුරු** යෙදුම ගැන පමණි — වෙනත් මාතෘකා (කේතනය, පාඨමාලා, ආදිය) ගැන පිළිතුරු දෙන්නේ නැත.
+
+**මෙසේ අසන්න:**
+- බෝග රෝග → [AI වෛද්‍ය](govi-nav://doctor)
+- කාලගුණය → [කාලගුණ උපදෙස්](govi-nav://weather)
+- මිල / වෙළඳපොළ → [මිල ප්‍රවණතා](govi-nav://trends)
+- මුල් පිටුව → [මුල් පිටුව](govi-nav://${homeView})`;
+  }
+
+  return `I can only help with **agriculture** and the **Govi Isuru** app — not programming, homework, or unrelated topics.
+
+**Ask me about:**
+- Crop disease → [AI Crop Doctor](govi-nav://doctor)
+- Weather for farming → [Weather Advisory](govi-nav://weather)
+- Prices / selling → [Market Trends](govi-nav://trends)
+- App home → [Home](govi-nav://${homeView})`;
+}
+
+function generateMockResponse(userMessage, language = 'en', options = {}) {
+  const lower = (userMessage || '').toLowerCase();
+  const home = options.homeView || 'farmerHub';
+
+  if (!isOnTopicQuery(userMessage)) {
+    return offTopicRefusal(language, home);
+  }
+
+  const en = {
+    default: `I can help with **crops**, **diseases**, **weather**, **markets**, and **app navigation**.
+
+**Try these:**
+- Detect disease → [AI Crop Doctor](govi-nav://doctor)
+- Check weather → [Weather Advisory](govi-nav://weather)
+- See prices → [Market Trends](govi-nav://trends)
+- Go home → [Home](govi-nav://${home})
+
+Ask me anything about rice, tea, or chili farming.`,
+    rice: `**Rice tips (Sri Lanka)**
+- Best main season: **Maha**
+- Watch for **Bacterial Leaf Blight**, **Brown Spot**, and **Leaf Blast**
+- Keep good water management and remove heavily infected leaves
+
+**Next steps**
+1. Photo a sick leaf → [AI Crop Doctor](govi-nav://doctor)
+2. Check humidity/rain risk → [Weather Advisory](govi-nav://weather)
+3. See local outbreaks → [Disease Alerts](govi-nav://alerts)`,
+    tea: `**Tea cultivation**
+- Prefers elevation **above ~600m** and steady rainfall
+- Wet weather increases **Blister Blight** risk
+
+Use [AI Crop Doctor](govi-nav://doctor) for leaf checks and [Weather Advisory](govi-nav://weather) before spraying.`,
+    chili: `**Chili tips**
+- Ideal temperature about **20–30°C**
+- Common pests/diseases: **Thrips**, **Leaf Spot**, **Yellow Virus**
+- Keep spacing and drainage clean
+
+Diagnose leaves in [AI Crop Doctor](govi-nav://doctor) or sell produce in [Marketplace](govi-nav://market).`,
+    weather: `Open **Weather Advisory** for your district forecast, humidity fungal risk, and fertilizer timing tips.
+
+➡️ [Weather Advisory](govi-nav://weather)`,
+    price: `Check live crop price patterns in **Market Trends**, or list/sell in **Marketplace**.
+
+- [Market Trends](govi-nav://trends)
+- [Marketplace](govi-nav://market)`,
+    navigate: `**How to move around Govi Isuru**
+- **Home** dashboard: [Home](govi-nav://${home})
+- **Crop tools**: [Crop Care Hub](govi-nav://cropCareHub)
+- **Sell & prices**: [Market Hub](govi-nav://marketHub)
+- **Officer booking**: [Book Officer](govi-nav://manualBooking)
+
+On mobile, use the **bottom bar** (Home · Crop · Market · Consult · You). Use **Back** / **Home** in the top bar to return.`,
+    doctor: `To detect crop disease:
+1. Open [AI Crop Doctor](govi-nav://doctor)
+2. Upload a clear leaf photo
+3. Review diagnosis, confidence, and treatment tips`,
+  };
+
+  const si = {
+    default: `මම **බෝග**, **රෝග**, **කාලගුණ**, **වෙළඳපොළ** සහ **යෙදුම් සංචාලනය** ගැන උදව් කරමි.
+
+**උත්සාහ කරන්න:**
+- රෝග හඳුනාගැනීම → [AI වෛද්‍ය](govi-nav://doctor)
+- කාලගුණය → [කාලගුණ උපදෙස්](govi-nav://weather)
+- මිල → [මිල ප්‍රවණතා](govi-nav://trends)
+- මුල් පිටුව → [මුල් පිටුව](govi-nav://${home})`,
+    rice: `**වී වගා උපදෙස්**
+- ප්‍රධාන කන්නය: **මහ**
+- පොදු රෝග: **Bacterial Leaf Blight**, **Brown Spot**, **Leaf Blast**
+
+[AI වෛද්‍ය](govi-nav://doctor) සහ [කාලගුණ උපදෙස්](govi-nav://weather) භාවිතා කරන්න.`,
+    tea: `**තේ**: ~600m ඉහළ, හොඳ වර්ෂාපතනය. තෙත් කාලයේ Blister Blight අවදානම වැඩි වේ.
+
+[AI වෛද්‍ය](govi-nav://doctor) · [කාලගුණ උපදෙස්](govi-nav://weather)`,
+    chili: `**මිරිස්**: ~20–30°C. Thrips, Leaf Spot, Yellow Virus ගැන සැලකිලිමත් වන්න.
+
+[AI වෛද්‍ය](govi-nav://doctor) · [වෙළඳසැල](govi-nav://market)`,
+    weather: `ඔබේ දිස්ත්‍රික්කයේ අනාවැකි සඳහා [කාලගුණ උපදෙස්](govi-nav://weather) විවෘත කරන්න.`,
+    price: `මිල සඳහා [මිල ප්‍රවණතා](govi-nav://trends) සහ විකිණීමට [වෙළඳසැල](govi-nav://market).`,
+    navigate: `**සංචාලනය**
+- [මුල් පිටුව](govi-nav://${home})
+- [බෝග හබ්](govi-nav://cropCareHub)
+- [වෙළඳ හබ්](govi-nav://marketHub)
+- [නිලධාරියා වෙන් කරන්න](govi-nav://manualBooking)
+
+ජංගම දුරකථනයේ **පහළ තීරුව** භාවිතා කරන්න.`,
+    doctor: `රෝග හඳුනා ගැනීමට [AI වෛද්‍ය](govi-nav://doctor) විවෘත කර පත්‍ර ඡායාරූපයක් උඩුගත කරන්න.`,
+  };
+
+  const pack = language === 'si' ? si : en;
+  if (lower.match(/navigat|how do i|where is|menu|sidebar|බලන්න|යන්න|කොහෙද/)) return pack.navigate;
+  if (lower.match(/doctor|disease|leaf|රෝග|වෛද්/)) return pack.doctor;
+  if (lower.match(/rice|paddy|වී|සහල්/)) return pack.rice;
+  if (lower.match(/tea|තේ/)) return pack.tea;
+  if (lower.match(/chili|chilli|මිරිස්/)) return pack.chili;
+  if (lower.match(/weather|කාලගුණ|rain|humidity/)) return pack.weather;
+  if (lower.match(/price|market|මිල|වෙළඳ/)) return pack.price;
+  return pack.default;
+}
+
+function buildMessages(userMessage, history = [], options = {}) {
+  const messages = [];
+  const recentHistory = history.slice(-10);
+  for (const msg of recentHistory) {
+    messages.push({ role: msg.role, content: msg.content });
+  }
+  messages.push({ role: 'user', content: userMessage });
+  return [{ role: 'system', content: buildSystemPrompt(options) }, ...messages];
+}
+
 async function callModelAPI(messages, options = {}, modelName = PRIMARY_MODEL) {
   if (!HF_API_TOKEN) {
     throw new Error('HUGGINGFACE_API_TOKEN not set in environment variables');
   }
 
-  try {
-    const language = options.language || 'en';
-    const languageInstruction = language === 'si' 
-      ? '\n\n**IMPORTANT**: Please respond in Sinhala (සිංහල) language.'
-      : '\n\n**IMPORTANT**: Please respond in English.';
+  const payload = {
+    model: modelName,
+    messages,
+    max_tokens: options.max_tokens || 4096,
+    temperature: options.temperature || 0.6,
+    top_p: options.top_p || 0.9,
+  };
 
-    // Add system message for agricultural context with platform knowledge
-    const systemMessage = {
-      role: 'system',
-      content: `You are an expert agricultural assistant for the Govi Isuru (ගොවි ඉසුරු) - Smart Farming Platform for Sri Lanka. You have two primary roles:
+  const response = await fetch(HUGGINGFACE_API_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${HF_API_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
 
-1. AGRICULTURAL EXPERT: Provide helpful, accurate advice about:
-   - Rice, Tea, and Chili cultivation
-   - Crop diseases and pest management
-   - Fertilizer recommendations and application timing
-   - Planting and harvesting techniques
-   - Weather-based farming advice
-   - Market trends and pricing
-   - Yield prediction and profit calculations
+  if (response.status === 503) {
+    throw new Error('Model is loading, please try again in 20 seconds');
+  }
 
-2. PLATFORM GUIDE: Help users navigate and use the Govi Isuru platform features:
+  if (!response.ok) {
+    const errBody = await response.text();
+    throw new Error(`Hugging Face API Error: ${response.status} ${errBody}`);
+  }
 
-**Main Features & Navigation:**
-- **AI Crop Doctor**: Upload crop leaf photos to detect diseases across Rice (8 diseases), Tea (5 diseases), and Chili (4 diseases). Get Grad-CAM visualization showing where AI focuses, confidence scores, and bilingual treatment recommendations.
-- **AgroLink Marketplace**: Peer-to-peer trading platform with farmer reputation system, ratings, and direct buyer-seller communication via WhatsApp/phone.
-- **Market Intelligence**: View price trends for Rice, Chili, Tea across 6 months. Compare prices across districts (Dambulla, Colombo, Kandy, etc.) with interactive charts.
-- **Weather Advisory**: Real-time weather with 5-day forecast, humidity warnings for fungal diseases, rain alerts for fertilizer timing, and temperature advisories.
-- **Yield Prediction**: AI-powered paddy yield forecasting for all 25 Sri Lankan districts, profit calculator, ROI analysis, and risk assessment with early warnings.
-- **Community Disease Alerts**: Location-based alerts for your GN Division, severity indicators, outbreak detection when multiple cases reported nearby.
-- **Agricultural News**: Multi-category news (Agriculture, Market, Weather, Government, Tech) with AI summaries, Sinhala translation, and text-to-speech in both languages.
-- **AI Chatbot**: That's me! Ask farming questions, upload images for disease diagnosis, use voice input (English/Sinhala), and get context-aware suggestions.
+  const data = await response.json();
+  const content = data?.choices?.[0]?.message?.content;
+  if (!content) throw new Error('Unexpected response format from Hugging Face Router API');
+  return content.trim();
+}
 
-**How to Navigate:**
-- **Top Navigation Bar**: Shows "Govi Isuru" logo, language toggle (English/Sinhala), and user info with logout button
-- **Left Sidebar**: Access all features via icon menu:
-  - 🌾 Home Dashboard
-  - 🤖 AI Crop Doctor  
-  - 🛒 Marketplace
-  - 📊 Market Trends
-  - 🌤️ Weather Advisory
-  - 🚨 Disease Alerts
-  - 📰 Agricultural News
-  - 📈 Yield Prediction
-- **Logout**: Click your username/profile button in the top-right corner, then select "Logout" from dropdown menu
+/**
+ * Stream tokens from HF (SSE). Yields string chunks.
+ */
+async function* streamModelAPI(messages, options = {}, modelName = PRIMARY_MODEL) {
+  if (!HF_API_TOKEN) {
+    throw new Error('HUGGINGFACE_API_TOKEN not set in environment variables');
+  }
 
-**Agricultural Instructor Features:**
-- Officer Dashboard for verifying disease reports
-- Field visit scheduling and management
-- Performance monitoring and leaderboards
-- Internal notes and priority flagging
+  const payload = {
+    model: modelName,
+    messages,
+    max_tokens: options.max_tokens || 4096,
+    temperature: options.temperature || 0.6,
+    top_p: options.top_p || 0.9,
+    stream: true,
+  };
 
-**User Actions:**
-- To logout: Click your profile icon in top-right → Select "Logout"
-- To switch language: Click "English/සිංහල" toggle button in top navigation
-- To report disease: Use AI Doctor or go to Disease Alerts section
-- To post listing: Go to Marketplace → Click "Post Listing" button
-- To check weather: Click Weather Advisory in sidebar
-- To predict yield: Go to Yield Prediction → Enter district, season, year
+  const response = await fetch(HUGGINGFACE_API_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${HF_API_TOKEN}`,
+      'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
+    },
+    body: JSON.stringify(payload),
+  });
 
-Provide clear, step-by-step instructions when users ask "how do I..." questions. Keep agricultural advice concise and practical. Support both English and Sinhala when appropriate.${languageInstruction}`
-    };
+  if (response.status === 503) {
+    throw new Error('Model is loading, please try again in 20 seconds');
+  }
 
-    const allMessages = [systemMessage, ...messages];
+  if (!response.ok) {
+    const errBody = await response.text();
+    throw new Error(`Hugging Face API Error: ${response.status} ${errBody}`);
+  }
 
-    // OpenAI-compatible request format - no token limit restriction
-    const payload = {
-      model: modelName,
-      messages: allMessages,
-      max_tokens: options.max_tokens || 4096,  // Allow full responses
-      temperature: options.temperature || 0.6, // 0.6 for factual farming advice
-      top_p: options.top_p || 0.9,
-    };
+  if (!response.body) {
+    throw new Error('No stream body from Hugging Face API');
+  }
 
-    const response = await axios.post(
-      HUGGINGFACE_API_URL,
-      payload,
-      {
-        headers: {
-          Authorization: `Bearer ${HF_API_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: 60000, // 60 second timeout
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const rawLine of lines) {
+      const line = rawLine.trim();
+      if (!line.startsWith('data:')) continue;
+      const data = line.slice(5).trim();
+      if (!data || data === '[DONE]') continue;
+      try {
+        const parsed = JSON.parse(data);
+        const delta = parsed.choices?.[0]?.delta?.content;
+        if (delta) yield delta;
+      } catch {
+        // ignore partial JSON
       }
-    );
-
-    // Log the full response for debugging
-    console.log('API Response Status:', response.status);
-    console.log('API Response Data:', JSON.stringify(response.data, null, 2));
-
-    // Extract response in OpenAI format: choices[0].message.content
-    if (response.data?.choices && response.data.choices[0]?.message?.content) {
-      const content = response.data.choices[0].message.content.trim();
-      console.log('Extracted content:', content);
-      return content;
-    }
-
-    // Check alternative response formats
-    if (response.data?.generated_text) {
-      console.log('Using generated_text format');
-      return response.data.generated_text.trim();
-    }
-
-    if (Array.isArray(response.data) && response.data[0]?.generated_text) {
-      console.log('Using array format');
-      return response.data[0].generated_text.trim();
-    }
-
-    console.error('Unexpected response format:', JSON.stringify(response.data, null, 2));
-    throw new Error('Unexpected response format from Hugging Face Router API');
-  } catch (error) {
-    if (error.response) {
-      // API error response
-      console.error('Hugging Face Router API Error:', error.response.data);
-      
-      // Handle model loading error (common when model is cold)
-      if (error.response.status === 503) {
-        throw new Error('Model is loading, please try again in 20 seconds');
-      }
-      
-      // Handle 404 - model not found or endpoint issue
-      if (error.response.status === 404) {
-        throw new Error('Model endpoint not found. Please check the model name and API access.');
-      }
-      
-      const errorMsg = error.response.data?.error || error.response.data?.message || error.message;
-      throw new Error(`Hugging Face API Error: ${errorMsg}`);
-    } else if (error.request) {
-      // Network error
-      console.error('Network Error:', error.message);
-      throw new Error('Failed to connect to Hugging Face Router API');
-    } else {
-      console.error('Error:', error.message);
-      throw error;
     }
   }
 }
 
-/**
- * Generate chatbot response using Llama 3.3 70B with automatic Llama 3.1 8B fallback
- * @param {string} userMessage - User's message
- * @param {Array} history - Conversation history
- * @param {Object} options - Additional options
- * @returns {Promise<Object>} - Response object
- */
+async function* streamMockResponse(text) {
+  // Reveal in small chunks with a natural typing pace
+  const parts = text.match(/.{1,4}|(\s+)/g) || [text];
+  for (const part of parts) {
+    yield part;
+    await new Promise((r) => setTimeout(r, 22));
+  }
+}
+
 async function generateResponse(userMessage, history = [], options = {}) {
+  const language = options.language || 'en';
+  const homeView = options.homeView || 'farmerHub';
+
+  // Hard guardrail before calling the model
+  if (!isOnTopicQuery(userMessage)) {
+    return {
+      success: true,
+      answer: offTopicRefusal(language, homeView),
+      model: 'Guardrail',
+      source: 'Topic Guardrail',
+    };
+  }
+
+  const messages = buildMessages(userMessage, history, options);
+  let response;
+  let modelUsed = PRIMARY_MODEL;
+
   try {
-    // Build messages array
-    const messages = [];
-    
-    // Add history (limit to last 10 messages to stay within context)
-    const recentHistory = history.slice(-10);
-    for (const msg of recentHistory) {
-      messages.push({
-        role: msg.role,
-        content: msg.content,
-      });
-    }
-
-    // Add current user message
-    messages.push({
-      role: 'user',
-      content: userMessage,
-    });
-
-    let response;
-    let modelUsed = PRIMARY_MODEL;
-
-    // Try primary model (Llama 3.3 70B) first
     try {
       response = await callModelAPI(messages, options, PRIMARY_MODEL);
     } catch (error) {
-      // Automatic fallback to Llama 3.1 8B on cold start or 503 errors
-      if (error.message.includes('loading') || 
-          error.message.includes('503') || 
-          error.message.includes('Model is loading')) {
-        console.log('Primary model cold, falling back to Llama 3.1 8B...');
+      if (
+        error.message.includes('loading') ||
+        error.message.includes('503') ||
+        error.message.includes('Model is loading')
+      ) {
         try {
           response = await callModelAPI(messages, options, FALLBACK_MODEL);
           modelUsed = FALLBACK_MODEL;
-        } catch (fallbackError) {
-          // Both models failed, use mock response
-          console.log('Both AI models unavailable, using mock response...');
-          const language = options.language || 'en';
-          response = generateMockResponse(userMessage, language);
+        } catch {
+          response = generateMockResponse(userMessage, language, options);
           modelUsed = 'MOCK';
         }
+      } else if (!HF_API_TOKEN || error.message.includes('HUGGINGFACE_API_TOKEN')) {
+        response = generateMockResponse(userMessage, language, options);
+        modelUsed = 'MOCK';
       } else {
-        throw error; // Re-throw if not a cold start error
+        throw error;
       }
     }
 
@@ -263,11 +432,7 @@ async function generateResponse(userMessage, history = [], options = {}) {
     };
   } catch (error) {
     console.error('Chatbot error:', error.message);
-    
-    // Final fallback: return mock response
-    const language = options.language || 'en';
-    const mockResponse = generateMockResponse(userMessage, language);
-    
+    const mockResponse = generateMockResponse(userMessage, language, options);
     return {
       success: true,
       answer: mockResponse,
@@ -277,7 +442,88 @@ async function generateResponse(userMessage, history = [], options = {}) {
   }
 }
 
+/**
+ * Async generator for SSE streaming endpoint
+ */
+async function* streamResponse(userMessage, history = [], options = {}) {
+  const language = options.language || 'en';
+  const homeView = options.homeView || 'farmerHub';
+
+  if (!isOnTopicQuery(userMessage)) {
+    for await (const chunk of streamMockResponse(offTopicRefusal(language, homeView))) {
+      yield { type: 'token', content: chunk };
+    }
+    yield { type: 'done', model: 'Guardrail', source: 'Topic Guardrail' };
+    return;
+  }
+
+  const messages = buildMessages(userMessage, history, options);
+  let modelUsed = PRIMARY_MODEL;
+
+  try {
+    try {
+      for await (const chunk of streamModelAPI(messages, options, PRIMARY_MODEL)) {
+        yield { type: 'token', content: chunk };
+      }
+    } catch (error) {
+      const canFallback =
+        error.message.includes('loading') ||
+        error.message.includes('503') ||
+        error.message.includes('Model is loading') ||
+        error.message.includes('stream') ||
+        !HF_API_TOKEN;
+
+      if (!canFallback && HF_API_TOKEN) {
+        try {
+          const full = await callModelAPI(messages, options, FALLBACK_MODEL);
+          modelUsed = FALLBACK_MODEL;
+          for await (const chunk of streamMockResponse(full)) {
+            yield { type: 'token', content: chunk };
+          }
+        } catch {
+          modelUsed = 'MOCK';
+          const mock = generateMockResponse(userMessage, language, options);
+          for await (const chunk of streamMockResponse(mock)) {
+            yield { type: 'token', content: chunk };
+          }
+        }
+      } else {
+        try {
+          for await (const chunk of streamModelAPI(messages, options, FALLBACK_MODEL)) {
+            modelUsed = FALLBACK_MODEL;
+            yield { type: 'token', content: chunk };
+          }
+        } catch {
+          modelUsed = 'MOCK';
+          const mock = generateMockResponse(userMessage, language, options);
+          for await (const chunk of streamMockResponse(mock)) {
+            yield { type: 'token', content: chunk };
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Stream chatbot error:', error.message);
+    modelUsed = 'MOCK';
+    const mock = generateMockResponse(userMessage, language, options);
+    for await (const chunk of streamMockResponse(mock)) {
+      yield { type: 'token', content: chunk };
+    }
+  }
+
+  yield {
+    type: 'done',
+    model: modelUsed === 'MOCK' ? 'Assistant' : modelUsed.split('/')[1],
+    source: modelUsed === 'MOCK' ? 'Local Knowledge Base' : 'Hugging Face Router API',
+  };
+}
+
 module.exports = {
   generateResponse,
+  streamResponse,
   callModelAPI,
+  buildSystemPrompt,
+  generateMockResponse,
+  isOnTopicQuery,
+  offTopicRefusal,
 };

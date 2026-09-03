@@ -77,7 +77,7 @@ const translations = {
     userManagement: "User Management",
     officerApprovals: "Officer Approvals",
     // Hub translations
-    farmerHub: "Farmer Hub",
+    farmerHub: "Home",
     cropCareHub: "Crop Care Hub",
     marketHub: "Market Hub",
     consultationHub: "Consultation Hub"
@@ -110,7 +110,7 @@ const translations = {
     userManagement: "පරිශීලක කළමනාකරණය",
     officerApprovals: "නිලධාරී අනුමැතිය",
     // Hub translations
-    farmerHub: "ගොවි හබ්",
+    farmerHub: "මුල් පිටුව",
     cropCareHub: "බෝග 관리 හබ්",
     marketHub: "වෙළඳ හබ්",
     consultationHub: "උපදෙස් හබ්"
@@ -407,7 +407,7 @@ function MainApp() {
     } else if (isFarmer) {
       // Farmer tabs - include hubs prominently (farmerHub must be clickable so users can return home)
       return [
-        { id: 'farmerHub', icon: Leaf, label: t.farmerHub, emoji: '🏘️' },
+        { id: 'farmerHub', icon: Home, label: t.farmerHub, emoji: '🏠' },
         { id: 'cropCareHub', icon: Droplets, label: t.cropCareHub, emoji: '🌱' },
         { id: 'marketHub', icon: ShoppingBag, label: t.marketHub, emoji: '📦' },
         { id: 'consultationHub', icon: Search, label: t.consultationHub, emoji: '👥', dividerAfter: true },
@@ -878,7 +878,7 @@ function MainApp() {
       />
 
       {/* Llama 3.1 AI Chatbot - Available on all pages */}
-      <LlamaChatbot lang={lang} />
+      <LlamaChatbot lang={lang} user={user} onNavigate={setView} />
       {/* Credit Purchase Modal */}
       <CreditPurchaseModal
         isOpen={showCreditModal}

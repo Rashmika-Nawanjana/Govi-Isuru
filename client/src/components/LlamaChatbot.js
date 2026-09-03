@@ -1,28 +1,165 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Send, Loader2, Sparkles, Languages, Mic, MicOff, AlertTriangle } from 'lucide-react';
-import axios from 'axios';
+import {
+  X,
+  Send,
+  Loader2,
+  Languages,
+  Mic,
+  MicOff,
+  AlertTriangle,
+  Stethoscope,
+  CloudSun,
+  TrendingUp,
+  Compass,
+  Leaf,
+  Sparkles,
+} from 'lucide-react';
+import ChatMarkdown from './chat/ChatMarkdown';
+import { getHomeView } from '../utils/navigation';
 
 const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
-export default function LlamaChatbot({ lang = 'en' }) {
+const SUGGESTIONS = {
+  en: [
+    { label: 'Detect crop disease', icon: Stethoscope, prompt: 'How do I detect a crop disease with AI Doctor?' },
+    { label: 'Weather advice', icon: CloudSun, prompt: 'How can I check weather and fertilizer timing?' },
+    { label: 'Market prices', icon: TrendingUp, prompt: 'Where can I see crop market prices?' },
+    { label: 'Navigate the app', icon: Compass, prompt: 'How do I navigate Govi Isuru on mobile and web?' },
+    { label: 'Rice farming tips', icon: Leaf, prompt: 'Give me practical rice farming tips for Sri Lanka' },
+  ],
+  si: [
+    { label: 'රෝග හඳුනාගන්න', icon: Stethoscope, prompt: 'AI වෛද්‍ය සමඟ බෝග රෝගයක් හඳුනා ගන්නේ කෙසේද?' },
+    { label: 'කාලගුණ උපදෙස්', icon: CloudSun, prompt: 'කාලගුණය සහ පොහොර යෙදීමේ වේලාව බලන්නේ කෙසේද?' },
+    { label: 'වෙළඳ මිල', icon: TrendingUp, prompt: 'බෝග මිල බලන්නේ කොහෙන්ද?' },
+    { label: 'යෙදුම සංචාලනය', icon: Compass, prompt: 'Govi Isuru ජංගම සහ වෙබ් තුළ සංචාලනය කරන්නේ කෙසේද?' },
+    { label: 'වී වගා උපදෙස්', icon: Leaf, prompt: 'ශ්‍රී ලංකාවට ප්‍රායෝගික වී වගා උපදෙස් දෙන්න' },
+  ],
+};
+
+function ChatOrb({ pulsing = false }) {
+  return (
+    <div className={`relative mx-auto w-36 h-36 md:w-40 md:h-40 ${pulsing ? 'animate-pulse' : ''}`}>
+      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-lime-200 via-emerald-300 to-green-500 blur-2xl opacity-70 animate-[pulse_3s_ease-in-out_infinite]" />
+      <div className="absolute inset-3 rounded-full bg-gradient-to-br from-emerald-200/80 via-green-400/90 to-teal-600 shadow-[0_0_40px_rgba(34,197,94,0.45)]" />
+      <div className="absolute inset-8 rounded-full bg-gradient-to-tr from-white/50 via-lime-100/30 to-transparent" />
+      <div className="absolute inset-[42%] rounded-full bg-white/70 blur-[2px]" />
+    </div>
+  );
+}
+
+export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = null }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [chatLang, setChatLang] = useState('en'); // Internal language state for chatbot
+  const [chatLang, setChatLang] = useState(lang === 'si' ? 'si' : 'en');
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const lastAiResponseRef = useRef(null);
   const recognitionRef = useRef(null);
-  const retryCountRef = useRef(0);
   const manualStopRef = useRef(false);
+  const abortRef = useRef(null);
+  const revealTimerRef = useRef(null);
+  const stickToBottomRef = useRef(true);
+  const scrollRafRef = useRef(null);
 
-  const scrollToLastAiResponse = () => {
-    lastAiResponseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const suggestions = SUGGESTIONS[chatLang] || SUGGESTIONS.en;
+  const hasConversation = messages.length > 0;
+  const homeView = getHomeView(user?.role);
+
+  const isNearBottom = () => {
+    const el = messagesContainerRef.current;
+    if (!el) return true;
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 80;
   };
 
-  // Initialize speech recognition (only once on mount)
+  const smoothScrollToBottom = () => {
+    if (!stickToBottomRef.current) return;
+    if (scrollRafRef.current) return;
+    scrollRafRef.current = requestAnimationFrame(() => {
+      scrollRafRef.current = null;
+      const el = messagesContainerRef.current;
+      if (!el) return;
+      const target = el.scrollHeight - el.clientHeight;
+      const distance = target - el.scrollTop;
+      if (distance <= 1) return;
+      // Ease toward bottom instead of jumping
+      el.scrollTop += Math.max(1, distance * 0.28);
+      if (el.scrollHeight - el.scrollTop - el.clientHeight > 2) {
+        smoothScrollToBottom();
+      }
+    });
+  };
+
+  const clearRevealTimer = () => {
+    if (revealTimerRef.current) {
+      clearInterval(revealTimerRef.current);
+      revealTimerRef.current = null;
+    }
+  };
+
+  /**
+   * Pace displayed text independently of network token speed.
+   * Incoming text fills a buffer; UI reveals a few chars at a time.
+   */
+  const startPacedReveal = (assistantId) => {
+    clearRevealTimer();
+    const state = {
+      buffer: '',
+      shown: 0,
+      done: false,
+      model: 'Assistant',
+    };
+
+    revealTimerRef.current = setInterval(() => {
+      if (state.shown < state.buffer.length) {
+        // Reveal 2–5 chars per tick depending on backlog
+        const backlog = state.buffer.length - state.shown;
+        const step = backlog > 80 ? 5 : backlog > 30 ? 3 : 2;
+        state.shown = Math.min(state.buffer.length, state.shown + step);
+        const snapshot = state.buffer.slice(0, state.shown);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId ? { ...m, content: snapshot, streaming: true } : m
+          )
+        );
+        smoothScrollToBottom();
+      } else if (state.done) {
+        clearRevealTimer();
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId
+              ? {
+                  ...m,
+                  content: state.buffer,
+                  streaming: false,
+                  model: state.model,
+                }
+              : m
+          )
+        );
+        smoothScrollToBottom();
+      }
+    }, 28);
+
+    return {
+      push(chunk) {
+        state.buffer += chunk;
+      },
+      finish(model) {
+        state.done = true;
+        if (model) state.model = model;
+      },
+      setFull(text, model) {
+        state.buffer = text;
+        state.done = true;
+        if (model) state.model = model;
+      },
+    };
+  };
+
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -30,107 +167,51 @@ export default function LlamaChatbot({ lang = 'en' }) {
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = false;
       recognitionRef.current.maxAlternatives = 1;
-      recognitionRef.current.lang = 'en-US'; // Default language
-      
+      recognitionRef.current.lang = 'en-US';
+
       recognitionRef.current.onstart = () => {
-        console.log('Speech recognition started successfully');
-        retryCountRef.current = 0;
         setIsListening(true);
         setError(null);
       };
-      
+
       recognitionRef.current.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
-        console.log('Speech recognized:', transcript);
-        retryCountRef.current = 0;
         setInput(transcript);
         manualStopRef.current = true;
         recognitionRef.current.stop();
       };
 
       recognitionRef.current.onerror = (event) => {
-        console.error('Speech recognition error:', event.error, event);
-        
-        // Don't reset if it's just an aborted error
-        if (event.error === 'aborted') {
-          console.log('Recognition aborted (user stopped or restart)');
-          return;
-        }
-        
-        // Reset listening state
+        if (event.error === 'aborted') return;
         setIsListening(false);
-        
-        // Handle specific errors with user-friendly messages
-        let errorMessage = '';
-        
-        switch(event.error) {
-          case 'no-speech':
-            errorMessage = chatLang === 'si'
-              ? '🎤 කථාවක් අනාවරණය නොවිය. නැවත උත්සාහ කරන්න.'
-              : '🎤 No speech detected. Please try again.';
-            setTimeout(() => setError(null), 3000);
-            break;
-          case 'network':
-            // Network errors mean the speech API couldn't connect to Google's servers
-            console.log('Network error - Speech API requires connection to Google servers');
-            errorMessage = chatLang === 'si' 
-              ? '⚠️ හඬ සේවාවට සම්බන්ධ විය නොහැක. VPN/Firewall අක්‍රිය කර නැවත උත්සාහ කරන්න.'
-              : '⚠️ Cannot connect to voice service. Try disabling VPN/Firewall, or just type your message.';
-            setTimeout(() => setError(null), 5000);
-            break;
-          case 'not-allowed':
-          case 'permission-denied':
-            errorMessage = chatLang === 'si'
-              ? '🎤 මයික්‍රොෆෝන් අවසර අවශ්‍යයි. URL ලිපිනයේ 🔒 ක්ලික් කර අවසර දෙන්න.'
-              : '🎤 Microphone permission denied. Click 🔒 in URL bar to allow.';
-            setTimeout(() => setError(null), 5000);
-            break;
-          case 'audio-capture':
-            errorMessage = chatLang === 'si'
-              ? '🎤 මයික්‍රොෆෝනය සොයාගත නොහැක.'
-              : '🎤 No microphone found.';
-            setTimeout(() => setError(null), 4000);
-            break;
-          case 'service-not-allowed':
-            errorMessage = chatLang === 'si'
-              ? '🔒 හඬ ආදානය HTTPS හෝ localhost හි පමණක් ක්‍රියා කරයි.'
-              : '🔒 Voice input requires HTTPS or localhost.';
-            setTimeout(() => setError(null), 5000);
-            break;
-          default:
-            console.log('Unknown speech error:', event.error);
-            errorMessage = chatLang === 'si'
-              ? `⚠️ හඬ ආදානය දෝෂයකි. නැවත උත්සාහ කරන්න.`
-              : `⚠️ Voice error (${event.error}). Please try again.`;
-            setTimeout(() => setError(null), 4000);
-        }
-        
-        if (errorMessage) {
-          setError(errorMessage);
-        }
+        const map = {
+          'no-speech': chatLang === 'si' ? '🎤 කථාවක් අනාවරණය නොවිය.' : '🎤 No speech detected.',
+          network: chatLang === 'si' ? '⚠️ හඬ සේවාවට සම්බන්ධ විය නොහැක.' : '⚠️ Cannot connect to voice service.',
+          'not-allowed': chatLang === 'si' ? '🎤 මයික්‍රොෆෝන් අවසර අවශ්‍යයි.' : '🎤 Microphone permission denied.',
+        };
+        setError(map[event.error] || (chatLang === 'si' ? '⚠️ හඬ ආදාන දෝෂයකි.' : `⚠️ Voice error (${event.error}).`));
+        setTimeout(() => setError(null), 4000);
       };
 
       recognitionRef.current.onend = () => {
-        console.log('Speech recognition ended, manualStop:', manualStopRef.current);
         manualStopRef.current = false;
         setIsListening(false);
       };
     }
-    
-    // Cleanup on unmount
+
     return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.abort();
-        } catch (e) {
-          // Ignore errors on cleanup
-        }
+      try {
+        recognitionRef.current?.abort();
+      } catch (_) {
+        /* ignore */
       }
+      abortRef.current?.abort();
+      clearRevealTimer();
+      if (scrollRafRef.current) cancelAnimationFrame(scrollRafRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+  }, []);
 
-  // Update speech recognition language when chatLang changes
   useEffect(() => {
     if (recognitionRef.current) {
       recognitionRef.current.lang = chatLang === 'si' ? 'si-LK' : 'en-US';
@@ -139,156 +220,171 @@ export default function LlamaChatbot({ lang = 'en' }) {
 
   const toggleVoiceInput = () => {
     if (!recognitionRef.current) {
-      setError(chatLang === 'si' 
-        ? '❌ ඔබේ බ්‍රවුසරය හඬ ආදානය සඳහා සහාය නොදක්වයි. Chrome හෝ Edge භාවිතා කරන්න.'
-        : '❌ Voice input not supported. Please use Chrome or Edge browser.');
-      setTimeout(() => setError(null), 5000);
+      setError(chatLang === 'si' ? '❌ හඬ ආදානයට සහාය නැත.' : '❌ Voice input not supported.');
       return;
     }
-
     if (isListening) {
       manualStopRef.current = true;
       try {
         recognitionRef.current.stop();
-      } catch (e) {
-        console.log('Error stopping recognition:', e);
+      } catch (_) {
+        /* ignore */
       }
       setIsListening(false);
-    } else {
-      manualStopRef.current = false;
-      setError(null);
-      retryCountRef.current = 0;
-      
-      // Update language
-      recognitionRef.current.lang = chatLang === 'si' ? 'si-LK' : 'en-US';
-      
-      try {
-        recognitionRef.current.start();
-      } catch (error) {
-        console.error('Error starting speech recognition:', error);
-        
-        // Handle "already started" error - stop and retry
-        if (error.name === 'InvalidStateError' || 
-            (error.message && error.message.includes('already started'))) {
-          console.log('Recognition already running, stopping and retrying...');
-          try {
-            recognitionRef.current.stop();
-          } catch (e) {
-            // Ignore
-          }
-          setTimeout(() => {
-            try {
-              recognitionRef.current.start();
-            } catch (e) {
-              console.error('Retry start failed:', e);
-              setError(chatLang === 'si'
-                ? '⚠️ හඬ ආදානය ආරම්භ කිරීමට නොහැකි විය.'
-                : '⚠️ Could not start voice input. Please try again.');
-              setTimeout(() => setError(null), 3000);
-            }
-          }, 200);
-          return;
-        }
-        
-        setError(chatLang === 'si'
-          ? '⚠️ හඬ ආදානය ආරම්භ කිරීමට නොහැකි විය. මයික්‍රොෆෝන් අවසර දෙන්න හෝ නැවත උත්සාහ කරන්න.'
-          : '⚠️ Could not start voice input. Please allow microphone access and try again.');
-        setTimeout(() => setError(null), 5000);
+      return;
+    }
+    recognitionRef.current.lang = chatLang === 'si' ? 'si-LK' : 'en-US';
+    try {
+      recognitionRef.current.start();
+    } catch (_) {
+      setError(chatLang === 'si' ? '⚠️ හඬ ආදානය ආරම්භ කළ නොහැක.' : '⚠️ Could not start voice input.');
+    }
+  };
+
+  const handleNavigateFromChat = (viewId) => {
+    if (onNavigate) {
+      onNavigate(viewId);
+      if (window.matchMedia('(max-width: 767px)').matches) {
+        setIsOpen(false);
       }
     }
   };
 
-  // Auto-scroll to the beginning of the last AI response
-  useEffect(() => {
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.role === 'assistant') {
-      scrollToLastAiResponse();
-    }
-  }, [messages]);
+  const sendMessage = async (rawText) => {
+    const text = (rawText ?? input).trim();
+    if (!text || isLoading) return;
 
-  useEffect(() => {
-    // Add welcome message when chatbot opens for the first time
-    if (isOpen && messages.length === 0) {
-      setMessages([
-        {
-          role: 'assistant',
-          content:
-            chatLang === 'si'
-              ? 'ආයුබෝවන්! ගොවි ඉසුරු ස්මාර්ට් ගොවිතැන් වේදිකාවට සාදරයෙන් පිළිගනිමු. වී, තේ සහ මිරිස් වගාව පිළිබඳ ඔබට ඇති ඕනෑම ප්‍රශ්නයකට හෝ ගැටලුවකට මෙන්ම වේදිකාවේ විශේෂාංග භාවිතා කිරීමට මම ඔබට උදව් කරන්නම්. අද මට ඔබට කුමක් සඳහා සහාය විය හැකිද?'
-              : 'Hello! Welcome to the Govi Isuru Smart Farming Platform. I\'m here to help you with any questions or concerns you may have about rice, tea, and chili cultivation, as well as navigating the platform\'s features. What can I assist you with today?',
-          timestamp: new Date(),
-        },
-      ]);
-    }
-  }, [isOpen, messages.length, chatLang]);
+    const userMessage = { role: 'user', content: text, timestamp: new Date() };
+    const history = messages.map((msg) => ({ role: msg.role, content: msg.content }));
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
-
-    const userMessage = {
-      role: 'user',
-      content: input.trim(),
-      timestamp: new Date(),
-    };
-
+    stickToBottomRef.current = true;
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
     setError(null);
+    requestAnimationFrame(() => smoothScrollToBottom());
+
+    const assistantId = `a-${Date.now()}`;
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: assistantId,
+        role: 'assistant',
+        content: '',
+        timestamp: new Date(),
+        streaming: true,
+      },
+    ]);
+
+    const reveal = startPacedReveal(assistantId);
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     try {
-      // Prepare conversation history for API
-      const history = messages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      }));
-
-      const response = await axios.post(`${API_BASE}/api/llama-chatbot/chat`, {
-        message: userMessage.content,
-        history: history,
-        options: {
-          temperature: 0.6,
-          language: chatLang, // Pass language preference
-        },
+      const response = await fetch(`${API_BASE}/api/llama-chatbot/chat/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          history,
+          options: {
+            temperature: 0.6,
+            language: chatLang,
+            role: user?.role || 'farmer',
+            homeView,
+          },
+        }),
+        signal: controller.signal,
       });
 
-      const assistantMessage = {
-        role: 'assistant',
-        content: response.data.answer,
-        timestamp: new Date(),
-        model: response.data.model,
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err) {
-      console.error('Llama chatbot error:', err);
-      
-      let errorMessage = 'Sorry, I encountered an error. Please try again.';
-      
-      if (err.response?.status === 503) {
-        errorMessage = err.response.data.fallback || 'The AI model is loading. Please wait 20 seconds and try again.';
-      } else if (err.response?.data?.error) {
-        errorMessage = err.response.data.error;
-      } else if (!navigator.onLine) {
-        errorMessage = 'No internet connection. Please check your network.';
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
       }
 
-      setError(errorMessage);
-      
-      // Add error message to chat
-      const errorMsg = {
-        role: 'assistant',
-        content: errorMessage,
-        timestamp: new Date(),
-        isError: true,
-      };
-      setMessages((prev) => [...prev, errorMsg]);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let model = 'Assistant';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split('\n');
+        buffer = parts.pop() || '';
+
+        for (const raw of parts) {
+          const line = raw.trim();
+          if (!line.startsWith('data:')) continue;
+          const data = line.slice(5).trim();
+          if (!data || data === '[DONE]') continue;
+
+          let event;
+          try {
+            event = JSON.parse(data);
+          } catch {
+            continue;
+          }
+
+          if (event.type === 'token' && event.content) {
+            reveal.push(event.content);
+          } else if (event.type === 'done') {
+            model = event.model || model;
+          } else if (event.type === 'error') {
+            throw new Error(event.content || 'Stream error');
+          }
+        }
+      }
+
+      reveal.finish(model);
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        clearRevealTimer();
+        return;
+      }
+      console.error('Llama chatbot stream error:', err);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/llama-chatbot/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: text,
+            history,
+            options: {
+              temperature: 0.6,
+              language: chatLang,
+              role: user?.role || 'farmer',
+              homeView,
+            },
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Chat failed');
+        // Still pace the fallback answer so it doesn't dump instantly
+        reveal.setFull(data.answer || '', data.model);
+      } catch (fallbackErr) {
+        clearRevealTimer();
+        const errorMessage =
+          chatLang === 'si'
+            ? 'සමාවන්න, දෝෂයක් ඇති විය. නැවත උත්සාහ කරන්න.'
+            : 'Sorry, I encountered an error. Please try again.';
+        setError(errorMessage);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId
+              ? { ...m, content: errorMessage, streaming: false, isError: true }
+              : m
+          )
+        );
+      }
     } finally {
       setIsLoading(false);
+      abortRef.current = null;
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
@@ -297,180 +393,193 @@ export default function LlamaChatbot({ lang = 'en' }) {
 
   return (
     <>
-      {/* Floating Chat Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-20 md:bottom-6 right-4 md:right-6 bg-gradient-to-br from-emerald-500 via-green-500 to-emerald-600 text-white p-4 rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 z-50 group border border-emerald-400/20"
+          className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-50 group"
           aria-label="Open AI Chat"
         >
-          <div className="relative">
-            <MessageCircle size={28} className="drop-shadow-sm" />
-            <Sparkles
-              size={14}
-              className="absolute -top-1 -right-1 text-yellow-300 animate-pulse drop-shadow-sm"
-            />
+          <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-lime-300 via-emerald-500 to-green-700 shadow-lg shadow-green-500/30 flex items-center justify-center text-white border border-white/30 hover:scale-105 transition-transform">
+            <div className="absolute inset-0 rounded-full bg-emerald-400/40 blur-md animate-pulse" />
+            <Sparkles size={22} className="relative z-10" />
           </div>
-          <span className="absolute bottom-full right-0 mb-3 px-4 py-2 bg-slate-800 text-white text-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
-            🤖 AI Assistant
-          </span>
         </button>
       )}
 
-      {/* Chat Window - Full Screen on Mobile */}
       {isOpen && (
-        <div className="fixed inset-0 md:bottom-6 md:right-6 md:top-auto md:left-auto md:w-96 md:h-[600px] w-full h-full bg-white dark:bg-gray-800 md:rounded-2xl shadow-2xl flex flex-col z-50 border-0 md:border md:border-slate-200 dark:border-gray-700 overflow-hidden">
+        <div className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 md:w-[420px] md:h-[680px] w-full h-full z-50 flex flex-col overflow-hidden md:rounded-[28px] shadow-2xl border-0 md:border md:border-green-100 dark:md:border-gray-700 bg-gradient-to-b from-[#eef8f0] via-white to-[#f3faf5] dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
           {/* Header */}
-          <div className="bg-gradient-to-br from-emerald-500 via-green-500 to-emerald-600 text-white p-4 md:p-5 flex justify-between items-center">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="bg-white/20 backdrop-blur-sm p-1.5 md:p-2 rounded-lg md:rounded-xl">
-                <Sparkles size={18} className="md:w-5 md:h-5 drop-shadow-sm" />
+          <div className="flex items-center justify-between px-4 py-3 md:px-5 md:py-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-lime-300 to-green-600 flex items-center justify-center text-white font-black text-sm shadow-md">
+                GI
               </div>
               <div>
-                <h3 className="font-bold text-base md:text-lg drop-shadow-sm">AI Farming Assistant</h3>
-                <p className="text-[10px] md:text-xs text-emerald-50 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-300 rounded-full animate-pulse"></span>
-                  Powered by Llama 3.3
+                <h3 className="font-bold text-slate-900 dark:text-white text-[15px] leading-tight">Govi Isuru AI</h3>
+                <p className="text-[11px] text-green-700/80 dark:text-green-300 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  {chatLang === 'si' ? 'ගොවි සහායක' : 'Farming assistant'}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-1.5 md:gap-2">
-              {/* Language Toggle Button */}
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setChatLang(chatLang === 'en' ? 'si' : 'en')}
-                className="hover:bg-white/20 backdrop-blur-sm p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all duration-200 flex items-center gap-1 md:gap-1.5 border border-white/10"
-                aria-label="Toggle language"
-                title={chatLang === 'en' ? 'Switch to Sinhala' : 'Switch to English'}
+                className="px-2.5 py-1.5 rounded-full text-[11px] font-bold bg-white/80 dark:bg-gray-800 border border-green-100 dark:border-gray-700 text-green-800 dark:text-green-200"
               >
-                <Languages size={16} className="md:w-[18px] md:h-[18px]" />
-                <span className="text-[10px] md:text-xs font-semibold">{chatLang === 'en' ? 'EN' : 'සිං'}</span>
+                <span className="inline-flex items-center gap-1">
+                  <Languages size={13} />
+                  {chatLang === 'en' ? 'EN' : 'සිං'}
+                </span>
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="hover:bg-white/20 backdrop-blur-sm p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all duration-200 border border-white/10"
+                className="p-2 rounded-full bg-white/80 dark:bg-gray-800 border border-green-100 dark:border-gray-700 text-slate-600 dark:text-gray-300"
                 aria-label="Close chat"
               >
-                <X size={20} className="md:w-[22px] md:h-[22px]" />
+                <X size={18} />
               </button>
             </div>
           </div>
 
-          {/* Messages Container */}
-          <div className="flex-1 overflow-y-auto p-3 md:p-5 space-y-3 md:space-y-4 bg-gradient-to-b from-slate-50 to-white dark:from-gray-900 dark:to-gray-800">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                ref={message.role === 'assistant' && index === messages.length - 1 ? lastAiResponseRef : null}
-                className={`flex ${
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                <div
-                  className={`max-w-[80%] p-4 rounded-2xl shadow-sm transition-all duration-200 hover:shadow-md ${
-                    message.role === 'user'
-                      ? 'bg-gradient-to-br from-emerald-500 to-green-600 text-white rounded-br-md'
-                      : message.isError
-                      ? 'bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-bl-md border border-red-200 dark:border-red-800'
-                      : 'bg-white dark:bg-gray-700 text-slate-800 dark:text-white rounded-bl-md border border-slate-200 dark:border-gray-600'
-                  }`}
-                >
-                  <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
-                    {message.content}
-                  </p>
-                  <p
-                    className={`text-xs mt-2 flex items-center gap-1 ${
-                      message.role === 'user'
-                        ? 'text-emerald-100'
-                        : message.isError
-                        ? 'text-red-600 dark:text-red-400'
-                        : 'text-slate-400 dark:text-gray-400'
-                    }`}
-                  >
-                    {new Date(message.timestamp).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
+          {/* Body */}
+          <div
+            ref={messagesContainerRef}
+            onScroll={() => {
+              stickToBottomRef.current = isNearBottom();
+            }}
+            className="flex-1 overflow-y-auto px-4 md:px-5 pb-3 scroll-smooth"
+          >
+            {!hasConversation ? (
+              <div className="h-full flex flex-col items-center justify-center text-center pt-4 pb-8">
+                <ChatOrb />
+                <h2 className="mt-6 text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight max-w-[16rem]">
+                  {chatLang === 'si' ? 'අද මට ඔබට කුමක් කළ හැකිද?' : 'What can I help you with today?'}
+                </h2>
+                <div className="mt-5 flex flex-wrap justify-center gap-2 max-w-sm">
+                  {suggestions.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => sendMessage(item.prompt)}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/90 dark:bg-gray-800 border border-green-100 dark:border-gray-700 text-[12px] font-semibold text-slate-700 dark:text-gray-200 shadow-sm hover:border-green-400 active:scale-95 transition"
+                      >
+                        <Icon size={13} className="text-green-600" />
+                        {item.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-            ))}
+            ) : (
+              <div className="space-y-4 pt-1">
+                {messages.map((message, index) => {
+                  const isUser = message.role === 'user';
+                  const isLastAssistant =
+                    !isUser && index === messages.length - 1;
 
-            {/* Loading Indicator */}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-white dark:bg-gray-700 text-slate-800 dark:text-white p-4 rounded-2xl rounded-bl-md shadow-sm border border-slate-200 dark:border-gray-600">
-                  <div className="flex items-center gap-2">
-                    <Loader2 size={18} className="animate-spin text-emerald-500" />
-                    <span className="text-sm text-slate-600 dark:text-gray-400 font-medium">
-                      AI is thinking...
-                    </span>
-                  </div>
-                </div>
+                  return (
+                    <div
+                      key={message.id || index}
+                      ref={isLastAssistant ? lastAiResponseRef : null}
+                      className={`flex gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}
+                    >
+                      {!isUser && (
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime-300 to-green-600 text-white text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                          AI
+                        </div>
+                      )}
+
+                      <div className={`max-w-[82%] ${isUser ? '' : 'flex-1'}`}>
+                        {isUser ? (
+                          <div className="bg-white dark:bg-gray-800 text-slate-800 dark:text-gray-100 px-4 py-2.5 rounded-2xl rounded-br-md shadow-sm border border-green-50 dark:border-gray-700 text-sm leading-relaxed">
+                            {message.content}
+                          </div>
+                        ) : (
+                          <div className={`${message.isError ? 'text-red-600 dark:text-red-300' : ''}`}>
+                            {message.content ? (
+                              <ChatMarkdown content={message.content} onNavigate={handleNavigateFromChat} />
+                            ) : (
+                              <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-gray-400">
+                                <Loader2 size={14} className="animate-spin text-green-600" />
+                                {chatLang === 'si' ? 'සිතමින්...' : 'Thinking...'}
+                              </div>
+                            )}
+                            {message.streaming && message.content && (
+                              <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-green-500 animate-pulse rounded-sm" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {isUser && (
+                        <div className="w-8 h-8 rounded-full bg-green-700 text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                          {(user?.username || 'U').slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                <div ref={messagesEndRef} />
               </div>
             )}
-
-            <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Area */}
-          <div className="p-3 md:p-5 border-t border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+          {/* Input */}
+          <div className="px-3 md:px-4 pb-3 md:pb-4 pt-1" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
             {error && (
-              <div className="mb-2 md:mb-3 text-xs text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 p-2 md:p-3 rounded-xl border border-red-200 dark:border-red-800 flex items-start gap-2">
+              <div className="mb-2 text-xs text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 p-2 rounded-xl border border-red-200 dark:border-red-800 flex items-start gap-2">
                 <AlertTriangle size={14} className="mt-0.5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
             )}
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-full border border-green-100 dark:border-gray-700 shadow-md px-2 py-1.5">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyDown}
                 placeholder={
                   isListening
-                    ? (chatLang === 'si' ? '🎤 සවන් දෙනවා...' : '🎤 Listening...')
-                    : (chatLang === 'si'
-                        ? 'ඔබගේ ප්‍රශ්නය ටයිප් කරන්න...'
-                        : 'Type your question...')
+                    ? chatLang === 'si'
+                      ? '🎤 සවන් දෙනවා...'
+                      : '🎤 Listening...'
+                    : chatLang === 'si'
+                      ? 'ඕනෑම දෙයක් අසන්න...'
+                      : 'Ask me anything...'
                 }
-                className="flex-1 px-3 md:px-4 py-2 md:py-3 text-sm md:text-base border border-slate-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-slate-50 dark:bg-gray-700 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-gray-400"
+                className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-slate-800 dark:text-white placeholder-slate-400 outline-none"
                 disabled={isLoading || isListening}
               />
-              {/* Voice input - show on HTTPS or localhost/127.0.0.1 */}
-              {(window.location.protocol === 'https:' || 
-                window.location.hostname === 'localhost' || 
+              {(window.location.protocol === 'https:' ||
+                window.location.hostname === 'localhost' ||
                 window.location.hostname === '127.0.0.1') && (
                 <button
+                  type="button"
                   onClick={toggleVoiceInput}
                   disabled={isLoading}
-                  className={`${
+                  className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition ${
                     isListening
-                      ? 'bg-gradient-to-br from-red-500 to-red-600 animate-pulse shadow-lg'
-                      : 'bg-gradient-to-br from-blue-500 to-blue-600 hover:shadow-lg'
-                  } text-white p-2 md:p-3 rounded-xl disabled:bg-slate-300 disabled:cursor-not-allowed transition-all duration-200 border border-transparent`}
-                  aria-label={isListening ? 'Stop recording' : 'Start voice input'}
-                  title={isListening ? 'Stop recording' : 'Voice input'}
+                      ? 'bg-red-500 text-white animate-pulse'
+                      : 'bg-green-600 text-white hover:bg-green-700'
+                  }`}
+                  aria-label={isListening ? 'Stop recording' : 'Voice input'}
                 >
-                  {isListening ? <MicOff size={18} className="md:w-5 md:h-5" /> : <Mic size={18} className="md:w-5 md:h-5" />}
+                  {isListening ? <MicOff size={18} /> : <Mic size={18} />}
                 </button>
               )}
               <button
-                onClick={sendMessage}
+                type="button"
+                onClick={() => sendMessage()}
                 disabled={!input.trim() || isLoading}
-                className="bg-gradient-to-br from-emerald-500 to-green-600 text-white p-2 md:p-3 rounded-xl hover:shadow-lg disabled:bg-slate-300 disabled:cursor-not-allowed transition-all duration-200 border border-transparent"
+                className="w-10 h-10 rounded-full bg-green-700 text-white flex items-center justify-center flex-shrink-0 disabled:bg-slate-300 disabled:text-slate-500 hover:bg-green-800 transition"
                 aria-label="Send message"
               >
-                {isLoading ? (
-                  <Loader2 size={18} className="md:w-5 md:h-5 animate-spin" />
-                ) : (
-                  <Send size={18} className="md:w-5 md:h-5" />
-                )}
+                {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={16} />}
               </button>
             </div>
-            <p className="text-[10px] md:text-xs text-slate-400 dark:text-gray-500 mt-2 md:mt-3 text-center flex items-center justify-center gap-1">
-              <Sparkles size={10} className="md:w-3 md:h-3 text-emerald-500" />
-              Powered by Meta Llama 3.3 via Hugging Face
-            </p>
           </div>
         </div>
       )}

@@ -30,7 +30,7 @@ export function canGoBack(view, role) {
 }
 
 const titlesEn = {
-  farmerHub: 'Farmer Hub',
+  farmerHub: 'Home',
   cropCareHub: 'Crop Care',
   marketHub: 'Market Hub',
   consultationHub: 'Consultation',
@@ -56,7 +56,7 @@ const titlesEn = {
 };
 
 const titlesSi = {
-  farmerHub: 'ගොවි හබ්',
+  farmerHub: 'මුල් පිටුව',
   cropCareHub: 'බෝග හබ්',
   marketHub: 'වෙළඳ හබ්',
   consultationHub: 'උපදෙස්',
