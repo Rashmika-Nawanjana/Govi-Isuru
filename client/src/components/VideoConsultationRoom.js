@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import DailyIframe from '@daily-co/daily-js';
 import { PhoneOff, Video, Loader2 } from 'lucide-react';
 
@@ -6,8 +7,7 @@ import { PhoneOff, Video, Loader2 } from 'lucide-react';
  * In-app Daily.co video consultation room.
  * Expects session: { roomUrl, token, topic, userName }
  *
- * Daily Prebuilt shows its own lobby ("Are you ready to join?").
- * We must not keep a blocking overlay after the iframe loads, or the Join button is unclickable.
+ * Rendered via portal to document.body so the app sidebar cannot sit above the call.
  */
 export default function VideoConsultationRoom({ session, onLeave, lang = 'en' }) {
   const containerRef = useRef(null);
@@ -32,6 +32,16 @@ export default function VideoConsultationRoom({ session, onLeave, lang = 'en' })
     }
   };
   const t = labels[lang] || labels.en;
+
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.body.classList.add('video-call-active');
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.classList.remove('video-call-active');
+    };
+  }, []);
 
   useEffect(() => {
     if (!session?.roomUrl || !session?.token || !containerRef.current) {
@@ -63,7 +73,6 @@ export default function VideoConsultationRoom({ session, onLeave, lang = 'en' })
 
         callRef.current = call;
 
-        // Prebuilt lobby is interactive as soon as the iframe loads
         call.on('loaded', () => {
           if (!cancelled) setStatus('lobby');
         });
@@ -86,7 +95,6 @@ export default function VideoConsultationRoom({ session, onLeave, lang = 'en' })
           }
         });
 
-        // Clear blocking overlay before join — join() may wait until user clicks Daily's Join
         if (!cancelled) setStatus('lobby');
 
         await call.join({
@@ -95,7 +103,7 @@ export default function VideoConsultationRoom({ session, onLeave, lang = 'en' })
           userName: session.userName
         });
 
-        if (!cancelled && status !== 'error') {
+        if (!cancelled) {
           setStatus((prev) => (prev === 'connecting' ? 'joined' : prev));
         }
       } catch (err) {
@@ -146,46 +154,51 @@ export default function VideoConsultationRoom({ session, onLeave, lang = 'en' })
 
   const showBlockingOverlay = status === 'connecting' || status === 'error';
 
-  return (
-    <div className="fixed inset-0 z-[80] bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 md:p-6">
-      <div className="w-full max-w-5xl h-[85vh] bg-gray-950 rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-gray-800">
-        <div className="flex items-center justify-between gap-3 px-4 py-3 bg-gray-900 text-white">
-          <div className="flex items-center gap-2 min-w-0">
-            <Video className="w-5 h-5 text-emerald-400 shrink-0" />
-            <div className="min-w-0">
-              <p className="font-semibold text-sm truncate">{t.title}</p>
-              <p className="text-xs text-gray-400 truncate">
-                {session?.topic || ''}
-                {status === 'lobby' ? ` · ${t.lobbyHint}` : ''}
-              </p>
-            </div>
+  const ui = (
+    <div
+      className="fixed inset-0 z-[9999] bg-gray-950 flex flex-col"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t.title}
+    >
+      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-gray-900 text-white shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <Video className="w-5 h-5 text-emerald-400 shrink-0" />
+          <div className="min-w-0">
+            <p className="font-semibold text-sm truncate">{t.title}</p>
+            <p className="text-xs text-gray-400 truncate">
+              {session?.topic || ''}
+              {status === 'lobby' ? ` · ${t.lobbyHint}` : ''}
+            </p>
           </div>
-          <button
-            type="button"
-            onClick={handleLeave}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold"
-          >
-            <PhoneOff className="w-4 h-4" />
-            {t.leave}
-          </button>
         </div>
+        <button
+          type="button"
+          onClick={handleLeave}
+          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold"
+        >
+          <PhoneOff className="w-4 h-4" />
+          {t.leave}
+        </button>
+      </div>
 
-        <div className="relative flex-1 bg-black">
-          {showBlockingOverlay && (
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-white bg-black/80">
-              {status === 'connecting' ? (
-                <>
-                  <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
-                  <p className="text-sm text-gray-200">{t.connecting}</p>
-                </>
-              ) : (
-                <p className="text-sm text-rose-300 px-6 text-center">{error || t.failed}</p>
-              )}
-            </div>
-          )}
-          <div ref={containerRef} className="w-full h-full" />
-        </div>
+      <div className="relative flex-1 bg-black min-h-0">
+        {showBlockingOverlay && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-white bg-black/80">
+            {status === 'connecting' ? (
+              <>
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+                <p className="text-sm text-gray-200">{t.connecting}</p>
+              </>
+            ) : (
+              <p className="text-sm text-rose-300 px-6 text-center">{error || t.failed}</p>
+            )}
+          </div>
+        )}
+        <div ref={containerRef} className="w-full h-full" />
       </div>
     </div>
   );
+
+  return createPortal(ui, document.body);
 }

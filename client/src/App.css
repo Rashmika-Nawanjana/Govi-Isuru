@@ -303,3 +303,8 @@ html.dark .glass {
     transform: rotate(360deg);
   }
 }
+
+/* Full-screen video consultation: keep chrome out of the way */
+body.video-call-active {
+  overflow: hidden !important;
+}
