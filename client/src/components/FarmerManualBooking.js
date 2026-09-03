@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { CalendarDays, RefreshCw, User, Clock, MapPin, ClipboardList, XCircle, Bell, Check } from 'lucide-react';
+import { CalendarDays, RefreshCw, User, Clock, MapPin, ClipboardList, XCircle, Bell, Check, Video } from 'lucide-react';
+import VideoConsultationRoom from './VideoConsultationRoom';
 
 const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
@@ -18,6 +19,17 @@ const MODE_LABELS = {
   video: 'Video'
 };
 
+const VIDEO_JOIN_EARLY_MS = 30 * 60 * 1000;
+const VIDEO_JOIN_LATE_MS = 120 * 60 * 1000;
+
+function canJoinVideoCall(booking) {
+  if (!booking || booking.mode !== 'video' || booking.status !== 'accepted') return false;
+  const now = Date.now();
+  const start = new Date(booking.scheduledStartAt).getTime();
+  const end = new Date(booking.scheduledEndAt).getTime();
+  return now >= start - VIDEO_JOIN_EARLY_MS && now <= end + VIDEO_JOIN_LATE_MS;
+}
+
 export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -28,6 +40,8 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [form, setForm] = useState({ topic: '', description: '', slotId: '' });
+  const [videoSession, setVideoSession] = useState(null);
+  const [joiningVideoId, setJoiningVideoId] = useState('');
 
   const t = useMemo(() => ({
     title: lang === 'si' ? 'අතින් වෙන්කරවා ගැනීම්' : 'Manual Instructor Booking',
@@ -50,7 +64,9 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
     pendingOnly: lang === 'si' ? 'බලාපොරොත්තු තත්වයේදී පමණක් අවලංගු කළ හැක' : 'Only pending bookings can be cancelled',
     advice: lang === 'si' ? 'උපදෙස්' : 'Advice',
     fee: lang === 'si' ? 'ගාස්තුව' : 'Fee',
-    status: lang === 'si' ? 'තත්වය' : 'Status'
+    status: lang === 'si' ? 'තත්වය' : 'Status',
+    joinVideo: lang === 'si' ? 'වීඩියෝ ඇමතුමට එකතු වන්න' : 'Join video call',
+    videoHint: lang === 'si' ? 'අනුමත වීඩියෝ වෙන්කිරීම් සඳහා ආරම්භයට මිනිත්තු 30කට පෙර ඇතුළු විය හැක' : 'Join opens 30 minutes before start for accepted video bookings'
   }), [lang]);
 
   const headers = useMemo(() => ({ Authorization: `Bearer ${localStorage.getItem('token')}` }), []);
@@ -161,6 +177,23 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
     }
   };
 
+  const joinVideoCall = async (bookingId) => {
+    try {
+      setJoiningVideoId(bookingId);
+      const res = await axios.post(
+        `${API_BASE}/api/manual-bookings/bookings/${bookingId}/video-session`,
+        {},
+        { headers }
+      );
+      setVideoSession(res.data);
+    } catch (err) {
+      console.error('Failed to join video session', err);
+      alert(err.response?.data?.msg || 'Failed to join video call');
+    } finally {
+      setJoiningVideoId('');
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
@@ -172,6 +205,13 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
 
   return (
     <div className="space-y-6">
+      {videoSession ? (
+        <VideoConsultationRoom
+          session={videoSession}
+          lang={lang}
+          onLeave={() => setVideoSession(null)}
+        />
+      ) : null}
       <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-6 text-white">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -180,6 +220,7 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
               {t.title}
             </h2>
             <p className="text-emerald-100 mt-1 text-sm">{t.subtitle}</p>
+            <p className="text-emerald-50/90 mt-2 text-xs">{t.videoHint}</p>
           </div>
           <button
             onClick={refreshAll}
@@ -345,13 +386,27 @@ export default function FarmerManualBooking({ lang = 'en', onInteraction }) {
                     <p className="text-xs text-emerald-700 mt-1">{booking.adviceText}</p>
                   </div>
                 ) : null}
-                {booking.status === 'pending' ? (
-                  <button
-                    onClick={() => cancelBooking(booking._id, booking.status)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-100 text-rose-700 hover:bg-rose-200"
-                  >
-                    <XCircle className="w-4 h-4" /> {t.cancel}
-                  </button>
+                {booking.status === 'pending' || canJoinVideoCall(booking) ? (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {booking.status === 'pending' ? (
+                      <button
+                        onClick={() => cancelBooking(booking._id, booking.status)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-100 text-rose-700 hover:bg-rose-200"
+                      >
+                        <XCircle className="w-4 h-4" /> {t.cancel}
+                      </button>
+                    ) : null}
+                    {canJoinVideoCall(booking) ? (
+                      <button
+                        onClick={() => joinVideoCall(booking._id)}
+                        disabled={joiningVideoId === booking._id}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60"
+                      >
+                        <Video className="w-4 h-4" />
+                        {joiningVideoId === booking._id ? 'Joining...' : t.joinVideo}
+                      </button>
+                    ) : null}
+                  </div>
                 ) : null}
               </div>
             ))

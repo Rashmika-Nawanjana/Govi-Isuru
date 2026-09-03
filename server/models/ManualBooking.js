@@ -92,6 +92,19 @@ const ManualBookingSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+  videoProvider: {
+    type: String,
+    enum: ['none', 'daily'],
+    default: 'none'
+  },
+  videoRoomName: {
+    type: String,
+    default: null
+  },
+  videoRoomUrl: {
+    type: String,
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now

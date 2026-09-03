@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { CalendarDays, RefreshCw, PlusCircle, Trash2, CheckCircle2, XCircle } from 'lucide-react';
+import { CalendarDays, RefreshCw, PlusCircle, Trash2, CheckCircle2, XCircle, Video } from 'lucide-react';
+import VideoConsultationRoom from './VideoConsultationRoom';
 
 const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
@@ -10,6 +11,17 @@ const MODE_OPTIONS = [
   { value: 'video', label: 'Video' }
 ];
 
+const VIDEO_JOIN_EARLY_MS = 30 * 60 * 1000;
+const VIDEO_JOIN_LATE_MS = 120 * 60 * 1000;
+
+function canJoinVideoCall(booking) {
+  if (!booking || booking.mode !== 'video' || booking.status !== 'accepted') return false;
+  const now = Date.now();
+  const start = new Date(booking.scheduledStartAt).getTime();
+  const end = new Date(booking.scheduledEndAt).getTime();
+  return now >= start - VIDEO_JOIN_EARLY_MS && now <= end + VIDEO_JOIN_LATE_MS;
+}
+
 export default function InstructorBookingManager({ lang = 'en', onInteraction }) {
   const [loading, setLoading] = useState(true);
   const [submittingSlot, setSubmittingSlot] = useState(false);
@@ -18,6 +30,8 @@ export default function InstructorBookingManager({ lang = 'en', onInteraction })
   const [bookings, setBookings] = useState([]);
   const [responseNotes, setResponseNotes] = useState({});
   const [adviceInputs, setAdviceInputs] = useState({});
+  const [videoSession, setVideoSession] = useState(null);
+  const [joiningVideoId, setJoiningVideoId] = useState('');
   const [slotForm, setSlotForm] = useState({
     startAt: '',
     endAt: '',
@@ -38,7 +52,8 @@ export default function InstructorBookingManager({ lang = 'en', onInteraction })
     reject: lang === 'si' ? 'ප්‍රතික්ෂේප' : 'Reject',
     complete: lang === 'si' ? 'සම්පූර්ණ' : 'Complete + Submit Advice',
     noSlots: lang === 'si' ? 'කාල ප්‍රකාශ නොමැත' : 'No slots published',
-    noBookings: lang === 'si' ? 'වෙන්කරවා ගැනීම් නොමැත' : 'No booking requests yet'
+    noBookings: lang === 'si' ? 'වෙන්කරවා ගැනීම් නොමැත' : 'No booking requests yet',
+    joinVideo: lang === 'si' ? 'වීඩියෝ ඇමතුමට එකතු වන්න' : 'Join video call'
   }), [lang]);
 
   const headers = useMemo(() => ({ Authorization: `Bearer ${localStorage.getItem('token')}` }), []);
@@ -149,6 +164,23 @@ export default function InstructorBookingManager({ lang = 'en', onInteraction })
     }
   };
 
+  const joinVideoCall = async (bookingId) => {
+    try {
+      setJoiningVideoId(bookingId);
+      const res = await axios.post(
+        `${API_BASE}/api/manual-bookings/bookings/${bookingId}/video-session`,
+        {},
+        { headers }
+      );
+      setVideoSession(res.data);
+    } catch (err) {
+      console.error('Failed to join video session', err);
+      alert(err.response?.data?.msg || 'Failed to join video call');
+    } finally {
+      setJoiningVideoId('');
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
@@ -160,6 +192,13 @@ export default function InstructorBookingManager({ lang = 'en', onInteraction })
 
   return (
     <div className="space-y-6">
+      {videoSession ? (
+        <VideoConsultationRoom
+          session={videoSession}
+          lang={lang}
+          onLeave={() => setVideoSession(null)}
+        />
+      ) : null}
       <div className="bg-gradient-to-r from-sky-700 to-indigo-700 rounded-2xl p-6 text-white">
         <div className="flex items-start justify-between">
           <div>
@@ -273,6 +312,9 @@ export default function InstructorBookingManager({ lang = 'en', onInteraction })
                 </div>
                 <p className="text-xs text-gray-600">Farmer: {booking.farmerName}</p>
                 <p className="text-xs text-gray-600">
+                  Mode: {MODE_OPTIONS.find((m) => m.value === booking.mode)?.label || booking.mode}
+                </p>
+                <p className="text-xs text-gray-600">
                   {new Date(booking.scheduledStartAt).toLocaleString()} - {new Date(booking.scheduledEndAt).toLocaleTimeString()}
                 </p>
                 {booking.description ? <p className="text-xs text-gray-700">{booking.description}</p> : null}
@@ -314,6 +356,16 @@ export default function InstructorBookingManager({ lang = 'en', onInteraction })
 
                 {booking.status === 'accepted' ? (
                   <div className="space-y-2">
+                    {canJoinVideoCall(booking) ? (
+                      <button
+                        onClick={() => joinVideoCall(booking._id)}
+                        disabled={joiningVideoId === booking._id}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-violet-600 text-white text-xs font-semibold hover:bg-violet-700 disabled:opacity-60"
+                      >
+                        <Video className="w-4 h-4" />
+                        {joiningVideoId === booking._id ? 'Joining...' : t.joinVideo}
+                      </button>
+                    ) : null}
                     <textarea
                       value={adviceInputs[booking._id] || ''}
                       onChange={(e) => setAdviceInputs((prev) => ({ ...prev, [booking._id]: e.target.value }))}

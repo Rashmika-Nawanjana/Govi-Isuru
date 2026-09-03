@@ -10,11 +10,63 @@ const eventBus = require('../core/EventBus');
 const BookingWorkflow = require('../domain/booking/BookingWorkflow');
 const { BookingDomainError } = require('../domain/booking/BookingState');
 const { BOOKING_EVENTS } = require('../events/registerBookingEventHandlers');
+const {
+  isDailyConfigured,
+  ensureRoomForBooking,
+  createMeetingToken
+} = require('../services/dailyService');
 
 const MANUAL_BOOKING_FEE_CREDITS = parseInt(
   process.env.MANUAL_BOOKING_FEE_CREDITS || process.env.ADVICE_FEE_CREDITS || '40',
   10
 );
+
+/** Minutes before scheduled start when Join Call becomes available */
+const VIDEO_JOIN_EARLY_MINUTES = parseInt(process.env.VIDEO_JOIN_EARLY_MINUTES || '30', 10);
+/** Minutes after scheduled end when Join Call remains available */
+const VIDEO_JOIN_LATE_MINUTES = parseInt(process.env.VIDEO_JOIN_LATE_MINUTES || '120', 10);
+
+function assertCanJoinVideo(booking, currentUser) {
+  if (!booking) {
+    throw new BookingDomainError('Booking not found', 404);
+  }
+
+  const userId = String(currentUser._id);
+  const isFarmer = String(booking.farmerId) === userId;
+  const isInstructor = String(booking.instructorId) === userId;
+  if (!isFarmer && !isInstructor) {
+    throw new BookingDomainError('Not allowed to join this video consultation', 403);
+  }
+
+  if (booking.mode !== 'video') {
+    throw new BookingDomainError('This booking is not a video consultation', 400);
+  }
+
+  if (booking.status !== 'accepted') {
+    throw new BookingDomainError(
+      `Video call is only available after the instructor accepts (current: ${booking.status})`,
+      409
+    );
+  }
+
+  const now = Date.now();
+  const start = new Date(booking.scheduledStartAt).getTime();
+  const end = new Date(booking.scheduledEndAt).getTime();
+  const windowStart = start - VIDEO_JOIN_EARLY_MINUTES * 60 * 1000;
+  const windowEnd = end + VIDEO_JOIN_LATE_MINUTES * 60 * 1000;
+
+  if (now < windowStart) {
+    throw new BookingDomainError(
+      `Video call opens ${VIDEO_JOIN_EARLY_MINUTES} minutes before the scheduled start`,
+      403
+    );
+  }
+  if (now > windowEnd) {
+    throw new BookingDomainError('Video call window has ended for this booking', 403);
+  }
+
+  return { isFarmer, isInstructor };
+}
 
 const isValidObjectId = (id) => /^[a-f\d]{24}$/i.test(id || '');
 
@@ -25,6 +77,10 @@ async function getCurrentUser(decoded) {
 function sendBookingError(res, error, fallbackMessage) {
   if (error instanceof BookingDomainError) {
     return res.status(error.statusCode).json({ success: false, msg: error.message });
+  }
+
+  if (error?.statusCode) {
+    return res.status(error.statusCode).json({ success: false, msg: error.message || fallbackMessage });
   }
 
   console.error(fallbackMessage, error);
@@ -533,6 +589,65 @@ router.put('/notifications/farmer/:id/read', authMiddleware, async (req, res) =>
   } catch (err) {
     console.error('Error marking farmer notification as read:', err);
     res.status(500).json({ success: false, msg: 'Failed to update notification' });
+  }
+});
+
+/**
+ * Create/reuse a Daily.co room and return a meeting token for farmer or instructor.
+ * POST /api/manual-bookings/bookings/:bookingId/video-session
+ */
+router.post('/bookings/:bookingId/video-session', authMiddleware, async (req, res) => {
+  try {
+    if (!isValidObjectId(req.params.bookingId)) {
+      return res.status(400).json({ success: false, msg: 'Invalid booking id' });
+    }
+
+    if (!isDailyConfigured()) {
+      return res.status(503).json({
+        success: false,
+        msg: 'Daily.co is not configured. Add DAILY_API_KEY to server/.env from https://dashboard.daily.co/developers'
+      });
+    }
+
+    const currentUser = await getCurrentUser(req.user);
+    if (!currentUser) {
+      return res.status(404).json({ success: false, msg: 'User not found' });
+    }
+
+    const booking = await ManualBooking.findById(req.params.bookingId);
+    const { isInstructor } = assertCanJoinVideo(booking, currentUser);
+
+    const room = await ensureRoomForBooking(booking);
+    if (!booking.videoRoomName || !booking.videoRoomUrl) {
+      booking.videoProvider = 'daily';
+      booking.videoRoomName = room.name;
+      booking.videoRoomUrl = room.url;
+      await booking.save();
+    }
+
+    const userName = currentUser.fullName || currentUser.username || 'Participant';
+    const token = await createMeetingToken({
+      roomName: booking.videoRoomName,
+      userName,
+      isOwner: isInstructor,
+      userId: currentUser._id
+    });
+
+    res.json({
+      success: true,
+      provider: 'daily',
+      roomName: booking.videoRoomName,
+      roomUrl: booking.videoRoomUrl,
+      token,
+      userName,
+      isOwner: isInstructor,
+      bookingId: booking._id,
+      topic: booking.topic,
+      scheduledStartAt: booking.scheduledStartAt,
+      scheduledEndAt: booking.scheduledEndAt
+    });
+  } catch (err) {
+    return sendBookingError(res, err, 'Failed to start video session');
   }
 });
 
