@@ -1,11 +1,13 @@
 const dotenv = require('dotenv');
+const path = require('path');
+// Prefer repo-root .env (docker/local), then server/.env if present
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 dotenv.config();
 // 1. Load variables from .env file
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
-const path = require('path');
 const fs = require('fs');
 
 const User = require('./models/User');

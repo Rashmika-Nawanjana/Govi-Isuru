@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   X,
   Send,
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import ChatMarkdown from './chat/ChatMarkdown';
 import { getHomeView } from '../utils/navigation';
+import useVoiceConversation from '../hooks/useVoiceConversation';
 
 const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:5000';
 
@@ -34,7 +35,17 @@ const SUGGESTIONS = {
     { label: 'යෙදුම සංචාලනය', icon: Compass, prompt: 'Govi Isuru ජංගම සහ වෙබ් තුළ සංචාලනය කරන්නේ කෙසේද?' },
     { label: 'වී වගා උපදෙස්', icon: Leaf, prompt: 'ශ්‍රී ලංකාවට ප්‍රායෝගික වී වගා උපදෙස් දෙන්න' },
   ],
+  ta: [
+    { label: 'பயிர் நோய் கண்டறி', icon: Stethoscope, prompt: 'AI மருத்துவரால் பயிர் நோயை எப்படி கண்டுபிடிப்பது?' },
+    { label: 'வானிலை ஆலோசனை', icon: CloudSun, prompt: 'வானிலை மற்றும் உர நேரத்தை எப்படி பார்ப்பது?' },
+    { label: 'சந்தை விலை', icon: TrendingUp, prompt: 'பயிர் சந்தை விலைகளை எங்கே பார்க்கலாம்?' },
+    { label: 'செயலி வழிகாட்டல்', icon: Compass, prompt: 'Govi Isuru செயலியில் எப்படி செல்ல வேண்டும்?' },
+    { label: 'நெல் விவசாயம்', icon: Leaf, prompt: 'இலங்கைக்கான நெல் விவசாய குறிப்புகள் கூறுங்கள்' },
+  ],
 };
+
+const LANG_LABEL = { en: 'EN', si: 'සිං', ta: 'தமிழ்' };
+const NEXT_LANG = { en: 'si', si: 'ta', ta: 'en' };
 
 function ChatOrb({ pulsing = false }) {
   return (
@@ -53,21 +64,25 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [chatLang, setChatLang] = useState(lang === 'si' ? 'si' : 'en');
-  const [isListening, setIsListening] = useState(false);
+  const [chatLang, setChatLang] = useState(lang === 'si' ? 'si' : lang === 'ta' ? 'ta' : 'en');
+  const [voiceMode, setVoiceMode] = useState(false);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const lastAiResponseRef = useRef(null);
-  const recognitionRef = useRef(null);
-  const manualStopRef = useRef(false);
   const abortRef = useRef(null);
   const revealTimerRef = useRef(null);
   const stickToBottomRef = useRef(true);
   const scrollRafRef = useRef(null);
+  const messagesRef = useRef([]);
+  const voiceAssistantIdRef = useRef(null);
 
   const suggestions = SUGGESTIONS[chatLang] || SUGGESTIONS.en;
   const hasConversation = messages.length > 0;
   const homeView = getHomeView(user?.role);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   const isNearBottom = () => {
     const el = messagesContainerRef.current;
@@ -85,7 +100,6 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
       const target = el.scrollHeight - el.clientHeight;
       const distance = target - el.scrollTop;
       if (distance <= 1) return;
-      // Ease toward bottom instead of jumping
       el.scrollTop += Math.max(1, distance * 0.28);
       if (el.scrollHeight - el.scrollTop - el.clientHeight > 2) {
         smoothScrollToBottom();
@@ -100,30 +114,18 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
     }
   };
 
-  /**
-   * Pace displayed text independently of network token speed.
-   * Incoming text fills a buffer; UI reveals a few chars at a time.
-   */
   const startPacedReveal = (assistantId) => {
     clearRevealTimer();
-    const state = {
-      buffer: '',
-      shown: 0,
-      done: false,
-      model: 'Assistant',
-    };
+    const state = { buffer: '', shown: 0, done: false, model: 'Assistant' };
 
     revealTimerRef.current = setInterval(() => {
       if (state.shown < state.buffer.length) {
-        // Reveal 2–5 chars per tick depending on backlog
         const backlog = state.buffer.length - state.shown;
         const step = backlog > 80 ? 5 : backlog > 30 ? 3 : 2;
         state.shown = Math.min(state.buffer.length, state.shown + step);
         const snapshot = state.buffer.slice(0, state.shown);
         setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantId ? { ...m, content: snapshot, streaming: true } : m
-          )
+          prev.map((m) => (m.id === assistantId ? { ...m, content: snapshot, streaming: true } : m))
         );
         smoothScrollToBottom();
       } else if (state.done) {
@@ -131,12 +133,7 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantId
-              ? {
-                  ...m,
-                  content: state.buffer,
-                  streaming: false,
-                  model: state.model,
-                }
+              ? { ...m, content: state.buffer, streaming: false, model: state.model }
               : m
           )
         );
@@ -160,87 +157,6 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
     };
   };
 
-  useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.maxAlternatives = 1;
-      recognitionRef.current.lang = 'en-US';
-
-      recognitionRef.current.onstart = () => {
-        setIsListening(true);
-        setError(null);
-      };
-
-      recognitionRef.current.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setInput(transcript);
-        manualStopRef.current = true;
-        recognitionRef.current.stop();
-      };
-
-      recognitionRef.current.onerror = (event) => {
-        if (event.error === 'aborted') return;
-        setIsListening(false);
-        const map = {
-          'no-speech': chatLang === 'si' ? '🎤 කථාවක් අනාවරණය නොවිය.' : '🎤 No speech detected.',
-          network: chatLang === 'si' ? '⚠️ හඬ සේවාවට සම්බන්ධ විය නොහැක.' : '⚠️ Cannot connect to voice service.',
-          'not-allowed': chatLang === 'si' ? '🎤 මයික්‍රොෆෝන් අවසර අවශ්‍යයි.' : '🎤 Microphone permission denied.',
-        };
-        setError(map[event.error] || (chatLang === 'si' ? '⚠️ හඬ ආදාන දෝෂයකි.' : `⚠️ Voice error (${event.error}).`));
-        setTimeout(() => setError(null), 4000);
-      };
-
-      recognitionRef.current.onend = () => {
-        manualStopRef.current = false;
-        setIsListening(false);
-      };
-    }
-
-    return () => {
-      try {
-        recognitionRef.current?.abort();
-      } catch (_) {
-        /* ignore */
-      }
-      abortRef.current?.abort();
-      clearRevealTimer();
-      if (scrollRafRef.current) cancelAnimationFrame(scrollRafRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.lang = chatLang === 'si' ? 'si-LK' : 'en-US';
-    }
-  }, [chatLang]);
-
-  const toggleVoiceInput = () => {
-    if (!recognitionRef.current) {
-      setError(chatLang === 'si' ? '❌ හඬ ආදානයට සහාය නැත.' : '❌ Voice input not supported.');
-      return;
-    }
-    if (isListening) {
-      manualStopRef.current = true;
-      try {
-        recognitionRef.current.stop();
-      } catch (_) {
-        /* ignore */
-      }
-      setIsListening(false);
-      return;
-    }
-    recognitionRef.current.lang = chatLang === 'si' ? 'si-LK' : 'en-US';
-    try {
-      recognitionRef.current.start();
-    } catch (_) {
-      setError(chatLang === 'si' ? '⚠️ හඬ ආදානය ආරම්භ කළ නොහැක.' : '⚠️ Could not start voice input.');
-    }
-  };
-
   const handleNavigateFromChat = (viewId) => {
     if (onNavigate) {
       onNavigate(viewId);
@@ -250,9 +166,71 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
     }
   };
 
+  const {
+    voiceState,
+    googleReady,
+  } = useVoiceConversation({
+    language: chatLang,
+    enabled: isOpen && voiceMode,
+    role: user?.role || 'farmer',
+    homeView,
+    getHistory: () =>
+      messagesRef.current.map((m) => ({ role: m.role, content: m.content })),
+    onUserTranscript: (transcript) => {
+      stickToBottomRef.current = true;
+      setMessages((prev) => [
+        ...prev,
+        { id: `u-${Date.now()}`, role: 'user', content: transcript, timestamp: new Date(), fromVoice: true },
+      ]);
+      requestAnimationFrame(() => smoothScrollToBottom());
+    },
+    onAssistantStart: () => {
+      const id = `a-${Date.now()}`;
+      voiceAssistantIdRef.current = id;
+      setIsLoading(true);
+      setMessages((prev) => [
+        ...prev,
+        { id, role: 'assistant', content: '', timestamp: new Date(), streaming: true, fromVoice: true },
+      ]);
+    },
+    onAssistantToken: (full) => {
+      const id = voiceAssistantIdRef.current;
+      if (!id) return;
+      setMessages((prev) =>
+        prev.map((m) => (m.id === id ? { ...m, content: full, streaming: true } : m))
+      );
+      smoothScrollToBottom();
+    },
+    onAssistantDone: (full, model) => {
+      const id = voiceAssistantIdRef.current;
+      setIsLoading(false);
+      if (!id) return;
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === id ? { ...m, content: full, streaming: false, model: model || 'Assistant' } : m
+        )
+      );
+      voiceAssistantIdRef.current = null;
+      smoothScrollToBottom();
+    },
+    onError: (msg) => {
+      setError(msg);
+      setIsLoading(false);
+      setTimeout(() => setError(null), 5000);
+    },
+  });
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+      clearRevealTimer();
+      if (scrollRafRef.current) cancelAnimationFrame(scrollRafRef.current);
+    };
+  }, []);
+
   const sendMessage = async (rawText) => {
     const text = (rawText ?? input).trim();
-    if (!text || isLoading) return;
+    if (!text || isLoading || voiceMode) return;
 
     const userMessage = { role: 'user', content: text, timestamp: new Date() };
     const history = messages.map((msg) => ({ role: msg.role, content: msg.content }));
@@ -267,13 +245,7 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
     const assistantId = `a-${Date.now()}`;
     setMessages((prev) => [
       ...prev,
-      {
-        id: assistantId,
-        role: 'assistant',
-        content: '',
-        timestamp: new Date(),
-        streaming: true,
-      },
+      { id: assistantId, role: 'assistant', content: '', timestamp: new Date(), streaming: true },
     ]);
 
     const reveal = startPacedReveal(assistantId);
@@ -297,9 +269,7 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
         signal: controller.signal,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -318,21 +288,15 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
           if (!line.startsWith('data:')) continue;
           const data = line.slice(5).trim();
           if (!data || data === '[DONE]') continue;
-
           let event;
           try {
             event = JSON.parse(data);
           } catch {
             continue;
           }
-
-          if (event.type === 'token' && event.content) {
-            reveal.push(event.content);
-          } else if (event.type === 'done') {
-            model = event.model || model;
-          } else if (event.type === 'error') {
-            throw new Error(event.content || 'Stream error');
-          }
+          if (event.type === 'token' && event.content) reveal.push(event.content);
+          else if (event.type === 'done') model = event.model || model;
+          else if (event.type === 'error') throw new Error(event.content || 'Stream error');
         }
       }
 
@@ -342,8 +306,6 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
         clearRevealTimer();
         return;
       }
-      console.error('Llama chatbot stream error:', err);
-
       try {
         const res = await fetch(`${API_BASE}/api/llama-chatbot/chat`, {
           method: 'POST',
@@ -361,20 +323,19 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Chat failed');
-        // Still pace the fallback answer so it doesn't dump instantly
         reveal.setFull(data.answer || '', data.model);
-      } catch (fallbackErr) {
+      } catch (_) {
         clearRevealTimer();
         const errorMessage =
           chatLang === 'si'
             ? 'සමාවන්න, දෝෂයක් ඇති විය. නැවත උත්සාහ කරන්න.'
-            : 'Sorry, I encountered an error. Please try again.';
+            : chatLang === 'ta'
+              ? 'மன்னிக்கவும், பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.'
+              : 'Sorry, I encountered an error. Please try again.';
         setError(errorMessage);
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === assistantId
-              ? { ...m, content: errorMessage, streaming: false, isError: true }
-              : m
+            m.id === assistantId ? { ...m, content: errorMessage, streaming: false, isError: true } : m
           )
         );
       }
@@ -384,12 +345,60 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+  const toggleVoiceMode = useCallback(() => {
+    if (!googleReady && !voiceMode) {
+      setError(
+        chatLang === 'si'
+          ? 'හඬ සේවා සක්‍රිය කිරීමට Google සේවා ගිණුම අවශ්‍යයි.'
+          : chatLang === 'ta'
+            ? 'குரல் சேவைக்கு Google கணக்கு தேவை.'
+            : 'Google voice services are not configured on the server yet.'
+      );
+      setTimeout(() => setError(null), 5000);
+      return;
     }
-  };
+    setVoiceMode((v) => !v);
+  }, [chatLang, googleReady, voiceMode]);
+
+  const voiceStatusText = {
+    en: {
+      listening: 'Listening… speak now',
+      processing: 'Understanding…',
+      speaking: 'Speaking… tap mic to stop',
+      idle: 'Voice chat',
+    },
+    si: {
+      listening: 'සවන් දෙමින්… කතා කරන්න',
+      processing: 'තේරුම් ගනිමින්…',
+      speaking: 'කතා කරමින්… නැවැත්වීමට mic',
+      idle: 'හඬ සංවාදය',
+    },
+    ta: {
+      listening: 'கேட்கிறேன்… பேசுங்கள்',
+      processing: 'புரிந்துகொள்கிறேன்…',
+      speaking: 'பேசுகிறேன்… நிறுத்த mic',
+      idle: 'குரல் உரையாடல்',
+    },
+  }[chatLang];
+
+  const placeholder =
+    voiceMode
+      ? voiceStatusText[voiceState] || voiceStatusText.idle
+      : chatLang === 'si'
+        ? 'ඕනෑම දෙයක් අසන්න...'
+        : chatLang === 'ta'
+          ? 'எதையும் கேளுங்கள்...'
+          : 'Ask me anything...';
+
+  const assistantSubtitle =
+    chatLang === 'si' ? 'ගොවි සහායක' : chatLang === 'ta' ? 'விவசாய உதவியாளர்' : 'Farming assistant';
+
+  const emptyTitle =
+    chatLang === 'si'
+      ? 'අද මට ඔබට කුමක් කළ හැකිද?'
+      : chatLang === 'ta'
+        ? 'இன்று நான் உங்களுக்கு என்ன உதவட்டும்?'
+        : 'What can I help you with today?';
 
   return (
     <>
@@ -408,7 +417,6 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
 
       {isOpen && (
         <div className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 md:w-[420px] md:h-[680px] w-full h-full z-50 flex flex-col overflow-hidden md:rounded-[28px] shadow-2xl border-0 md:border md:border-green-100 dark:md:border-gray-700 bg-gradient-to-b from-[#eef8f0] via-white to-[#f3faf5] dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
-          {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 md:px-5 md:py-4">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-lime-300 to-green-600 flex items-center justify-center text-white font-black text-sm shadow-md">
@@ -417,23 +425,27 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
               <div>
                 <h3 className="font-bold text-slate-900 dark:text-white text-[15px] leading-tight">Govi Isuru AI</h3>
                 <p className="text-[11px] text-green-700/80 dark:text-green-300 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                  {chatLang === 'si' ? 'ගොවි සහායක' : 'Farming assistant'}
+                  <span className={`w-1.5 h-1.5 rounded-full ${voiceMode ? 'bg-red-500 animate-pulse' : 'bg-green-500 animate-pulse'}`} />
+                  {voiceMode ? voiceStatusText[voiceState] || assistantSubtitle : assistantSubtitle}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
               <button
-                onClick={() => setChatLang(chatLang === 'en' ? 'si' : 'en')}
+                onClick={() => setChatLang(NEXT_LANG[chatLang] || 'en')}
                 className="px-2.5 py-1.5 rounded-full text-[11px] font-bold bg-white/80 dark:bg-gray-800 border border-green-100 dark:border-gray-700 text-green-800 dark:text-green-200"
+                title="Switch language EN / සිං / தமிழ்"
               >
                 <span className="inline-flex items-center gap-1">
                   <Languages size={13} />
-                  {chatLang === 'en' ? 'EN' : 'සිං'}
+                  {LANG_LABEL[chatLang]}
                 </span>
               </button>
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  setVoiceMode(false);
+                  setIsOpen(false);
+                }}
                 className="p-2 rounded-full bg-white/80 dark:bg-gray-800 border border-green-100 dark:border-gray-700 text-slate-600 dark:text-gray-300"
                 aria-label="Close chat"
               >
@@ -442,7 +454,6 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
             </div>
           </div>
 
-          {/* Body */}
           <div
             ref={messagesContainerRef}
             onScroll={() => {
@@ -452,10 +463,17 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
           >
             {!hasConversation ? (
               <div className="h-full flex flex-col items-center justify-center text-center pt-4 pb-8">
-                <ChatOrb />
+                <ChatOrb pulsing={voiceMode && voiceState === 'listening'} />
                 <h2 className="mt-6 text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight max-w-[16rem]">
-                  {chatLang === 'si' ? 'අද මට ඔබට කුමක් කළ හැකිද?' : 'What can I help you with today?'}
+                  {emptyTitle}
                 </h2>
+                <p className="mt-2 text-xs text-slate-500 dark:text-gray-400 max-w-xs">
+                  {chatLang === 'si'
+                    ? 'ටයිප් කරන්න හෝ හඬ බොත්තම ඔබා සංවාදයක් පටන් ගන්න'
+                    : chatLang === 'ta'
+                      ? 'தட்டச்சு செய்யுங்கள் அல்லது மைக்கை அழுத்தி பேசுங்கள்'
+                      : 'Type a message or tap the mic for a voice conversation'}
+                </p>
                 <div className="mt-5 flex flex-wrap justify-center gap-2 max-w-sm">
                   {suggestions.map((item) => {
                     const Icon = item.icon;
@@ -464,7 +482,8 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
                         key={item.label}
                         type="button"
                         onClick={() => sendMessage(item.prompt)}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/90 dark:bg-gray-800 border border-green-100 dark:border-gray-700 text-[12px] font-semibold text-slate-700 dark:text-gray-200 shadow-sm hover:border-green-400 active:scale-95 transition"
+                        disabled={voiceMode}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/90 dark:bg-gray-800 border border-green-100 dark:border-gray-700 text-[12px] font-semibold text-slate-700 dark:text-gray-200 shadow-sm hover:border-green-400 active:scale-95 transition disabled:opacity-50"
                       >
                         <Icon size={13} className="text-green-600" />
                         {item.label}
@@ -477,9 +496,7 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
               <div className="space-y-4 pt-1">
                 {messages.map((message, index) => {
                   const isUser = message.role === 'user';
-                  const isLastAssistant =
-                    !isUser && index === messages.length - 1;
-
+                  const isLastAssistant = !isUser && index === messages.length - 1;
                   return (
                     <div
                       key={message.id || index}
@@ -491,10 +508,10 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
                           AI
                         </div>
                       )}
-
                       <div className={`max-w-[82%] ${isUser ? '' : 'flex-1'}`}>
                         {isUser ? (
                           <div className="bg-white dark:bg-gray-800 text-slate-800 dark:text-gray-100 px-4 py-2.5 rounded-2xl rounded-br-md shadow-sm border border-green-50 dark:border-gray-700 text-sm leading-relaxed">
+                            {message.fromVoice && <span className="mr-1 opacity-60">🎤</span>}
                             {message.content}
                           </div>
                         ) : (
@@ -504,7 +521,7 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
                             ) : (
                               <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-gray-400">
                                 <Loader2 size={14} className="animate-spin text-green-600" />
-                                {chatLang === 'si' ? 'සිතමින්...' : 'Thinking...'}
+                                {chatLang === 'si' ? 'සිතමින්...' : chatLang === 'ta' ? 'யோசிக்கிறேன்...' : 'Thinking...'}
                               </div>
                             )}
                             {message.streaming && message.content && (
@@ -513,7 +530,6 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
                           </div>
                         )}
                       </div>
-
                       {isUser && (
                         <div className="w-8 h-8 rounded-full bg-green-700 text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                           {(user?.username || 'U').slice(0, 1).toUpperCase()}
@@ -527,7 +543,6 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
             )}
           </div>
 
-          {/* Input */}
           <div className="px-3 md:px-4 pb-3 md:pb-4 pt-1" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
             {error && (
               <div className="mb-2 text-xs text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 p-2 rounded-xl border border-red-200 dark:border-red-800 flex items-start gap-2">
@@ -540,44 +555,37 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={
-                  isListening
-                    ? chatLang === 'si'
-                      ? '🎤 සවන් දෙනවා...'
-                      : '🎤 Listening...'
-                    : chatLang === 'si'
-                      ? 'ඕනෑම දෙයක් අසන්න...'
-                      : 'Ask me anything...'
-                }
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
+                placeholder={placeholder}
                 className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-slate-800 dark:text-white placeholder-slate-400 outline-none"
-                disabled={isLoading || isListening}
+                disabled={isLoading || voiceMode}
               />
-              {(window.location.protocol === 'https:' ||
-                window.location.hostname === 'localhost' ||
-                window.location.hostname === '127.0.0.1') && (
-                <button
-                  type="button"
-                  onClick={toggleVoiceInput}
-                  disabled={isLoading}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition ${
-                    isListening
-                      ? 'bg-red-500 text-white animate-pulse'
-                      : 'bg-green-600 text-white hover:bg-green-700'
-                  }`}
-                  aria-label={isListening ? 'Stop recording' : 'Voice input'}
-                >
-                  {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={toggleVoiceMode}
+                className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition ${
+                  voiceMode
+                    ? 'bg-red-500 text-white animate-pulse'
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                }`}
+                aria-label={voiceMode ? 'Stop voice conversation' : 'Start voice conversation'}
+                title={voiceMode ? 'Stop voice chat' : 'Start voice chat (EN / SI / TA)'}
+              >
+                {voiceMode ? <MicOff size={18} /> : <Mic size={18} />}
+              </button>
               <button
                 type="button"
                 onClick={() => sendMessage()}
-                disabled={!input.trim() || isLoading}
+                disabled={!input.trim() || isLoading || voiceMode}
                 className="w-10 h-10 rounded-full bg-green-700 text-white flex items-center justify-center flex-shrink-0 disabled:bg-slate-300 disabled:text-slate-500 hover:bg-green-800 transition"
                 aria-label="Send message"
               >
-                {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={16} />}
+                {isLoading && !voiceMode ? <Loader2 size={18} className="animate-spin" /> : <Send size={16} />}
               </button>
             </div>
           </div>
