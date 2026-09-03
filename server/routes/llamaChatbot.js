@@ -63,8 +63,10 @@ router.post('/chat/stream', async (req, res) => {
     res.setHeader('X-Accel-Buffering', 'no');
     if (typeof res.flushHeaders === 'function') res.flushHeaders();
 
+    // Only stop when the response socket closes — req "close" fires too early
+    // after the body is read and was silencing all SSE writes.
     let closed = false;
-    req.on('close', () => {
+    res.on('close', () => {
       closed = true;
     });
 

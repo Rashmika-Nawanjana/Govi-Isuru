@@ -213,35 +213,24 @@ async function* streamResponse(userMessage, history = [], options = {}) {
   if (isGoogleConfigured()) {
     try {
       const gemini = getGemini();
-      let gotToken = false;
-      // Overall budget so voice mode never freezes on Vertex
-      const resultPromise = (async function* () {
-        for await (const event of gemini.streamGeminiResponse(userMessage, history, options)) {
-          yield event;
+      // Non-stream generate (with internal mock fallback) — Vertex SSE was hanging voice chat
+      const result = await Promise.race([
+        gemini.generateGeminiResponse(userMessage, history, options),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Gemini overall timeout')), 12000)
+        ),
+      ]);
+      if (result?.success && result.answer) {
+        for await (const chunk of streamMockResponse(result.answer)) {
+          yield { type: 'token', content: chunk };
         }
-      })();
-
-      const deadline = Date.now() + 16000;
-      for await (const event of resultPromise) {
-        if (Date.now() > deadline) {
-          console.warn('Gemini stream budget exceeded, falling back');
-          break;
-        }
-        if (event.type === 'token' && event.content) {
-          gotToken = true;
-          yield event;
-        } else if (event.type === 'done') {
-          if (gotToken) {
-            yield event;
-            return;
-          }
-        } else if (event.type === 'error') {
-          console.warn('Gemini stream error event:', event.content);
-        } else {
-          yield event;
-        }
+        yield {
+          type: 'done',
+          model: result.model || 'Assistant',
+          source: result.source || 'Google Vertex Gemini',
+        };
+        return;
       }
-      if (gotToken) return;
     } catch (err) {
       console.warn('Gemini stream failed, falling back:', err.message);
     }
