@@ -8,7 +8,7 @@ const {
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const LOCATION = process.env.GOOGLE_VERTEX_LOCATION || 'us-central1';
-const DEFAULT_MODEL = process.env.GOOGLE_GEMINI_MODEL || 'gemini-2.0-flash';
+const DEFAULT_MODEL = process.env.GOOGLE_GEMINI_MODEL || 'gemini-2.5-flash';
 const GEMINI_TIMEOUT_MS = parseInt(process.env.GOOGLE_GEMINI_TIMEOUT_MS || '10000', 10);
 
 function useGeminiApiKey() {
