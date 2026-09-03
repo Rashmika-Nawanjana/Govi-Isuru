@@ -167,7 +167,6 @@ export default function LlamaChatbot({ lang = 'en', user = null, onNavigate = nu
   const stickToBottomRef = useRef(true);
   const scrollRafRef = useRef(null);
   const messagesRef = useRef([]);
-  const voiceAssistantIdRef = useRef(null);
 
   const suggestions = SUGGESTIONS[chatLang] || SUGGESTIONS.en;
   const hasConversation = messages.length > 0;
