@@ -1,0 +1,170 @@
+const api = require('../api');
+const { t, formatDiagnosis, pick } = require('../text');
+
+const AI_PREDICT_COST = 25;
+
+const CROPS = {
+  1: { key: 'rice', label: 'Rice', labelSi: 'වී' },
+  2: { key: 'tea', label: 'Tea', labelSi: 'තේ' },
+  3: { key: 'chili', label: 'Chili', labelSi: 'මිරිස්' }
+};
+
+/**
+ * Photos are held in memory only. A bot restart loses them, which is the
+ * right trade: a farmer can resend a photo, but we should not push image
+ * buffers through Mongo on every diagnosis.
+ */
+const pendingImages = new Map();
+const PENDING_TTL_MS = 10 * 60 * 1000;
+
+function stashImage(jid, buffer) {
+  pendingImages.set(jid, { buffer, at: Date.now() });
+}
+
+function takeImage(jid) {
+  const entry = pendingImages.get(jid);
+  if (!entry) return null;
+  pendingImages.delete(jid);
+  if (Date.now() - entry.at > PENDING_TTL_MS) return null;
+  return entry.buffer;
+}
+
+function sweep() {
+  const cutoff = Date.now() - PENDING_TTL_MS;
+  for (const [jid, entry] of pendingImages) {
+    if (entry.at < cutoff) pendingImages.delete(jid);
+  }
+}
+
+/** A photo arrived: hold it and ask which crop it is. */
+async function onImage(ctx, buffer) {
+  stashImage(ctx.jid, buffer);
+  await api.setSession(ctx.jid, 'doctor', 1, {});
+  await ctx.reply(t.chooseCrop(ctx.lang));
+}
+
+/** Step 1: the farmer picked a crop number. */
+async function onCropChoice(ctx, session) {
+  const choice = CROPS[ctx.body.trim()];
+
+  if (!choice) {
+    await ctx.reply(t.chooseCrop(ctx.lang));
+    return;
+  }
+
+  const buffer = takeImage(ctx.jid);
+  if (!buffer) {
+    await api.clearSession(ctx.jid);
+    await ctx.reply(t.noPhotoPending(ctx.lang));
+    return;
+  }
+
+  await ctx.reply(t.analysing(ctx.lang));
+  await ctx.typing();
+
+  let token;
+  try {
+    token = await ctx.token();
+  } catch (err) {
+    await api.clearSession(ctx.jid);
+    await ctx.reply(t.notLinkedForThis(ctx.lang));
+    return;
+  }
+
+  try {
+    const result = await api.predictDisease(token, choice.key, buffer);
+    const label = ctx.lang === 'si' ? choice.labelSi : choice.label;
+
+    // Grad-CAM comes back as a base64 heatmap under one of a few keys
+    const heatmap = result.heatmap || result.gradcam || result.gradcam_image || result.heatmap_image;
+
+    if (heatmap) {
+      const b64 = String(heatmap).replace(/^data:image\/\w+;base64,/, '');
+      await ctx.sendImage(Buffer.from(b64, 'base64'), formatDiagnosis(ctx.lang, result, label));
+    } else {
+      await ctx.reply(formatDiagnosis(ctx.lang, result, label));
+    }
+
+    // Remember it so "report" can warn the neighbours
+    await api.setSession(ctx.jid, 'doctor', 2, {
+      crop: choice.key,
+      disease: result.disease || result.predicted_class || result.class,
+      confidence: result.confidence,
+      treatment: typeof result.treatment === 'string' ? result.treatment : ''
+    });
+  } catch (err) {
+    await api.clearSession(ctx.jid);
+
+    if (err.status === 403) {
+      await ctx.reply(t.insufficientCredits(ctx.lang, err.body?.credits ?? 0, AI_PREDICT_COST));
+      return;
+    }
+    if (err.status === 503) {
+      await ctx.reply(t.aiUnavailable(ctx.lang));
+      return;
+    }
+    if (err.status === 400) {
+      // Leaf-likeness / crop-mismatch guard rejected the photo
+      await ctx.reply(pick(ctx.lang, {
+        en: `🤔 ${err.body?.error || err.body?.msg || 'That does not look like a leaf of that crop.'}\n\nTry a clear, close photo of a single leaf in daylight.`,
+        si: `🤔 ${err.body?.error || err.body?.msg || 'එය එම බෝගයේ කොළයක් ලෙස නොපෙනේ.'}\n\nදිවා ආලෝකයේ තනි කොළයක පැහැදිලි ඡායාරූපයක් ගන්න.`
+      }));
+      return;
+    }
+
+    console.warn('Diagnosis failed:', err.message);
+    await ctx.reply(t.error(ctx.lang));
+  }
+}
+
+/** "report" after a diagnosis - warns other farmers in the same GN division. */
+async function onReport(ctx, session) {
+  const draft = session?.draft || {};
+
+  if (!draft.disease) {
+    await ctx.reply(pick(ctx.lang, {
+      en: '📸 Diagnose a leaf photo first, then reply *report* to warn your neighbours.',
+      si: '📸 පළමුව කොළයක් පරීක්ෂා කරන්න, පසුව *report* එවන්න.'
+    }));
+    return;
+  }
+
+  if (ctx.isGuest) {
+    await ctx.reply(t.guestWriteBlocked(ctx.lang));
+    await api.clearSession(ctx.jid);
+    return;
+  }
+
+  try {
+    const token = await ctx.token();
+    const user = ctx.user || {};
+
+    const res = await api.reportDisease(token, {
+      crop: draft.crop,
+      disease: draft.disease,
+      confidence: draft.confidence,
+      district: user.district,
+      dsDivision: user.dsDivision,
+      gnDivision: user.gnDivision,
+      treatment: draft.treatment,
+      farmerUsername: user.username
+    });
+
+    await api.clearSession(ctx.jid);
+    await ctx.reply(pick(ctx.lang, {
+      en: `✅ Reported. Officers in ${user.district} can see this, and farmers near ${user.gnDivision} will be warned if more cases appear.${res.alertsTriggered ? `\n\n🚨 ${res.alertsTriggered} alert(s) triggered.` : ''}`,
+      si: `✅ වාර්තා කළා. ${user.district} නිලධාරීන්ට මෙය පෙනේ.${res.alertsTriggered ? `\n\n🚨 අනතුරු ඇඟවීම් ${res.alertsTriggered}ක්.` : ''}`
+    }));
+  } catch (err) {
+    console.warn('Disease report failed:', err.message);
+    await ctx.reply(t.error(ctx.lang));
+  }
+}
+
+async function handle(ctx, session) {
+  if (session.step === 1) return onCropChoice(ctx, session);
+  if (session.step === 2 && /^report$/i.test(ctx.body.trim())) return onReport(ctx, session);
+  return false; // not ours - let the router fall through
+}
+
+module.exports = { onImage, onReport, handle, sweep, CROPS };

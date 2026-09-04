@@ -1,0 +1,20 @@
+{
+  "name": "whatsapp-bot",
+  "version": "1.0.0",
+  "description": "Govi Isuru WhatsApp bot - Baileys transport over the existing platform API",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test test/text.test.js test/outbox.test.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.9",
+    "axios": "^1.13.2",
+    "express": "^5.2.1",
+    "form-data": "^4.0.1",
+    "pino": "^9.5.0",
+    "qrcode": "^1.5.4"
+  }
+}

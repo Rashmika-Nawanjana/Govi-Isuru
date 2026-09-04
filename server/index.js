@@ -34,7 +34,9 @@ const savedListingsRoutes = require('./routes/savedListings');
 const adminRoutes = require('./routes/admin');
 const aiRoutes = require('./routes/ai');
 const creditRoutes = require('./routes/credits');
+const whatsappRoutes = require('./routes/whatsapp');
 const { registerBookingEventHandlers } = require('./events/registerBookingEventHandlers');
+const { registerWhatsAppEventHandlers } = require('./events/registerWhatsAppEventHandlers');
 const { attachVoiceLiveProxy } = require('./ws/voiceLiveProxy');
 
 const authMiddleware = require('./middleware/authMiddleware');
@@ -42,6 +44,7 @@ const checkCredits = require('./middleware/creditMiddleware');
 
 const app = express();
 registerBookingEventHandlers();
+registerWhatsAppEventHandlers();
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads', 'listings');
@@ -129,6 +132,9 @@ app.use('/api/credits', creditRoutes);
 
 // AI Doctor Route (Proxy + Credit Check)
 app.use('/api/ai', aiRoutes);
+
+// WhatsApp bridge (account linking + bot-only internal routes)
+app.use('/api/whatsapp', whatsappRoutes);
 
 // 2. Connect to Database using environment variable
 // We remove the hardcoded string and the deprecated options (no longer needed in Mongoose 6+)
