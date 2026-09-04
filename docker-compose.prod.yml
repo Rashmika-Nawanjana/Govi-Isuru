@@ -37,6 +37,8 @@ services:
       - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
       - MONGO_URI=${MONGO_URI}
       - AI_SERVICE_URL=http://ai-service:8000
+      - WHATSAPP_BOT_URL=http://whatsapp-bot:7000
+      - WHATSAPP_BOT_KEY=${WHATSAPP_BOT_KEY}
       - NEWS_API_KEY=${NEWS_API_KEY}
       - WEATHER_API_KEY=${WEATHER_API_KEY}
       - SMTP_HOST=${SMTP_HOST}
@@ -64,6 +66,45 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    networks:
+      - govi-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # WhatsApp Bot - Baileys transport over the existing API
+  whatsapp-bot:
+    build:
+      context: ./whatsapp-bot
+      dockerfile: Dockerfile
+    container_name: govi-whatsapp-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - BOT_PORT=7000
+      - BACKEND_URL=http://backend:5000
+      - WHATSAPP_BOT_KEY=${WHATSAPP_BOT_KEY}
+      - BOT_ADMIN_KEY=${BOT_ADMIN_KEY}
+      - BOT_PHONE_NUMBER=${BOT_PHONE_NUMBER}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - TZ=Asia/Colombo
+    volumes:
+      # Baileys credentials MUST outlive `compose down` and `rsync --delete`,
+      # otherwise every deploy logs the bot out and forces a new QR scan.
+      - whatsapp_auth:/app/auth_state
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:7000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 25s
     networks:
       - govi-network
     logging:
@@ -110,3 +151,4 @@ networks:
 
 volumes:
   uploads_data:
+  whatsapp_auth:

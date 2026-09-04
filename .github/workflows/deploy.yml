@@ -71,6 +71,24 @@ jobs:
             echo "Google service account env detected in .env"
           fi
 
+          if ! grep -q '^WHATSAPP_BOT_KEY=' .env; then
+            BOT_KEY="$(openssl rand -hex 32)"
+            echo "WHATSAPP_BOT_KEY=${BOT_KEY}" | sudo tee -a .env >/dev/null
+            echo "Generated WHATSAPP_BOT_KEY"
+          fi
+
+          if ! grep -q '^BOT_ADMIN_KEY=' .env; then
+            echo "WARNING: BOT_ADMIN_KEY is missing from /home/ubuntu/govi-isuru/.env"
+            echo "The pairing QR at /bot/qr will stay closed until that env var is added."
+          fi
+
+          if ! grep -q '^BOT_PHONE_NUMBER=' .env; then
+            echo "WARNING: BOT_PHONE_NUMBER is missing from /home/ubuntu/govi-isuru/.env"
+            echo "The poster wa.me link cannot be built until that env var is added."
+          else
+            echo "WhatsApp bot number detected in .env"
+          fi
+
           if ! grep -q '^DAILY_API_KEY=' .env; then
             echo "WARNING: DAILY_API_KEY is missing from /home/ubuntu/govi-isuru/.env"
             echo "Video consultations will stay disabled until that env var is added on the server."
@@ -126,5 +144,15 @@ jobs:
           echo ""
           echo "Voice status:"
           curl -k -s https://govi-isuru.rashmika.dev/api/llama-chatbot/voice/status || true
+          echo ""
+          echo "WhatsApp bot status:"
+          BOT_STATUS=$(curl -k -s https://govi-isuru.rashmika.dev/bot/status || echo '{}')
+          echo "$BOT_STATUS"
+          if echo "$BOT_STATUS" | grep -q '"connected":true'; then
+            echo "WhatsApp bot is paired and connected."
+          else
+            echo "NOTE: WhatsApp bot is not connected. Scan the pairing QR at /bot/qr?key=<BOT_ADMIN_KEY>."
+            echo "This does not fail the deploy - the website is unaffected."
+          fi
           echo ""
           sudo docker compose -f /home/ubuntu/govi-isuru/docker-compose.prod.yml ps

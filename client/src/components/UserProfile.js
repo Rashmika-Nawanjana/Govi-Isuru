@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { administrativeData } from '../data/sriLankaData';
+import WhatsAppConnect from './WhatsAppConnect';
 import {
   User,
   Mail,
@@ -412,6 +413,8 @@ const UserProfile = () => {
 
         </form>
       </div>
+
+      <WhatsAppConnect />
     </div>
   );
 };

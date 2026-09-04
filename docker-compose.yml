@@ -27,10 +27,27 @@ services:
       - AI_SERVICE_URL=${AI_SERVICE_URL:-http://ai-service:8000}
       - NEWS_API_KEY=${NEWS_API_KEY:-}
       - HUGGINGFACE_API_TOKEN=${HUGGINGFACE_API_TOKEN}
+      - WHATSAPP_BOT_URL=http://whatsapp-bot:7000
+      - WHATSAPP_BOT_KEY=${WHATSAPP_BOT_KEY:-}
     depends_on:
       - mongo
       - ai-service
   
+  whatsapp-bot:
+    build: ./whatsapp-bot
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - BOT_PORT=7000
+      - BACKEND_URL=http://backend:5000
+      - WHATSAPP_BOT_KEY=${WHATSAPP_BOT_KEY:-}
+      - BOT_ADMIN_KEY=${BOT_ADMIN_KEY:-}
+      - BOT_PHONE_NUMBER=${BOT_PHONE_NUMBER:-}
+    volumes:
+      - whatsapp_auth:/app/auth_state
+    depends_on:
+      - backend
+
   frontend:
     build:
       context: ./client
@@ -48,3 +65,4 @@ services:
 
 volumes:
   mongo_data:
+  whatsapp_auth:
