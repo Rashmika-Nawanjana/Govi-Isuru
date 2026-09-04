@@ -18,6 +18,17 @@ const config = {
   outboxJitterMs: Number(process.env.OUTBOX_JITTER_MS || 600),
   outboxDailyCap: Number(process.env.OUTBOX_DAILY_CAP || 800),
 
+  // Most Govi Isuru farmers are Sinhala-native, so the bot opens in Sinhala
+  // and offers English rather than the other way round.
+  defaultLanguage: ['en', 'si', 'ta'].includes(process.env.BOT_DEFAULT_LANGUAGE)
+    ? process.env.BOT_DEFAULT_LANGUAGE
+    : 'si',
+
+  // Simultaneous heavy operations. TensorFlow inference on a small EC2 box is
+  // the real ceiling, not the chat socket.
+  maxConcurrent: Number(process.env.BOT_MAX_CONCURRENT || 4),
+  maxQueuePerUser: Number(process.env.BOT_MAX_QUEUE_PER_USER || 3),
+
   logLevel: process.env.LOG_LEVEL || 'info'
 };
 

@@ -6,7 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "start": "node index.js",
-    "test": "node --test test/text.test.js test/outbox.test.js"
+    "test": "node --test test/text.test.js test/outbox.test.js test/format.test.js test/limits.test.js"
   },
   "license": "ISC",
   "dependencies": {

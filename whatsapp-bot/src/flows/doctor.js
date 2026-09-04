@@ -90,22 +90,34 @@ async function onCropChoice(ctx, session) {
     const result = await api.predictDisease(token, choice.key, payload);
     const label = ctx.lang === 'si' ? choice.labelSi : choice.label;
 
-    // Grad-CAM comes back as a base64 heatmap under one of a few keys
-    const heatmap = result.heatmap || result.gradcam || result.gradcam_image || result.heatmap_image;
+    // gradcam is an object: { overlay, heatmap }. The overlay keeps the leaf
+    // visible under the heat, which is the one worth showing a farmer.
+    const overlay = result.gradcam?.overlay || result.gradcam?.heatmap || null;
+    const card = formatDiagnosis(ctx.lang, result, label);
 
-    if (heatmap) {
-      const b64 = String(heatmap).replace(/^data:image\/\w+;base64,/, '');
-      await ctx.sendImage(Buffer.from(b64, 'base64'), formatDiagnosis(ctx.lang, result, label));
-    } else {
-      await ctx.reply(formatDiagnosis(ctx.lang, result, label));
+    let sent = false;
+    if (overlay) {
+      try {
+        const b64 = String(overlay).replace(/^data:image\/\w+;base64,/, '');
+        const png = Buffer.from(b64, 'base64');
+        if (png.length > 0) {
+          await ctx.sendImage(png, card);
+          sent = true;
+        }
+      } catch (err) {
+        console.warn('Grad-CAM send failed, falling back to text:', err.message);
+      }
     }
+    if (!sent) await ctx.reply(card);
 
     // Remember it so "report" can warn the neighbours
     await api.setSession(ctx.jid, 'doctor', 2, {
       crop: choice.key,
-      disease: result.disease || result.predicted_class || result.class,
+      disease: result.prediction || result.disease || result.predicted_class,
       confidence: result.confidence,
-      treatment: typeof result.treatment === 'string' ? result.treatment : ''
+      treatment: Array.isArray(result.treatment)
+        ? result.treatment.join('; ')
+        : (typeof result.treatment === 'string' ? result.treatment : '')
     });
   } catch (err) {
     // A crop mismatch is recoverable, so decide whether to keep the session
