@@ -108,7 +108,46 @@ async function onCropChoice(ctx, session) {
       treatment: typeof result.treatment === 'string' ? result.treatment : ''
     });
   } catch (err) {
+    // A crop mismatch is recoverable, so decide whether to keep the session
+    // before tearing it down.
+    const detail = err.body?.detail;
+    const guard = typeof detail === 'object' && detail ? detail : null;
+
+    if (err.status === 422 && guard?.code === 'CROP_MISMATCH') {
+      const detected = String(guard.validation?.best_matched_crop || '').toLowerCase();
+      const entry = Object.entries(CROPS).find(([, c]) => c.key === detected);
+
+      if (entry) {
+        // Keep the photo and the cursor so a single digit re-runs it.
+        stashImage(ctx.jid, payload);
+        await api.setSession(ctx.jid, 'doctor', 1, {});
+
+        const [num, crop] = entry;
+        const name = ctx.lang === 'si' ? crop.labelSi : crop.label;
+        await ctx.reply(pick(ctx.lang, {
+          en: `🤔 That looks like a *${name}* leaf, not ${choice.label}.\n\nReply *${num}* to check it as ${name}, or send a clearer photo.`,
+          si: `🤔 එය *${name}* කොළයක් සේ පෙනේ, ${choice.labelSi} නොවේ.\n\n${name} ලෙස පරීක්ෂා කිරීමට *${num}* එවන්න, නැතහොත් පැහැදිලි ඡායාරූපයක් එවන්න.`
+        }));
+        return;
+      }
+
+      await api.clearSession(ctx.jid);
+      await ctx.reply(pick(ctx.lang, {
+        en: `🤔 ${guard.message || 'That does not look like the crop you chose.'}`,
+        si: '🤔 එය ඔබ තෝරාගත් බෝගය නොවේ. පැහැදිලි ඡායාරූපයක් එවන්න.'
+      }));
+      return;
+    }
+
     await api.clearSession(ctx.jid);
+
+    if (err.status === 422 && guard?.code === 'NOT_A_LEAF') {
+      await ctx.reply(pick(ctx.lang, {
+        en: '🍃 That does not look like a crop leaf.\n\nHold the camera close to a single leaf, in daylight, with the leaf filling most of the frame.',
+        si: '🍃 එය බෝග කොළයක් සේ නොපෙනේ.\n\nදිවා ආලෝකයේ තනි කොළයකට කැමරාව ළං කර ඡායාරූපයක් ගන්න.'
+      }));
+      return;
+    }
 
     if (err.status === 403) {
       await ctx.reply(t.insufficientCredits(ctx.lang, err.body?.credits ?? 0, AI_PREDICT_COST));
@@ -129,11 +168,10 @@ async function onCropChoice(ctx, session) {
     }
 
     if (err.status === 422) {
-      // The upload reached the model service but its form validation rejected
-      // it. Usually an unusual image container from a forward or a screenshot.
+      // An unrecognised rejection from the model service's input guards.
       await ctx.reply(pick(ctx.lang, {
-        en: '📸 I could not read that image. Take a fresh photo with the camera (not a forwarded or edited one) and send it again.',
-        si: '📸 එම රූපය කියවිය නොහැකි විය. කැමරාවෙන් නව ඡායාරූපයක් ගෙන එවන්න.'
+        en: `📸 ${guard?.message || 'I could not use that image.'}\n\nTry a fresh close-up of a single leaf.`,
+        si: '📸 එම රූපය භාවිත කළ නොහැකි විය. තනි කොළයක නව ඡායාරූපයක් ගන්න.'
       }));
       return;
     }
