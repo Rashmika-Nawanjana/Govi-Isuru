@@ -1,7 +1,11 @@
 const api = require('../api');
+const media = require('../media');
 const { t, formatDiagnosis, pick } = require('../text');
 
 const AI_PREDICT_COST = 25;
+
+// The backend's multer cap is 10MB; stay comfortably under it.
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 const CROPS = {
   1: { key: 'rice', label: 'Rice', labelSi: 'වී' },
@@ -62,6 +66,17 @@ async function onCropChoice(ctx, session) {
   await ctx.reply(t.analysing(ctx.lang));
   await ctx.typing();
 
+  // Cap oversized camera photos before upload - see media.shrinkImage.
+  let payload = buffer;
+  if (buffer.length > MAX_UPLOAD_BYTES) {
+    try {
+      payload = await media.shrinkImage(buffer);
+      console.log(`Resized photo ${buffer.length} -> ${payload.length} bytes`);
+    } catch (err) {
+      console.warn('Photo resize failed, sending original:', err.message);
+    }
+  }
+
   let token;
   try {
     token = await ctx.token();
@@ -72,7 +87,7 @@ async function onCropChoice(ctx, session) {
   }
 
   try {
-    const result = await api.predictDisease(token, choice.key, buffer);
+    const result = await api.predictDisease(token, choice.key, payload);
     const label = ctx.lang === 'si' ? choice.labelSi : choice.label;
 
     // Grad-CAM comes back as a base64 heatmap under one of a few keys
@@ -103,11 +118,40 @@ async function onCropChoice(ctx, session) {
       await ctx.reply(t.aiUnavailable(ctx.lang));
       return;
     }
+    if (err.status === 0 || err.body?.error === 'EMPTY_IMAGE') {
+      // The media download came back empty - ask for the photo again rather
+      // than sending nothing upstream and reporting a mystery failure.
+      await ctx.reply(pick(ctx.lang, {
+        en: '📸 That photo did not download fully. Please send it again.',
+        si: '📸 එම ඡායාරූපය සම්පූර්ණයෙන් බාගත නොවීය. නැවත එවන්න.'
+      }));
+      return;
+    }
+
+    if (err.status === 422) {
+      // The upload reached the model service but its form validation rejected
+      // it. Usually an unusual image container from a forward or a screenshot.
+      await ctx.reply(pick(ctx.lang, {
+        en: '📸 I could not read that image. Take a fresh photo with the camera (not a forwarded or edited one) and send it again.',
+        si: '📸 එම රූපය කියවිය නොහැකි විය. කැමරාවෙන් නව ඡායාරූපයක් ගෙන එවන්න.'
+      }));
+      return;
+    }
+
     if (err.status === 400) {
       // Leaf-likeness / crop-mismatch guard rejected the photo
       await ctx.reply(pick(ctx.lang, {
         en: `🤔 ${err.body?.error || err.body?.msg || 'That does not look like a leaf of that crop.'}\n\nTry a clear, close photo of a single leaf in daylight.`,
         si: `🤔 ${err.body?.error || err.body?.msg || 'එය එම බෝගයේ කොළයක් ලෙස නොපෙනේ.'}\n\nදිවා ආලෝකයේ තනි කොළයක පැහැදිලි ඡායාරූපයක් ගන්න.`
+      }));
+      return;
+    }
+
+    if (err.status === 413 || err.status === 500) {
+      // Typically an upload the backend refused before returning JSON.
+      await ctx.reply(pick(ctx.lang, {
+        en: '📸 That photo was too large for me to process. Try sending it again — WhatsApp will compress it.',
+        si: '📸 එම ඡායාරූපය විශාල වැඩියි. නැවත එවන්න.'
       }));
       return;
     }

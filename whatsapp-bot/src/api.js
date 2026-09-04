@@ -95,17 +95,64 @@ async function creditBalance(token) {
   return unwrap(await http.get('/api/credits/balance', { headers: auth(token) }));
 }
 
+/**
+ * Identifies the real image type from its magic bytes.
+ *
+ * WhatsApp does not only send JPEG - a forwarded sticker or a screenshot can
+ * arrive as WebP or PNG. Labelling those as image/jpeg makes the decoder
+ * reject a perfectly good photo, so trust the bytes over any declared type.
+ */
+function sniffImage(buffer) {
+  if (!Buffer.isBuffer(buffer) || buffer.length < 12) return null;
+
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return { ext: 'jpg', mime: 'image/jpeg' };
+  }
+  if (buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
+    return { ext: 'png', mime: 'image/png' };
+  }
+  if (buffer.subarray(0, 4).toString('ascii') === 'RIFF' &&
+      buffer.subarray(8, 12).toString('ascii') === 'WEBP') {
+    return { ext: 'webp', mime: 'image/webp' };
+  }
+  return null;
+}
+
 /** AI crop doctor. 25 credits, refunded server-side if the model is unreachable. */
-async function predictDisease(token, crop, buffer, filename = 'leaf.jpg') {
+async function predictDisease(token, crop, buffer) {
+  if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
+    throw new ApiError(0, { error: 'EMPTY_IMAGE' });
+  }
+
+  const kind = sniffImage(buffer) || { ext: 'jpg', mime: 'image/jpeg' };
+
   const form = new FormData();
-  form.append('file', buffer, { filename, contentType: 'image/jpeg' });
+  form.append('file', buffer, {
+    filename: `leaf.${kind.ext}`,
+    contentType: kind.mime,
+    knownLength: buffer.length
+  });
 
   const res = await http.post(`/api/ai/predict/${crop}`, form, {
-    headers: { ...auth(token), ...form.getHeaders() },
+    headers: {
+      ...auth(token),
+      ...form.getHeaders(),
+      // form-data can compute this because knownLength was supplied. Without
+      // an explicit length the request goes out chunked, and the upstream
+      // multipart parser can end up seeing no fields at all.
+      'Content-Length': form.getLengthSync()
+    },
     timeout: 90000,
     maxContentLength: Infinity,
     maxBodyLength: Infinity
   });
+
+  if (res.status < 200 || res.status >= 300) {
+    console.warn(
+      `predictDisease ${crop} failed: status=${res.status} bytes=${buffer.length} ` +
+      `mime=${kind.mime} body=${JSON.stringify(res.data).slice(0, 300)}`
+    );
+  }
 
   return unwrap(res);
 }
