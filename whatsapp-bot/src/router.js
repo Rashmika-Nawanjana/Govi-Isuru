@@ -1,4 +1,6 @@
 const api = require('./api');
+const format = require('./format');
+const { config } = require('./config');
 const doctor = require('./flows/doctor');
 const { suitability, yield: yieldFlow } = require('./flows/forms');
 const { booking } = require('./flows/booking');
@@ -7,6 +9,21 @@ const {
   formatMarketPrices, formatListings, formatAlerts,
   formatWeather, formatCredits, formatHeadlines
 } = require('./text');
+
+/**
+ * Language chosen by a guest. A guest has no WhatsAppLink row to store it on,
+ * so without this their "si" was accepted and then forgotten on the next
+ * message - which is exactly what QA hit.
+ */
+const guestLanguages = new Map();
+
+function rememberLanguage(jid, lang) {
+  guestLanguages.set(jid, lang);
+}
+
+function languageFor(jid, fallback) {
+  return guestLanguages.get(jid) || fallback || config.defaultLanguage;
+}
 
 /** Short rolling chat history per number, so the assistant keeps context. */
 const histories = new Map();
@@ -55,13 +72,15 @@ async function route(ctx) {
   }
 
   if (/^(si|sinhala|සිංහල)$/i.test(body)) {
-    if (!ctx.isGuest) await api.setPrefs(ctx.jid, { language: 'si' });
+    rememberLanguage(ctx.jid, 'si');
+    if (!ctx.isGuest) await api.setPrefs(ctx.jid, { language: 'si' }).catch(() => {});
     ctx.lang = 'si';
     return ctx.reply(t.welcome('si', ctx.user?.fullName));
   }
 
   if (/^(en|english)$/i.test(body)) {
-    if (!ctx.isGuest) await api.setPrefs(ctx.jid, { language: 'en' });
+    rememberLanguage(ctx.jid, 'en');
+    if (!ctx.isGuest) await api.setPrefs(ctx.jid, { language: 'en' }).catch(() => {});
     ctx.lang = 'en';
     return ctx.reply(t.welcome('en', ctx.user?.fullName));
   }
@@ -232,10 +251,12 @@ async function assistant(ctx, message) {
       channel: 'whatsapp'
     });
 
+    const answer = format.toWhatsApp(res.answer, ctx.lang);
+
     remember(ctx.jid, 'user', message);
     remember(ctx.jid, 'assistant', res.answer);
 
-    return ctx.reply(res.answer);
+    return ctx.reply(answer);
   } catch (err) {
     console.warn('Assistant failed:', err.message);
     return ctx.reply(pick(ctx.lang, {
@@ -245,4 +266,4 @@ async function assistant(ctx, message) {
   }
 }
 
-module.exports = { route, weatherAt, assistant, detectLanguage, remember, historyFor };
+module.exports = { route, weatherAt, assistant, detectLanguage, remember, historyFor, rememberLanguage, languageFor };

@@ -80,3 +80,66 @@ test('formatCredits shows the balance against the daily limit', () => {
   assert.match(out, /200/);
   assert.match(out, /Resets at midnight/);
 });
+
+// --- diagnosis card -------------------------------------------------------
+// The model service returns `prediction` / `si_name`, not `disease`. Reading
+// the wrong field printed "Unknown" for every diagnosis, so pin the contract.
+
+const { formatDiagnosis } = require('../src/text');
+
+const MODEL_RESPONSE = {
+  success: true,
+  crop_type: 'rice',
+  prediction: 'Narrow Brown Leaf Spot',
+  confidence: 0.8550950567470876,
+  si_name: 'පටු දුඹුරු පත්‍ර ලප රෝගය',
+  description: 'Linear brown lesions caused by Cercospora janseana.',
+  treatment: ['Apply propiconazole', 'Avoid excess nitrogen'],
+  severity: 'medium'
+};
+
+test('the diagnosis reads the model service field names, never "Unknown"', () => {
+  const out = formatDiagnosis('en', MODEL_RESPONSE, 'Rice');
+  assert.match(out, /Narrow Brown Leaf Spot/);
+  assert.doesNotMatch(out, /Unknown/);
+});
+
+test('a Sinhala diagnosis leads with the Sinhala disease name', () => {
+  const out = formatDiagnosis('si', MODEL_RESPONSE, 'වී');
+  const siIndex = out.indexOf('පටු දුඹුරු');
+  const enIndex = out.indexOf('Narrow Brown Leaf Spot');
+  assert.ok(siIndex > -1, 'Sinhala name must be present');
+  assert.ok(enIndex > siIndex, 'English name stays underneath for the officer');
+});
+
+test('treatment arrives as an array and is numbered, not printed as [object]', () => {
+  const out = formatDiagnosis('en', MODEL_RESPONSE, 'Rice');
+  assert.match(out, /1\.\s+Apply propiconazole/);
+  assert.match(out, /2\.\s+Avoid excess nitrogen/);
+  assert.doesNotMatch(out, /\[object/);
+});
+
+test('confidence is rounded and severity is shown with a colour cue', () => {
+  const out = formatDiagnosis('en', MODEL_RESPONSE, 'Rice');
+  assert.match(out, /86%/);
+  assert.match(out, /🟠/u);
+});
+
+test('severity is translated for a Sinhala reply', () => {
+  const out = formatDiagnosis('si', { ...MODEL_RESPONSE, severity: 'high' }, 'වී');
+  assert.match(out, /ඉහළ/u);
+  assert.match(out, /🔴/u);
+});
+
+test('a sparse response still produces a readable card', () => {
+  const out = formatDiagnosis('en', { prediction: 'Leaf Blast', confidence: 0.5 }, 'Rice');
+  assert.match(out, /Leaf Blast/);
+  assert.match(out, /50%/);
+  assert.doesNotMatch(out, /undefined/);
+  assert.doesNotMatch(out, /\n\n\n/);
+});
+
+test('severity "unknown" is omitted rather than shown to the farmer', () => {
+  const out = formatDiagnosis('en', { ...MODEL_RESPONSE, severity: 'unknown' }, 'Rice');
+  assert.doesNotMatch(out, /unknown/i);
+});

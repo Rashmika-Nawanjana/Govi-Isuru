@@ -17,6 +17,8 @@ const api = require('./src/api');
 const media = require('./src/media');
 const doctor = require('./src/flows/doctor');
 const { Outbox } = require('./src/outbox');
+const { Limiter } = require('./src/limits');
+const format = require('./src/format');
 const router = require('./src/router');
 const { t, detectLanguage } = require('./src/text');
 
@@ -34,6 +36,15 @@ const state = {
   ffmpeg: false,
   reconnectAttempts: 0
 };
+
+/**
+ * Inbound work is dispatched through this rather than awaited in the socket
+ * loop, so one farmer's slow diagnosis cannot hold up everyone behind them.
+ */
+const limiter = new Limiter({
+  concurrency: config.maxConcurrent,
+  maxQueuePerUser: config.maxQueuePerUser
+});
 
 const outbox = new Outbox(async ({ jid, text }) => {
   if (!state.sock) throw new Error('socket not connected');
@@ -107,15 +118,22 @@ async function connect() {
     }
   });
 
-  sock.ev.on('messages.upsert', async ({ messages, type }) => {
+  sock.ev.on('messages.upsert', ({ messages, type }) => {
     if (type !== 'notify') return;
 
     for (const msg of messages) {
-      try {
-        await onMessage(sock, msg);
-      } catch (err) {
-        logger.error({ err: err.message }, 'Message handling failed');
-      }
+      const jid = msg.key?.remoteJid;
+      if (!jid) continue;
+
+      // Deliberately not awaited: the socket must keep reading while this runs.
+      limiter.run(jid, () => onMessage(sock, msg)).catch((err) => {
+        if (err?.code === 'BUSY') {
+          const lang = router.languageFor(jid, config.defaultLanguage);
+          sock.sendMessage(jid, { text: t.busy(lang) }).catch(() => {});
+          return;
+        }
+        logger.error({ err: err?.message }, 'Message handling failed');
+      });
     }
   });
 
@@ -167,7 +185,9 @@ async function onMessage(sock, msg) {
   }
 
   const isGuest = !identity.linked;
-  const baseLang = identity.language || 'en';
+  // A linked farmer's stored preference, else what a guest picked this session,
+  // else the deployment default (Sinhala).
+  const baseLang = identity.language || router.languageFor(jid, config.defaultLanguage);
 
   const ctx = {
     jid,
@@ -264,11 +284,13 @@ async function onVoiceNote(ctx, sock, msg) {
     router.remember(ctx.jid, 'user', transcript);
     router.remember(ctx.jid, 'assistant', answer.answer);
 
-    await ctx.reply(answer.answer);
+    const pretty = format.toWhatsApp(answer.answer, ctx.lang);
+    await ctx.reply(pretty);
 
     // Speak it back, but never fail the text reply because TTS was unavailable
     try {
-      const mp3 = await api.textToSpeech(answer.answer.slice(0, 900), ctx.lang);
+      const spoken = format.toSpeech(pretty).slice(0, 900);
+      const mp3 = await api.textToSpeech(spoken, ctx.lang);
       await ctx.sendVoice(await media.mp3ToVoiceNote(mp3));
     } catch (err) {
       logger.warn({ err: err.message }, 'TTS reply skipped');
@@ -307,6 +329,7 @@ function buildAdminServer() {
       uptimeSeconds: Math.round((Date.now() - state.startedAt) / 1000),
       lastError: state.lastError,
       outbox: outbox.stats(),
+      load: limiter.snapshot(),
       waLink: config.botPhoneNumber
         ? `https://wa.me/${config.botPhoneNumber}?text=${encodeURIComponent('Hi Govi Isuru')}`
         : null

@@ -22,8 +22,8 @@ function pick(lang, strings) {
 
 const t = {
   welcome: (lang, name) => pick(lang, {
-    en: `🌾 *Govi Isuru* — Farmer's Fortune\n\n${name ? `Hello ${name}! ` : 'Hello! '}I can help you with:\n\n📸 *Send a photo of a sick leaf* — I'll name the disease\n🎤 *Send a voice note* — ask me anything in Sinhala or English\n\nOr type a number:\n\n*1* Crop doctor\n*2* Market prices\n*3* Weather\n*4* Marketplace\n*5* Disease alerts near me\n*6* Which crop suits my land\n*7* Yield & profit\n*8* Book an officer\n*9* My credits\n\nType *menu* any time. Type *si* for Sinhala.`,
-    si: `🌾 *ගොවි ඉසුරු*\n\n${name ? `ආයුබෝවන් ${name}! ` : 'ආයුබෝවන්! '}මට ඔබට උදව් කළ හැක:\n\n📸 *රෝගී කොළයක ඡායාරූපයක් එවන්න* — රෝගය හඳුනාගන්නම්\n🎤 *හඬ පණිවිඩයක් එවන්න* — ඕනෑම දෙයක් අසන්න\n\nනැතහොත් අංකයක් ටයිප් කරන්න:\n\n*1* බෝග වෛද්‍යවරයා\n*2* වෙළඳපොළ මිල\n*3* කාලගුණය\n*4* වෙළඳපොළ\n*5* මගේ ප්‍රදේශයේ රෝග\n*6* මගේ ඉඩමට සුදුසු බෝග\n*7* අස්වැන්න සහ ලාභය\n*8* නිලධාරියෙකු වෙන් කරන්න\n*9* මගේ ක්‍රෙඩිට්\n\n*menu* ටයිප් කරන්න. English සඳහා *en*.`
+    en: `🌾 *Govi Isuru* — Farmer's Fortune\n${name ? `Hello, ${name}!` : 'Hello!'}\n\n📸 *Send a photo of a sick leaf*\n     I'll name the disease and the treatment\n\n🎤 *Send a voice note*\n     Ask anything, in Sinhala or English\n\n─────────────\n\n*1*  Crop doctor\n*2*  Market prices\n*3*  Weather\n*4*  Marketplace\n*5*  Disease alerts near me\n*6*  Which crop suits my land\n*7*  Yield & profit\n*8*  Book an officer\n*9*  My credits\n\n─────────────\n_Send *menu* any time_\n_සිංහල සඳහා *si* එවන්න_`,
+    si: `🌾 *ගොවි ඉසුරු*\n${name ? `ආයුබෝවන්, ${name}!` : 'ආයුබෝවන්!'}\n\n📸 *රෝගී කොළයක ඡායාරූපයක් එවන්න*\n     රෝගය හඳුනාගෙන ප්‍රතිකාරය කියන්නම්\n\n🎤 *හඬ පණිවිඩයක් එවන්න*\n     සිංහලෙන් ඕනෑම දෙයක් අසන්න\n\n─────────────\n\n*1*  බෝග වෛද්‍යවරයා\n*2*  වෙළඳපොළ මිල\n*3*  කාලගුණය\n*4*  වෙළඳපොළ දැන්වීම්\n*5*  මගේ ප්‍රදේශයේ රෝග\n*6*  ඉඩමට සුදුසු බෝග\n*7*  අස්වැන්න හා ලාභය\n*8*  නිලධාරියෙකු වෙන් කිරීම\n*9*  මගේ ක්‍රෙඩිට්\n\n─────────────\n_ඕනෑම වෙලාවක *menu* එවන්න_\n_For English, send *en*_`
   }),
 
   guestBanner: (lang) => pick(lang, {
@@ -101,6 +101,11 @@ const t = {
     si: '🔕 දැනුම්දීම් නවතා ඇත. නැවත ලබා ගැනීමට *START* එවන්න.'
   }),
 
+  busy: (lang) => pick(lang, {
+    en: '⏳ I am still working on your last message. One moment, then send it again.',
+    si: '⏳ ඔබේ පෙර පණිවිඩය තවම කරගෙන යනවා. මොහොතක් ඉන්න, පසුව නැවත එවන්න.'
+  }),
+
   started: (lang) => pick(lang, {
     en: '🔔 Alerts on. You will hear about disease outbreaks near you.',
     si: '🔔 දැනුම්දීම් ක්‍රියාත්මකයි.'
@@ -109,39 +114,78 @@ const t = {
 
 // ------------------------------------------------------------------ builders
 
+const SEVERITY_SI = { low: 'අඩු', medium: 'මධ්‍යම', moderate: 'මධ්‍යම', high: 'ඉහළ', severe: 'ඉතා ඉහළ' };
+const RULE = '━━━━━━━━━━━━━━';
+
+/**
+ * The diagnosis card - the message the whole demo is built around.
+ *
+ * The model returns an English class name plus si_name, so a Sinhala reply
+ * leads with the Sinhala disease name and keeps the English one underneath
+ * for the agricultural officer who will be asked about it later.
+ */
 function formatDiagnosis(lang, result, cropLabel) {
-  const disease = result.disease || result.predicted_class || result.class || 'Unknown';
+  const english = result.prediction || result.disease || result.predicted_class || '';
+  const sinhala = result.si_name || '';
+  const isSi = lang === 'si';
+
   const confidence = result.confidence != null
-    ? `${(result.confidence <= 1 ? result.confidence * 100 : result.confidence).toFixed(1)}%`
+    ? `${(result.confidence <= 1 ? result.confidence * 100 : result.confidence).toFixed(0)}%`
     : null;
 
   const lines = [];
-  lines.push(pick(lang, { en: `🌱 *${cropLabel} — diagnosis*`, si: `🌱 *${cropLabel} — රෝග විනිශ්චය*` }));
+  lines.push(isSi ? `🌱 *${cropLabel} — රෝග විනිශ්චය*` : `🌱 *${cropLabel} — diagnosis*`);
+  lines.push(RULE);
   lines.push('');
-  lines.push(pick(lang, { en: `*Disease:* ${disease}`, si: `*රෝගය:* ${disease}` }));
-  if (confidence) {
-    lines.push(pick(lang, { en: `*Confidence:* ${confidence}`, si: `*නිශ්චිතභාවය:* ${confidence}` }));
-  }
 
-  const severity = result.severity || result.details?.severity;
+  // Disease name, in the farmer's language first
+  lines.push(isSi ? '*රෝගය*' : '*Disease*');
+  if (isSi && sinhala) {
+    lines.push(sinhala);
+    if (english && english !== sinhala) lines.push(`_${english}_`);
+  } else {
+    lines.push(english || (isSi ? 'හඳුනාගත නොහැක' : 'Unknown'));
+    if (!isSi && sinhala && sinhala !== english) lines.push(`_${sinhala}_`);
+  }
+  lines.push('');
+
+  const facts = [];
+  if (confidence) facts.push(isSi ? `*නිශ්චිතභාවය:*  ${confidence}` : `*Confidence:*  ${confidence}`);
+
+  const severity = result.severity && result.severity !== 'unknown' ? result.severity : null;
   if (severity) {
-    lines.push(pick(lang, { en: `*Severity:* ${severity}`, si: `*බරපතලකම:* ${severity}` }));
+    const label = isSi ? (SEVERITY_SI[String(severity).toLowerCase()] || severity) : severity;
+    const dot = /high|severe/i.test(severity) ? '🔴' : /med|mod/i.test(severity) ? '🟠' : '🟡';
+    facts.push(isSi ? `*බරපතලකම:*  ${dot} ${label}` : `*Severity:*  ${dot} ${label}`);
   }
-
-  const treatment = result.treatment || result.details?.treatment || result.recommendation;
-  if (treatment) {
+  if (facts.length) {
+    lines.push(facts.join('\n'));
     lines.push('');
-    lines.push(pick(lang, { en: '*What to do*', si: '*කළ යුතු දේ*' }));
-    lines.push(Array.isArray(treatment) ? treatment.map((x) => `• ${x}`).join('\n') : String(treatment));
   }
 
-  lines.push('');
-  lines.push(pick(lang, {
-    en: '_Reply *report* to warn other farmers in your area._',
-    si: '_ඔබේ ප්‍රදේශයේ අනෙක් ගොවීන්ට දැනුම් දීමට *report* එවන්න._'
-  }));
+  if (result.description) {
+    lines.push(String(result.description).trim());
+    lines.push('');
+  }
 
-  return lines.join('\n');
+  // treatment is an array from the model service
+  const treatment = result.treatment || result.details?.treatment || result.recommendation;
+  const steps = Array.isArray(treatment)
+    ? treatment.filter(Boolean)
+    : (treatment ? [String(treatment)] : []);
+
+  if (steps.length) {
+    lines.push(isSi ? '*කළ යුතු දේ*' : '*What to do*');
+    steps.forEach((step, i) => lines.push(`${i + 1}.  ${String(step).trim()}`));
+    lines.push('');
+  }
+
+  lines.push(RULE);
+  lines.push(isSi
+    ? '_අසල ගොවීන්ට දැනුම් දීමට *report* එවන්න_'
+    : '_Send *report* to warn nearby farmers_');
+
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n');
 }
 
 function formatMarketPrices(lang, rows) {
