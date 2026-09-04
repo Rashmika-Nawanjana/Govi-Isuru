@@ -47,6 +47,22 @@ async function mp3ToVoiceNote(buffer) {
     '-f', 'ogg', 'pipe:1'], buffer);
 }
 
+/**
+ * Downscales an oversized photo before upload.
+ *
+ * A modern phone camera produces images far larger than the backend's 10MB
+ * multer limit, which fails as an unparseable 500 rather than a clean error.
+ * The disease models see 224x224 anyway, so nothing is lost by capping the
+ * long edge - and the upload and inference both get faster.
+ */
+async function shrinkImage(buffer, maxEdge = 1600) {
+  return run(['-hide_banner', '-loglevel', 'error',
+    '-i', 'pipe:0',
+    '-vf', `scale='min(${maxEdge},iw)':'min(${maxEdge},ih)':force_original_aspect_ratio=decrease`,
+    '-q:v', '4',
+    '-f', 'mjpeg', 'pipe:1'], buffer);
+}
+
 /** Fails loudly at boot rather than silently at the first voice note. */
 function probe() {
   return new Promise((resolve) => {
@@ -56,4 +72,4 @@ function probe() {
   });
 }
 
-module.exports = { voiceNoteToWav, mp3ToVoiceNote, probe };
+module.exports = { voiceNoteToWav, mp3ToVoiceNote, shrinkImage, probe };
